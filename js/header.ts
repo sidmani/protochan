@@ -1,83 +1,71 @@
 /// <reference path="util.ts" />
-
-class BlockHeader {
-  protected data: Uint8Array;
-
-  constructor() { }
-
-  protocolVersion(): Uint8Array {
-    return this.data.subarray(0, 1);
+namespace Block {
+  export enum Type {
+    Thread  = 0,
+    Post    = 1
   }
 
-  blockType(): Uint8Array {
-    return this.data.subarray(1, 2);
-  }
+  export class Header {
+    private data: Uint8Array;
 
-  timestamp(): Uint8Array {
-    return this.data.subarray(2, 6);
-  }
+    constructor(_data: Uint8Array) {
+      if (_data.byteLength !== 80) {
+        throw new TypeError('Length of buffer is incorrect.');
+      }
 
-  nonce(): Uint8Array {
-    return this.data.subarray(6, 10);
-  }
+      this.data = _data;
 
-  prevHash(): Uint8Array {
-    return this.data.subarray(10, 42);
-  }
-
-  dataHash(): Uint8Array {
-    return this.data.subarray(42, 74);
-  }
-}
-
-class ThreadBlockHeader extends BlockHeader {
-  static readonly BLOCK_TYPE: number = 0x00000000;
-  constructor(_data: Uint8Array) {
-    super();
-    if (_data.byteLength !== 80) {
-      throw new TypeError('Length of buffer is incorrect.');
+      if (this.blockType() === undefined) { // validation should be moved somewhere else
+        throw new TypeError('Unknown block type.');
+      }
     }
 
-    this.data = _data;
-
-    if (Util.parseIntFromUint8Array(this.blockType()) !== ThreadBlockHeader.BLOCK_TYPE) {
-      throw new TypeError('Header data represents incorrect block type.');
-    }
-  }
-
-  titleLength(): Uint8Array {
-    return this.data.subarray(74, 75);
-  }
-
-  postLength(): Uint8Array {
-    return this.data.subarray(75, 77);
-  }
-
-  options(): Uint8Array {
-    return this.data.subarray(77, 80);
-  }
-}
-
-class PostBlockHeader extends BlockHeader {
-  static readonly BLOCK_TYPE: number = 0x00000001;
-  constructor(_data: Uint8Array) {
-    super();
-    if (_data.byteLength !== 80) {
-      throw new TypeError('Length of buffer is incorrect.');
+    /// Protocol version
+    protocolVersion_raw(): Uint8Array {
+      return this.data.subarray(0, 1);
     }
 
-    this.data = _data;
-
-    if (Util.parseIntFromUint8Array(this.blockType()) !== PostBlockHeader.BLOCK_TYPE) {
-      throw new TypeError('Header data represents incorrect block type.');
+    protocolVersion(): number {
+      return Util.parseIntFromUint8Array(this.protocolVersion_raw());
     }
-  }
 
-  postLength(): Uint8Array {
-    return this.data.subarray(74, 76);
-  }
+    /// Block type
+    blockType_raw(): Uint8Array {
+      return this.data.subarray(1, 2);
+    }
 
-  options(): Uint8Array {
-    return this.data.subarray(76, 80);
+    blockType(): Type {
+      return Util.parseIntFromUint8Array(this.blockType_raw());
+    }
+
+    // Unix timestamp
+    timestamp_raw(): Uint8Array {
+      return this.data.subarray(2, 6);
+    }
+
+    timestamp(): number {
+      return Util.parseIntFromUint8Array(this.timestamp_raw());
+    }
+
+    // nonce
+    nonce_raw(): Uint8Array {
+      return this.data.subarray(6, 10);
+    }
+
+    nonce(): number {
+      return Util.parseIntFromUint8Array(this.nonce_raw());
+    }
+
+    prevHash(): Uint8Array {
+      return this.data.subarray(10, 42);
+    }
+
+    dataHash(): Uint8Array {
+      return this.data.subarray(42, 74);
+    }
+
+    reserved(): Uint8Array {
+      return this.data.subarray(75, 80);
+    }
   }
 }
