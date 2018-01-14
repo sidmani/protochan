@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "module": "None",
+        "noImplicitAny": false,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "outFile": "protochan.js",
+        "sourceMap": true
+    }
+}

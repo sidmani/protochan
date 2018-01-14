@@ -22,20 +22,7 @@ namespace Hash {
   export let skein = Skein.digest;
   export let shavite = Shavite.digest;
   export let simd = SIMD.digest;
-
-  export function keccak(str,format, output) {
-    var msg = str;
-    if (format === 2) {
-      msg = Helper.int32Buffer2Bytes(str);
-    }
-    if (output === 1) {
-      return keccak['array'](msg);
-    } else if (output === 2) {
-      return Helper.bytes2Int32Buffer(keccak['array'](msg));
-    } else {
-      return keccak['hex'](msg);
-    }
-  }
+  export let keccak = Keccak.digest;
 
   export namespace X11 {
     export function digest(str, format, output) {
@@ -44,8 +31,8 @@ namespace Hash {
       a = groestl(a,2,2);
       a = skein(a,2,2);
       a = jh(a,2,2);
-      a = this.keccak(a,2,1);
-      a = luffa(a,1,2);
+      a = keccak(a,2,2);
+      a = luffa(a,2,2);
       a = cubehash(a,2,2);
       a = shavite(a,2,2);
       a = simd(a,2,2);
