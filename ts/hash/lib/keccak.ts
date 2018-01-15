@@ -1,5 +1,5 @@
 // Copyright 2015-2016 Chen, Yi-Cyuan
-
+// Modifications (c) 2018 Sid Mani
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -18,6 +18,7 @@
 // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 /// <reference path="helper.ts" />
 
 namespace Keccak {
@@ -31,243 +32,223 @@ namespace Keccak {
     2147516545, 2147483648, 32896, 2147483648, 2147483649, 0, 2147516424, 2147483648
   ];
 
-  var OUTPUT_TYPES = ['hex', 'buffer', 'digest'];
+  function Keccak(bits, padding, outputBits) {
+    this.blocks = [];
+    this.s = [];
+    this.padding = padding;
+    this.outputBits = outputBits;
+    this.reset = true;
+    this.block = 0;
+    this.start = 0;
+    this.blockCount = (1600 - (bits << 1)) >> 5;
+    this.byteCount = this.blockCount << 2;
+    this.outputBlocks = outputBits >> 5;
+    this.extraBytes = (outputBits & 31) >> 3;
 
-  export function digest(input, format, output) {
-    var kec = new Keccak(512, KECCAK_PADDING, 512).update(input)
-    kec.finalize();
-    return kec[OUTPUT_TYPES[output]]();
-  }
-
-  class Keccak {
-    blocks: number[];
-    s: number[];
-    padding: number[];
-    outputBits: number;
-    reset: boolean;
-    block: number;
-    start: number;
-    blockCount: number;
-    byteCount: number;
-    outputBlocks: number;
-    extraBytes: number;
-
-    lastByteIndex: number;
-
-    constructor(bits, padding, outputBits) {
-      this.blocks = [];
-      this.s = [];
-      this.padding = padding;
-      this.outputBits = outputBits;
-      this.reset = true;
-      this.block = 0;
-      this.start = 0;
-      this.blockCount = (1600 - (bits << 1)) >> 5;
-      this.byteCount = this.blockCount << 2;
-      this.outputBlocks = outputBits >> 5;
-      this.extraBytes = (outputBits & 31) >> 3;
-
-      for (var i = 0; i < 50; ++i) {
-        this.s[i] = 0;
-      }
+    for (var i = 0; i < 50; ++i) {
+      this.s[i] = 0;
     }
+  };
 
-    update(message) {
-      var notString = typeof(message) != 'string';
-      if (notString && Object.prototype.toString.call(message.constructor) === "[object ArrayBuffer]") {
-        message = Helper.string2bytes(message);
-      }
-
-      var length = message.length,
-        blocks = this.blocks,
-        byteCount = this.byteCount,
-        blockCount = this.blockCount,
-        index = 0,
-        s = this.s,
-        i, code;
-
-      while (index < length) {
-        if (this.reset) {
-          this.reset = false;
-          blocks[0] = this.block;
-          for (i = 1; i < blockCount + 1; ++i) {
-            blocks[i] = 0;
-          }
-        }
-        if (notString) {
-          for (i = this.start; index < length && i < byteCount; ++index) {
-            blocks[i >> 2] |= message[index] << SHIFT[i++ & 3];
-          }
-        }
-        else {
-          for (i = this.start; index < length && i < byteCount; ++index) {
-            code = message.charCodeAt(index);
-            if (code < 0x80) {
-              blocks[i >> 2] |= code << SHIFT[i++ & 3];
-            }
-            else if (code < 0x800) {
-              blocks[i >> 2] |= (0xc0 | (code >> 6)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-            }
-            else if (code < 0xd800 || code >= 0xe000) {
-              blocks[i >> 2] |= (0xe0 | (code >> 12)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-            }
-            else {
-              code = 0x10000 + (((code & 0x3ff) << 10) | (message.charCodeAt(++index) & 0x3ff));
-              blocks[i >> 2] |= (0xf0 | (code >> 18)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | ((code >> 12) & 0x3f)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-            }
-          }
-        }
-        this.lastByteIndex = i;
-        if (i >= byteCount) {
-          this.start = i - byteCount;
-          this.block = blocks[blockCount];
-          for (i = 0; i < blockCount; ++i) {
-            s[i] ^= blocks[i];
-          }
-          f(s);
-          this.reset = true;
-        }
-        else {
-          this.start = i;
-        }
-      }
-      return this;
+  Keccak.prototype.update = function(message) {
+    var notString = typeof(message) != 'string';
+    if (notString && Object.prototype.toString.call(message.constructor) === "[object ArrayBuffer]") {
+      message = Helper.string2bytes(message);
     }
+    var length = message.length,
+      blocks = this.blocks,
+      byteCount = this.byteCount,
+      blockCount = this.blockCount,
+      index = 0,
+      s = this.s,
+      i, code;
 
-    finalize() {
-      var blocks = this.blocks,
-        i = this.lastByteIndex,
-        blockCount = this.blockCount,
-        s = this.s;
-      blocks[i >> 2] |= this.padding[i & 3];
-      if (this.lastByteIndex == this.byteCount) {
-        blocks[0] = blocks[blockCount];
+    while (index < length) {
+      if (this.reset) {
+        this.reset = false;
+        blocks[0] = this.block;
         for (i = 1; i < blockCount + 1; ++i) {
           blocks[i] = 0;
         }
       }
-      blocks[blockCount - 1] |= 0x80000000;
-      for (i = 0; i < blockCount; ++i) {
-        s[i] ^= blocks[i];
-      }
-      f(s);
-    }
-
-    hex() {
-      var blockCount = this.blockCount,
-        s = this.s,
-        outputBlocks = this.outputBlocks,
-        extraBytes = this.extraBytes,
-        i = 0,
-        j = 0;
-      var hex = '',
-        block;
-      while (j < outputBlocks) {
-        for (i = 0; i < blockCount && j < outputBlocks; ++i, ++j) {
-          block = s[i];
-          hex += HEX_CHARS[(block >> 4) & 0x0F] + HEX_CHARS[block & 0x0F] +
-            HEX_CHARS[(block >> 12) & 0x0F] + HEX_CHARS[(block >> 8) & 0x0F] +
-            HEX_CHARS[(block >> 20) & 0x0F] + HEX_CHARS[(block >> 16) & 0x0F] +
-            HEX_CHARS[(block >> 28) & 0x0F] + HEX_CHARS[(block >> 24) & 0x0F];
+      if (notString) {
+        for (i = this.start; index < length && i < byteCount; ++index) {
+          blocks[i >> 2] |= message[index] << SHIFT[i++ & 3];
         }
-        if (j % blockCount == 0) {
-          f(s);
-          i = 0;
-        }
-      }
-      if (extraBytes) {
-        block = s[i];
-        if (extraBytes > 0) {
-          hex += HEX_CHARS[(block >> 4) & 0x0F] + HEX_CHARS[block & 0x0F];
-        }
-        if (extraBytes > 1) {
-          hex += HEX_CHARS[(block >> 12) & 0x0F] + HEX_CHARS[(block >> 8) & 0x0F];
-        }
-        if (extraBytes > 2) {
-          hex += HEX_CHARS[(block >> 20) & 0x0F] + HEX_CHARS[(block >> 16) & 0x0F];
-        }
-      }
-      return hex;
-    }
-
-    buffer() {
-      var blockCount = this.blockCount,
-        s = this.s,
-        outputBlocks = this.outputBlocks,
-        extraBytes = this.extraBytes,
-        i = 0,
-        j = 0;
-      var bytes = this.outputBits >> 3;
-      var buffer;
-      if (extraBytes) {
-        buffer = new ArrayBuffer((outputBlocks + 1) << 2);
       }
       else {
-        buffer = new ArrayBuffer(bytes);
-      }
-      var array = new Uint32Array(buffer);
-      while (j < outputBlocks) {
-        for (i = 0; i < blockCount && j < outputBlocks; ++i, ++j) {
-          array[j] = s[i];
+        for (i = this.start; index < length && i < byteCount; ++index) {
+          code = message.charCodeAt(index);
+          if (code < 0x80) {
+            blocks[i >> 2] |= code << SHIFT[i++ & 3];
+          }
+          else if (code < 0x800) {
+            blocks[i >> 2] |= (0xc0 | (code >> 6)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+          }
+          else if (code < 0xd800 || code >= 0xe000) {
+            blocks[i >> 2] |= (0xe0 | (code >> 12)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+          }
+          else {
+            code = 0x10000 + (((code & 0x3ff) << 10) | (message.charCodeAt(++index) & 0x3ff));
+            blocks[i >> 2] |= (0xf0 | (code >> 18)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | ((code >> 12) & 0x3f)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+          }
         }
-        if (j % blockCount == 0) {
-          f(s);
+      }
+      this.lastByteIndex = i;
+      if (i >= byteCount) {
+        this.start = i - byteCount;
+        this.block = blocks[blockCount];
+        for (i = 0; i < blockCount; ++i) {
+          s[i] ^= blocks[i];
         }
+        f(s);
+        this.reset = true;
       }
-      if (extraBytes) {
-        array[i] = s[i];
-        buffer = buffer.slice(0, bytes);
+      else {
+        this.start = i;
       }
-      return buffer;
     }
+    return this;
+  };
 
-    digest() {
-      var blockCount = this.blockCount,
-        s = this.s,
-        outputBlocks = this.outputBlocks,
-        extraBytes = this.extraBytes,
-        i = 0,
-        j = 0;
-      var array = [],
-        offset, block;
-      while (j < outputBlocks) {
-        for (i = 0; i < blockCount && j < outputBlocks; ++i, ++j) {
-          offset = j << 2;
-          block = s[i];
-          array[offset] = block & 0xFF;
-          array[offset + 1] = (block >> 8) & 0xFF;
-          array[offset + 2] = (block >> 16) & 0xFF;
-          array[offset + 3] = (block >> 24) & 0xFF;
-        }
-        if (j % blockCount == 0) {
-          f(s);
-        }
+  Keccak.prototype.finalize = function() {
+    var blocks = this.blocks,
+      i = this.lastByteIndex,
+      blockCount = this.blockCount,
+      s = this.s;
+    blocks[i >> 2] |= this.padding[i & 3];
+    if (this.lastByteIndex == this.byteCount) {
+      blocks[0] = blocks[blockCount];
+      for (i = 1; i < blockCount + 1; ++i) {
+        blocks[i] = 0;
       }
-      if (extraBytes) {
+    }
+    blocks[blockCount - 1] |= 0x80000000;
+    for (i = 0; i < blockCount; ++i) {
+      s[i] ^= blocks[i];
+    }
+    f(s);
+  };
+
+  Keccak.prototype.hex = function() {
+    this.finalize();
+
+    var blockCount = this.blockCount,
+      s = this.s,
+      outputBlocks = this.outputBlocks,
+      extraBytes = this.extraBytes,
+      i = 0,
+      j = 0;
+    var hex = '',
+      block;
+    while (j < outputBlocks) {
+      for (i = 0; i < blockCount && j < outputBlocks; ++i, ++j) {
+        block = s[i];
+        hex += HEX_CHARS[(block >> 4) & 0x0F] + HEX_CHARS[block & 0x0F] +
+          HEX_CHARS[(block >> 12) & 0x0F] + HEX_CHARS[(block >> 8) & 0x0F] +
+          HEX_CHARS[(block >> 20) & 0x0F] + HEX_CHARS[(block >> 16) & 0x0F] +
+          HEX_CHARS[(block >> 28) & 0x0F] + HEX_CHARS[(block >> 24) & 0x0F];
+      }
+      if (j % blockCount == 0) {
+        f(s);
+        i = 0;
+      }
+    }
+    if (extraBytes) {
+      block = s[i];
+      if (extraBytes > 0) {
+        hex += HEX_CHARS[(block >> 4) & 0x0F] + HEX_CHARS[block & 0x0F];
+      }
+      if (extraBytes > 1) {
+        hex += HEX_CHARS[(block >> 12) & 0x0F] + HEX_CHARS[(block >> 8) & 0x0F];
+      }
+      if (extraBytes > 2) {
+        hex += HEX_CHARS[(block >> 20) & 0x0F] + HEX_CHARS[(block >> 16) & 0x0F];
+      }
+    }
+    return hex;
+  };
+
+  Keccak.prototype.buffer = function() {
+    this.finalize();
+
+    var blockCount = this.blockCount,
+      s = this.s,
+      outputBlocks = this.outputBlocks,
+      extraBytes = this.extraBytes,
+      i = 0,
+      j = 0;
+    var bytes = this.outputBits >> 3;
+    var buffer;
+    if (extraBytes) {
+      buffer = new ArrayBuffer((outputBlocks + 1) << 2);
+    }
+    else {
+      buffer = new ArrayBuffer(bytes);
+    }
+    var array = new Uint32Array(buffer);
+    while (j < outputBlocks) {
+      for (i = 0; i < blockCount && j < outputBlocks; ++i, ++j) {
+        array[j] = s[i];
+      }
+      if (j % blockCount == 0) {
+        f(s);
+      }
+    }
+    if (extraBytes) {
+      array[i] = s[i];
+      buffer = buffer.slice(0, bytes);
+    }
+    return buffer;
+  };
+
+  Keccak.prototype.array = function() {
+    this.finalize();
+
+    var blockCount = this.blockCount,
+      s = this.s,
+      outputBlocks = this.outputBlocks,
+      extraBytes = this.extraBytes,
+      i = 0,
+      j = 0;
+    var array = [],
+      offset, block;
+    while (j < outputBlocks) {
+      for (i = 0; i < blockCount && j < outputBlocks; ++i, ++j) {
         offset = j << 2;
         block = s[i];
-        if (extraBytes > 0) {
-          array[offset] = block & 0xFF;
-        }
-        if (extraBytes > 1) {
-          array[offset + 1] = (block >> 8) & 0xFF;
-        }
-        if (extraBytes > 2) {
-          array[offset + 2] = (block >> 16) & 0xFF;
-        }
+        array[offset] = block & 0xFF;
+        array[offset + 1] = (block >> 8) & 0xFF;
+        array[offset + 2] = (block >> 16) & 0xFF;
+        array[offset + 3] = (block >> 24) & 0xFF;
       }
-      
-      return array;
+      if (j % blockCount == 0) {
+        f(s);
+      }
     }
-  }
+    if (extraBytes) {
+      offset = j << 2;
+      block = s[i];
+      if (extraBytes > 0) {
+        array[offset] = block & 0xFF;
+      }
+      if (extraBytes > 1) {
+        array[offset + 1] = (block >> 8) & 0xFF;
+      }
+      if (extraBytes > 2) {
+        array[offset + 2] = (block >> 16) & 0xFF;
+      }
+    }
+    return array;
+  };
 
-  function f(s) {
+  var f = function(s) {
     var h, l, n, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9,
       b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17,
       b18, b19, b20, b21, b22, b23, b24, b25, b26, b27, b28, b29, b30, b31, b32, b33,
@@ -449,6 +430,29 @@ namespace Keccak {
 
       s[0] ^= RC[n];
       s[1] ^= RC[n + 1];
+    }
+  }
+
+  export function digest(input, format, output) {
+    var msg = input;
+    if (format === 1) {
+      msg = input;
+    }
+    else if (format === 2) {
+      msg = Helper.int32Buffer2Bytes(input);
+    }
+    else {
+      msg = Helper.string2bytes(input);
+    }
+    var ctx = {};
+    if (output === 1) {
+      return Helper.bytes2Int32Buffer(new Keccak(512, KECCAK_PADDING, 512).update(msg).array());
+    }
+    else if (output === 2) {
+      return new Keccak(512, KECCAK_PADDING, 512).update(msg).array();
+    }
+    else {
+      return new Keccak(512, KECCAK_PADDING, 512).update(msg).hex();
     }
   }
 }

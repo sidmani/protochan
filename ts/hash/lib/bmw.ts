@@ -325,10 +325,6 @@ namespace BMW {
       bitCount: Op.u(0,0),
       buffer: new Array(128)
     };
-    // ctx.state = Op.clone64Array(V_INIT);
-    // ctx.ptr = 0;
-    // ctx.bitCount = Op.u(0,0);
-    // ctx.buffer = new Array(128);
     bmw(ctx, msg);
     var r = bmwClose(ctx);
     var out;

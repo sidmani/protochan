@@ -277,7 +277,7 @@ namespace Cubehash {
 		ctx.state = x;
 		ctx.ptr = ptr;
 	}
-	
+
 	function cubehashClose(ctx) {
 		var buf = ctx.buffer;
 		var ptr = ctx.ptr;
@@ -317,9 +317,7 @@ namespace Cubehash {
 			ptr: 0,
 			buffer: new Array(Cubehash_BlockSize)
 		};
-		// ctx.state = IV512;
-		// ctx.ptr = 0;
-		// ctx.buffer = new Array(Cubehash_BlockSize);
+
 		cubehash(ctx, msg);
 		var r = cubehashClose(ctx);
 	  var out;

@@ -22,44 +22,35 @@ namespace Hash {
   export let skein = Skein.digest;
   export let shavite = Shavite.digest;
   export let simd = SIMD.digest;
-  export let keccak = function(str,format, output) {
-    var msg = str;
-    if (format === 2) {
-      msg = Helper.int32Buffer2Bytes(str);
-    }
-    if (output === 1) {
-      return Keccak.digest(msg, 0, 1);
-    } else if (output === 2) {
-      return Helper.bytes2Int32Buffer(Keccak.digest(msg, 0, 0))
-    } else {
-      return Keccak.digest(msg, 0, 0);
-    }
-  }
+  export let keccak = Keccak.digest;
 
-  export namespace X11 {
-    export function digest(str, format, output) {
-      var a = blake(str,format,2);
-      console.log("Blake: " + a);
-      a = bmw(a,2,2);
-      console.log("BMW: " + a);
-      a = groestl(a,2,2);
-      console.log("Groestl: " + a);
-      a = skein(a,2,2);
-      console.log("Skein: " + a);
+  export namespace X8X {
+    export let fMap = {
+      0x0: blake,
+      0x1: bmw,
+      0x2: cubehash,
+      0x3: echo,
+      0x4: groestl,
+      0x5: jh,
+      0x6: luffa,
+      0x7: skein,
+      0x8: shavite,
+      0x9: simd,
+      0xA: keccak
+    }
+
+    export function x11(str, format, output) {
+      var a = blake(str,format,1);
+      a = bmw(a,1,1);
+      a = groestl(a,1,1);
+      a = skein(a,1,2);
       a = jh(a,2,2);
-      console.log("JH: " + a);
       a = keccak(a,2,1);
-      console.log("Keccak: " + a);
-      a = luffa(a,1,2);
-      console.log("Luffa: " + a);
+      a = luffa(a,2,2);
       a = cubehash(a,2,2);
-      console.log("Cubehash: " + a);
-      a = shavite(a,2,2);
-      console.log("Shavite: " + a);
-      a = simd(a,2,2);
-      console.log("SIMD: " + a);
-      a = echo(a,2,2);
-      console.log("Echo: " + a);
+      a = shavite(a,2,1);
+      a = simd(a,1,1);
+      a = echo(a,1,2);
       if (output === 2) {
         return a;
       }
@@ -69,6 +60,10 @@ namespace Hash {
       else {
         return Helper.int32ArrayToHexString(a);
       }
+    }
+
+    export function digest(str, format, output) {
+
     }
   }
 }
