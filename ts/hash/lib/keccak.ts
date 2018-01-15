@@ -31,10 +31,12 @@ namespace Keccak {
     2147516545, 2147483648, 32896, 2147483648, 2147483649, 0, 2147516424, 2147483648
   ];
 
-  var OUTPUT_TYPES = ['hex', 'buffer', 'array'];
+  var OUTPUT_TYPES = ['hex', 'buffer', 'digest'];
 
   export function digest(input, format, output) {
-    return new Keccak(512, KECCAK_PADDING, 512).update(input)[OUTPUT_TYPES[output]]();
+    var kec = new Keccak(512, KECCAK_PADDING, 512).update(input)
+    kec.finalize();
+    return kec[OUTPUT_TYPES[output]]();
   }
 
   class Keccak {
@@ -52,7 +54,7 @@ namespace Keccak {
 
     lastByteIndex: number;
 
-    constructor(bits, padding, outputBits: number) {
+    constructor(bits, padding, outputBits) {
       this.blocks = [];
       this.s = [];
       this.padding = padding;
@@ -157,13 +159,7 @@ namespace Keccak {
       f(s);
     }
 
-    toString() {
-      return this.hex()
-    }
-
     hex() {
-      this.finalize();
-
       var blockCount = this.blockCount,
         s = this.s,
         outputBlocks = this.outputBlocks,
@@ -198,11 +194,9 @@ namespace Keccak {
         }
       }
       return hex;
-    };
+    }
 
     buffer() {
-      this.finalize();
-
       var blockCount = this.blockCount,
         s = this.s,
         outputBlocks = this.outputBlocks,
@@ -231,15 +225,9 @@ namespace Keccak {
         buffer = buffer.slice(0, bytes);
       }
       return buffer;
-    };
-
-    array() {
-      return this.digest();
     }
 
     digest() {
-      this.finalize();
-
       var blockCount = this.blockCount,
         s = this.s,
         outputBlocks = this.outputBlocks,
@@ -274,8 +262,9 @@ namespace Keccak {
           array[offset + 2] = (block >> 16) & 0xFF;
         }
       }
+      
       return array;
-    };
+    }
   }
 
   function f(s) {
