@@ -2,21 +2,6 @@
 <html>
 <meta charset=utf-8>
 <title>protochan</title>
-<script src="ts/hash/lib/op.js"></script>
-<script src="ts/hash/lib/helper.js"></script>
-<script src="ts/hash/lib/blake.js"></script>
-<script src="ts/hash/lib/bmw.js"></script>
-<script src="ts/hash/lib/cubehash.js"></script>
-<script src="ts/hash/lib/aes.js"></script>
-<script src="ts/hash/lib/echo.js"></script>
-<script src="ts/hash/lib/groestl.js"></script>
-<script src="ts/hash/lib/jh.js"></script>
-<script src="ts/hash/lib/keccak.js"></script>
-<script src="ts/hash/lib/luffa.js"></script>
-<script src="ts/hash/lib/skein.js"></script>
-<script src="ts/hash/lib/simd.js"></script>
-<script src="ts/hash/lib/shavite.js"></script>
-<script src="ts/hash/hash.js"></script>
 
 <script>
 // test hash functions
@@ -33,7 +18,7 @@
     console.log("Shavite: " + (Helper.int32ArrayToHexString(Shavite.digest('The great experiment continues.', 0, 2)) === '6fbca2d53a26e22e6df1a8064230bdb98c0a612b64dad958f16757cf8ee8526862a0e4f56be69b98b07f0ea47db7211cf42352443fc806013374e819f26cb923'));
     console.log("SIMD: " + (Helper.int32ArrayToHexString(SIMD.digest('The great experiment continues.', 0, 2)) === '13ae2c08260f7d5abcfa791446800c1eaed8c5332ec437222428a28823aa2ba19a5907a2c860c12c0b894bdf9c0d64f807cb9512f1ed42980d15747ff4a26c1c'));
     console.log("Echo: " + (Helper.int32ArrayToHexString(Echo.digest('The great experiment continues.', 0, 2)) === 'b1db282b1672f3423c1e1bdf4496a8ddda0b6f483e92e9a8be2efbaab0ea230814f1f1485d919285deac13794dc215000eb39a47ac32bfc07299a0475049be2e'));
-    console.log("X11: " + (Hash.X8X.x11('The great experiment continues.', 0, 0) === '4da3b7c5ff698c6546564ebc72204f31885cd87b75b2b3ca5a93b5d75db85b8c9191d2825370ae032b1eebcff5edbae416b34bc97dae76738e7450d33b203f50'));
+    console.log("X11: " + (Hash.X11.x11('The great experiment continues.', 0, 0) === '4da3b7c5ff698c6546564ebc72204f31885cd87b75b2b3ca5a93b5d75db85b8c9191d2825370ae032b1eebcff5edbae416b34bc97dae76738e7450d33b203f50'));
   }
 </script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hack/0.8.0/hack.css">
