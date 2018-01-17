@@ -4,6 +4,10 @@ module.exports = {
     description: 'Blake hash function string -> string',
     fn: function() { return hash.blake('The great experiment continues.', 0, 0) === '8f257723af0741fb7d3d8c264a5ea86a57d4ae833557de04f5f78fad1ac17d6dfa1ae4a78a7564c08fc21d5d8cdd2793ca17d5500ecc2b43eb8aaf9c220d7b49'; }
   },
+  testKeccak: {
+    description: 'Keccak hash function string -> string',
+    fn: function() { return hash.keccak('The great experiment continues.', 0, 0) === '4c7e9c893fcdc87a2fd604574a4a5b9a0b6864665ed19057dedf24858314690ba45d6bbcfb86cd7182d1677e2d30dad9716ee99eb8ea267c6638f47ef20e0226'; }
+  },
   testBMW: {
     description: 'BMW hash function string -> string',
     fn: function() { return hash.bmw('The great experiment continues.', 0, 0) === '7b30b4f1ccd83692bc6a01b1f7e374b59b81da6b21421679ae59d84c4f73afec5a0857565b6ebc1b9ddf9da5e75bf1ecd0ba6f5a75b7926ba9278385fb83533c'; }
@@ -44,5 +48,4 @@ module.exports = {
     description: 'X11 hash function string -> string',
     fn: function() { return hash.digest('The great experiment continues.', 0, 0) === '4da3b7c5ff698c6546564ebc72204f31885cd87b75b2b3ca5a93b5d75db85b8c'; }
   }
-
-}
+};
