@@ -161,7 +161,7 @@ u64.prototype.setShiftLeft = function(bits) {
   if (bits > 63) {
     bits = bits % 64;
   }
-  
+
   if (bits > 31) {
     this.hi = this.lo << (bits - 32);
     this.lo = 0;
@@ -419,7 +419,7 @@ module.exports.bufferInsert64 = function(buffer, bufferOffset, data, len) {
     i++;
   }
 }
-/*
+
 module.exports.buffer2Insert = function(buffer, bufferOffset, bufferOffset2, data, len, len2) {
   while (len--) {
     var j = len2;
@@ -428,7 +428,7 @@ module.exports.buffer2Insert = function(buffer, bufferOffset, bufferOffset2, dat
     }
   }
 }
-*/
+
 module.exports.bufferInsertBackwards = function(buffer, bufferOffset, data, len) {
   var i = 0;
   while (i < len) {

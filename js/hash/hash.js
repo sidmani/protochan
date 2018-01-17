@@ -13,8 +13,6 @@ var groestl = require('./lib/groestl');
 var bmw = require('./lib/bmw');
 var h = require('./lib/helper');
 
-// var x11hash = module.exports;
-
 module.exports.blake = function(str,format, output) {
   return blake(str,format,output);
 }
@@ -68,7 +66,6 @@ module.exports.simd = function(str,format, output) {
 module.exports.skein = function(str,format, output) {
   return skein(str,format,output);
 }
-
 
 module.exports.digest = function(str,format, output) {
   var a = blake(str,format,2);
