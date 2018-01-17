@@ -1,3 +1,7 @@
+// This file is a part of the protochan project.
+// https://github.com/sidmani/protochan
+// https://www.sidmani.com/?postid=3
+
 // Copyright (c) 2018 Sid Mani
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy

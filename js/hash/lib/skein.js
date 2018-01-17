@@ -1,5 +1,9 @@
-//from http://www.h2database.com/skein/
-// Released under the public domain
+// This file is a part of the protochan project.
+// https://github.com/sidmani/protochan
+// https://www.sidmani.com/?postid=3
+
+// from http://www.h2database.com/skein/
+// Released to the public domain
 
 var op = require('./op');
 var h = require('./helper');

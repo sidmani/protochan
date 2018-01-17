@@ -1,10 +1,27 @@
-/////////////////////////////////////
-////////////  groestl ///////////////
+// This file is a part of the protochan project.
+// https://github.com/sidmani/protochan
+// https://www.sidmani.com/?postid=3
 
-//// Written by Quantum Explorer ////
-////////// Dash Foundation //////////
-/// Released under the MIT License //
-/////////////////////////////////////
+// Copyright (c) 2016 Quantum Explorer
+// Modifications (c) 2018 Sid Mani
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 var o = require('./op');
 var h = require('./helper');
@@ -1136,7 +1153,7 @@ var final = function(state) {
   o.bufferInsert64(g, 0, state, 16);
   var t = new Array(16);
   for (var r = 0; r < 14; r++) {
-    
+
     for (var i = 0; i < 16; i++) {
       g[i].setxor64(j64[i].plus(r64[r]).setShiftLeft(56));
     }
