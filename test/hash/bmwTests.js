@@ -22,17 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var bmw = require('../../js/hash/lib/bmw.js');
+var helper = require('../../js/hash/lib/helper.js');
+
+var inputString = 'The great experiment continues.';
+var outputString = '7b30b4f1ccd83692bc6a01b1f7e374b59b81da6b21421679ae59d84c4f73afec5a0857565b6ebc1b9ddf9da5e75bf1ecd0ba6f5a75b7926ba9278385fb83533c';
+module.exports = [
+  { description: 'BMW hash function string -> string',
+    fn: function() { return bmw(inputString, 0, 0) === outputString; }
+  },
+  { description: 'BMW hash function uint8[] -> uint8[]',
+    fn: function() { return helper.int8ArrayToHexString(bmw(inputString, 0, 1)) === outputString; }
+  },
+  { description: 'BMW hash function uint32 -> uint32[]',
+    fn: function() { return helper.int32ArrayToHexString(bmw(inputString, 0, 2)) === outputString; }
+  }
+];

@@ -22,17 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var luffa = require('../../js/hash/lib/luffa.js');
+var helper = require('../../js/hash/lib/helper.js');
+
+var inputString = 'The great experiment continues.';
+var outputString = 'ea531ce38473fc4bd508c5396194dd6201699d47e25bd4d6b0c5dc7ab0627831e01ea027ebe33d80f608f139aa9fd0c6d923f32de9b5d714026300ed1c9a2f48';
+module.exports = [
+  { description: 'Luffa hash function string -> string',
+    fn: function() { return luffa(inputString, 0, 0) === outputString; }
+  },
+  { description: 'Luffa hash function uint8[] -> uint8[]',
+    fn: function() { return helper.int8ArrayToHexString(luffa(inputString, 0, 1)) === outputString; }
+  },
+  { description: 'Luffa hash function uint32 -> uint32[]',
+    fn: function() { return helper.int32ArrayToHexString(luffa(inputString, 0, 2)) === outputString; }
+  }
+];

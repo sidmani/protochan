@@ -22,17 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var skein = require('../../js/hash/lib/skein.js');
+var helper = require('../../js/hash/lib/helper.js');
+
+var inputString = 'The great experiment continues.';
+var outputString = '88a9dd727bb9b7cbd59612edbcd6b321427f473acc5673d7dffb16071dc71821d0cc1b94dccf7e5f71a0a94019a7e764d3315c3f4a40f73aee4ad98c75bcc2f7';
+module.exports = [
+  { description: 'Skein hash function string -> string',
+    fn: function() { return skein(inputString, 0, 0) === outputString; }
+  },
+  { description: 'Skein hash function uint8[] -> uint8[]',
+    fn: function() { return helper.int8ArrayToHexString(skein(inputString, 0, 1)) === outputString; }
+  },
+  { description: 'Skein hash function uint32 -> uint32[]',
+    fn: function() { return helper.int32ArrayToHexString(skein(inputString, 0, 2)) === outputString; }
+  }
+];

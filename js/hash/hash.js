@@ -27,7 +27,7 @@
 'use strict';
 
 var blake = require('./lib/blake');
-var keccak = require('./lib/keccak').keccak_512;
+var keccak = require('./lib/keccak');
 var skein = require('./lib/skein');
 var luffa = require('./lib/luffa');
 var simd = require('./lib/simd');
@@ -64,17 +64,18 @@ module.exports.jh = function(str,format, output) {
 }
 
 module.exports.keccak = function(str,format, output) {
-  var msg = str;
-  if (format === 2) {
-    msg = h.int32Buffer2Bytes(str);
-  }
-  if (output === 1) {
-    return keccak['array'](msg);
-  } else if (output === 2) {
-    return h.bytes2Int32Buffer(keccak['array'](msg));
-  } else {
-    return keccak['hex'](msg);
-  }
+  return keccak(str,format,output);
+  // var msg = str;
+  // if (format === 2) {
+  //   msg = h.int32Buffer2Bytes(str);
+  // }
+  // if (output === 1) {
+  //   return keccak['array'](msg);
+  // } else if (output === 2) {
+  //   return h.bytes2Int32Buffer(keccak['array'](msg));
+  // } else {
+  //   return keccak['hex'](msg);
+  // }
 }
 
 module.exports.luffa = function(str,format, output) {
@@ -99,8 +100,8 @@ module.exports.digest = function(str,format, output) {
   a = groestl(a,2,2);
   a = skein(a,2,2);
   a = jh(a,2,2);
-  a = this.keccak(a,2,1);
-  a = luffa(a,1,2);
+  a = keccak(a,2,2);
+  a = luffa(a,2,2);
   a = cubehash(a,2,2);
   a = shavite(a,2,2);
   a = simd(a,2,2);

@@ -22,17 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var x11 = require('../../js/hash/hash.js');
+var helper = require('../../js/hash/lib/helper.js');
+
+var inputString = 'The great experiment continues.';
+var outputString = '4da3b7c5ff698c6546564ebc72204f31885cd87b75b2b3ca5a93b5d75db85b8c';
+module.exports = [
+  { description: 'X11 hash function string -> string',
+    fn: function() { return x11.digest(inputString, 0, 0) === outputString; }
+  },
+  { description: 'X11 hash function uint8[] -> uint8[]',
+    fn: function() { return helper.int8ArrayToHexString(x11.digest(inputString, 0, 1)) === outputString; }
+  },
+  { description: 'X11 hash function uint32 -> uint32[]',
+    fn: function() { return helper.int32ArrayToHexString(x11.digest(inputString, 0, 2)) === outputString; }
+  }
+];

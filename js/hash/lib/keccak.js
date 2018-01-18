@@ -32,56 +32,8 @@ var RC = [1, 0, 32898, 0, 32906, 2147483648, 2147516416, 2147483648, 32907, 0, 2
   2147483648, 32770, 2147483648, 128, 2147483648, 32778, 0, 2147483658, 2147483648,
   2147516545, 2147483648, 32896, 2147483648, 2147483649, 0, 2147516424, 2147483648
 ];
-var BITS = [512];
-var OUTPUT_TYPES = ['hex', 'buffer', 'array'];
 
 var h = require('./helper');
-
-var createOutputMethod = function(bits, padding, outputType) {
-  return function(message) {
-    return new Keccak(bits, padding, bits).update(message)[outputType]();
-  }
-};
-
-var createShakeOutputMethod = function(bits, padding, outputType) {
-  return function(message, outputBits) {
-    return new Keccak(bits, padding, outputBits).update(message)[outputType]();
-  }
-};
-
-var createMethod = function(bits, padding) {
-  var method = createOutputMethod(bits, padding, 'array');
-  method.create = function() {
-    return new Keccak(bits, padding, bits);
-  };
-  method.update = function(message) {
-    return method.create().update(message);
-  };
-  for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
-    var type = OUTPUT_TYPES[i];
-    method[type] = createOutputMethod(bits, padding, type);
-  }
-  return method;
-};
-
-var algorithms = [{
-  name: 'keccak',
-  padding: KECCAK_PADDING,
-  bits: BITS,
-  createMethod: createMethod
-}];
-
-var methods = {};
-
-for (var i = 0; i < algorithms.length; ++i) {
-  var algorithm = algorithms[i];
-  var bits = algorithm.bits;
-  var createMethod = algorithm.createMethod;
-  for (var j = 0; j < bits.length; ++j) {
-    var method = algorithm.createMethod(bits[j], algorithm.padding);
-    methods[algorithm.name + '_' + bits[j]] = method;
-  }
-}
 
 function Keccak(bits, padding, outputBits) {
   this.blocks = [];
@@ -187,7 +139,7 @@ Keccak.prototype.finalize = function() {
   f(s);
 };
 
-Keccak.prototype.toString = Keccak.prototype.hex = function() {
+Keccak.prototype.hex = function() {
   this.finalize();
 
   var blockCount = this.blockCount,
@@ -259,7 +211,7 @@ Keccak.prototype.buffer = function() {
   return buffer;
 };
 
-Keccak.prototype.digest = Keccak.prototype.array = function() {
+Keccak.prototype.array = function() {
   this.finalize();
 
   var blockCount = this.blockCount,
@@ -483,34 +435,24 @@ var f = function(s) {
     s[1] ^= RC[n + 1];
   }
 }
-module.exports = methods;
-//   if (!root.JS_SHA3_TEST && NODE_JS) {
-//     module.exports = methods;
-//   } else if (root) {
-//     for (var key in methods) {
-//       root[key] = methods[key];
-//     }
-//   }
 
-// module.exports = function(input, format, output) {
-//   var msg = input;
-//   if (format === 1) {
-//     msg = input;
-//   }
-//   else if (format === 2) {
-//     msg = h.int32Buffer2Bytes(input);
-//   }
-//   else {
-//     msg = h.string2bytes(input);
-//   }
-//   var ctx = {};
-//   if (output === 1) {
-//     return h.bytes2Int32Buffer(new Keccak().update(msg).array());
-//   }
-//   else if (output === 2) {
-//     return new Keccak().update(msg).array();
-//   }
-//   else {
-//     return new Keccak().update(msg).hex();
-//   }
-// }
+module.exports = function(input, format, output) {
+  var msg = input;
+  if (format === 1) {
+    msg = input;
+  }
+  else if (format === 2) {
+    msg = h.int32Buffer2Bytes(input);
+  }
+  else {
+    msg = h.string2bytes(input);
+  }
+
+  if (output === 2) {
+    return h.bytes2Int32Buffer(new Keccak(512, KECCAK_PADDING, 512).update(msg).array());
+  } else if (output === 1) {
+    return new Keccak(512, KECCAK_PADDING, 512).update(msg).array();
+  } else {
+    return new Keccak(512, KECCAK_PADDING, 512).update(msg).hex();
+  }
+}

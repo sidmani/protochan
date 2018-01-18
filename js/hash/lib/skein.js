@@ -44,21 +44,19 @@ module.exports = function(input, format, output) {
 	tweak[0][1] = 8;
 	tweak[1][0] = (0x80 + 0x40 + 0x3f) << 24;
 	block(c, tweak, [], 0);
+
 	for (var hash = [], i = 0; i < 64; i++) {
 		var b = (shiftRight(c[i >> 3], (i & 7) * 8)[1] & 255);
 		hash.push(b);
 	}
-	var out;
+
   if (output === 2) {
-    out = h.bytes2Int32Buffer(hash);
+    return h.bytes2Int32Buffer(hash);
+  } else if (output === 1) {
+    return hash;
+  } else {
+    return h.int8ArrayToHexString(hash);
   }
-  else if (output === 1) {
-    return out;
-  }
-  else {
-    out = h.int8ArrayToHexString(hash);
-  }
-  return out;
 }
 
 function shiftLeft(x, n) {

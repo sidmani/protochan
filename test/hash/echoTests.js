@@ -22,17 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var echo = require('../../js/hash/lib/echo.js');
+var helper = require('../../js/hash/lib/helper.js');
+
+var inputString = 'The great experiment continues.';
+var outputString = 'b1db282b1672f3423c1e1bdf4496a8ddda0b6f483e92e9a8be2efbaab0ea230814f1f1485d919285deac13794dc215000eb39a47ac32bfc07299a0475049be2e';
+module.exports = [
+  { description: 'Echo hash function string -> string',
+    fn: function() { return echo(inputString, 0, 0) === outputString; }
+  },
+  { description: 'Echo hash function uint8[] -> uint8[]',
+    fn: function() { return helper.int8ArrayToHexString(echo(inputString, 0, 1)) === outputString; }
+  },
+  { description: 'Echo hash function uint32 -> uint32[]',
+    fn: function() { return helper.int32ArrayToHexString(echo(inputString, 0, 2)) === outputString; }
+  }
+];

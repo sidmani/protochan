@@ -22,17 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var keccak = require('../../js/hash/lib/keccak.js');
+var helper = require('../../js/hash/lib/helper.js');
+
+var inputString = 'The great experiment continues.';
+var outputString = '4c7e9c893fcdc87a2fd604574a4a5b9a0b6864665ed19057dedf24858314690ba45d6bbcfb86cd7182d1677e2d30dad9716ee99eb8ea267c6638f47ef20e0226';
+module.exports = [
+  { description: 'Keccak hash function string -> string',
+    fn: function() { return keccak(inputString, 0, 0) === outputString; }
+  },
+  { description: 'Keccak hash function uint8[] -> uint8[]',
+    fn: function() { return helper.int8ArrayToHexString(keccak(inputString, 0, 1)) === outputString; }
+  },
+  { description: 'Keccak hash function uint32 -> uint32[]',
+    fn: function() { return helper.int32ArrayToHexString(keccak(inputString, 0, 2)) === outputString; }
+  }
+];

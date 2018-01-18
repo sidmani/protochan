@@ -22,17 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var cubehash = require('../../js/hash/lib/cubehash.js');
+var helper = require('../../js/hash/lib/helper.js');
+
+var inputString = 'The great experiment continues.';
+var outputString = '64394bcb9d7844070c8516480ea5f03f68386f33c3829e08bf38bea11f09eba5806aa7831cfbe8e515678b0cad7d4ac888ea2b9ea8f63f0cc918d5a6a76b7ae9';
+module.exports = [
+  { description: 'Cubehash hash function string -> string',
+    fn: function() { return cubehash(inputString, 0, 0) === outputString; }
+  },
+  { description: 'Cubehash hash function uint8[] -> uint8[]',
+    fn: function() { return helper.int8ArrayToHexString(cubehash(inputString, 0, 1)) === outputString; }
+  },
+  { description: 'Cubehash hash function uint32 -> uint32[]',
+    fn: function() { return helper.int32ArrayToHexString(cubehash(inputString, 0, 2)) === outputString; }
+  }
+];

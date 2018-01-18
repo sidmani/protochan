@@ -22,17 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var shavite = require('../../js/hash/lib/shavite.js');
+var helper = require('../../js/hash/lib/helper.js');
+
+var inputString = 'The great experiment continues.';
+var outputString = '6fbca2d53a26e22e6df1a8064230bdb98c0a612b64dad958f16757cf8ee8526862a0e4f56be69b98b07f0ea47db7211cf42352443fc806013374e819f26cb923';
+module.exports = [
+  { description: 'Shavite hash function string -> string',
+    fn: function() { return shavite(inputString, 0, 0) === outputString; }
+  },
+  { description: 'Shavite hash function uint8[] -> uint8[]',
+    fn: function() { return helper.int8ArrayToHexString(shavite(inputString, 0, 1)) === outputString; }
+  },
+  { description: 'Shavite hash function uint32 -> uint32[]',
+    fn: function() { return helper.int32ArrayToHexString(shavite(inputString, 0, 2)) === outputString; }
+  }
+];

@@ -22,17 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var groestl = require('../../js/hash/lib/groestl.js');
+var helper = require('../../js/hash/lib/helper.js');
+
+var inputString = 'The great experiment continues.';
+var outputString = '6cea044acf31194eab7d1adb704712c34dd4f0b6a470b0f297832addab691faa459474c651efdbebddb138a2a9adb41705e0fb75741775314ddd8e5449ace986';
+module.exports = [
+  { description: 'Groestl hash function string -> string',
+    fn: function() { return groestl(inputString, 0, 0) === outputString; }
+  },
+  { description: 'Groestl hash function uint8[] -> uint8[]',
+    fn: function() { return helper.int8ArrayToHexString(groestl(inputString, 0, 1)) === outputString; }
+  },
+  { description: 'Groestl hash function uint32 -> uint32[]',
+    fn: function() { return helper.int32ArrayToHexString(groestl(inputString, 0, 2)) === outputString; }
+  }
+];
