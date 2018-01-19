@@ -28,25 +28,6 @@ var h = require('./helper');
 
 var CB = h.bytes2Int64Buffer(h.b64Decode("JD9qiIWjCNMTGYouA3BzRKQJOCIpnzHQCC76mOxObIlFKCHmONATd75UZs806QxswKwpt8l8UN0/hNW1tUcJF5IW1dmJefsb0TELppjftawv/XLb0Brft7jhr+1qJn6WunyQRfEsf5kkoZlHs5Fs9wgB8uKFjvwWY2kg2HFXTmk="));
 
-// var CB = [
-//   o.u(0x243f6a88, 0x85a308d3),
-//   o.u(0x13198a2e, 0x03707344),
-//   o.u(0xa4093822, 0x299f31d0),
-//   o.u(0x082efa98, 0xec4e6c89),
-//   o.u(0x452821e6, 0x38d01377),
-//   o.u(0xbe5466cf, 0x34e90c6c),
-//   o.u(0xc0ac29b7, 0xc97c50dd),
-//   o.u(0x3f84d5b5, 0xb5470917),
-//   o.u(0x9216d5d9, 0x8979fb1b),
-//   o.u(0xd1310ba6, 0x98dfb5ac),
-//   o.u(0x2ffd72db, 0xd01adfb7),
-//   o.u(0xb8e1afed, 0x6a267e96),
-//   o.u(0xba7c9045, 0xf12c7f99),
-//   o.u(0x24a19947, 0xb3916cf7),
-//   o.u(0x0801f2e2, 0x858efc16),
-//   o.u(0x636920d8, 0x71574e69)
-// ];
-
 var Z = [
   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
   [14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3],

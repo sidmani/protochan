@@ -26,29 +26,7 @@
 var o = require('./op');
 var h = require('./helper');
 
-// var V_INIT = [
-//   o.u(0x80818283, 0x84858687), o.u(0x88898A8B, 0x8C8D8E8F),
-//   o.u(0x90919293, 0x94959697), o.u(0x98999A9B, 0x9C9D9E9F),
-//   o.u(0xA0A1A2A3, 0xA4A5A6A7), o.u(0xA8A9AAAB, 0xACADAEAF),
-//   o.u(0xB0B1B2B3, 0xB4B5B6B7), o.u(0xB8B9BABB, 0xBCBDBEBF),
-//   o.u(0xC0C1C2C3, 0xC4C5C6C7), o.u(0xC8C9CACB, 0xCCCDCECF),
-//   o.u(0xD0D1D2D3, 0xD4D5D6D7), o.u(0xD8D9DADB, 0xDCDDDEDF),
-//   o.u(0xE0E1E2E3, 0xE4E5E6E7), o.u(0xE8E9EAEB, 0xECEDEEEF),
-//   o.u(0xF0F1F2F3, 0xF4F5F6F7), o.u(0xF8F9FAFB, 0xFCFDFEFF)
-// ];
-
 var V_INIT = h.bytes2Int64Buffer(h.b64Decode("gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8="));
-
-// var final = [
-//   o.u(0xaaaaaaaa, 0xaaaaaaa0), o.u(0xaaaaaaaa, 0xaaaaaaa1),
-//   o.u(0xaaaaaaaa, 0xaaaaaaa2), o.u(0xaaaaaaaa, 0xaaaaaaa3),
-//   o.u(0xaaaaaaaa, 0xaaaaaaa4), o.u(0xaaaaaaaa, 0xaaaaaaa5),
-//   o.u(0xaaaaaaaa, 0xaaaaaaa6), o.u(0xaaaaaaaa, 0xaaaaaaa7),
-//   o.u(0xaaaaaaaa, 0xaaaaaaa8), o.u(0xaaaaaaaa, 0xaaaaaaa9),
-//   o.u(0xaaaaaaaa, 0xaaaaaaaa), o.u(0xaaaaaaaa, 0xaaaaaaab),
-//   o.u(0xaaaaaaaa, 0xaaaaaaac), o.u(0xaaaaaaaa, 0xaaaaaaad),
-//   o.u(0xaaaaaaaa, 0xaaaaaaae), o.u(0xaaaaaaaa, 0xaaaaaaaf)
-// ];
 
 var final = h.bytes2Int64Buffer(h.b64Decode("qqqqqqqqqqCqqqqqqqqqoaqqqqqqqqqiqqqqqqqqqqOqqqqqqqqqpKqqqqqqqqqlqqqqqqqqqqaqqqqqqqqqp6qqqqqqqqqoqqqqqqqqqqmqqqqqqqqqqqqqqqqqqqqrqqqqqqqqqqyqqqqqqqqqraqqqqqqqqquqqqqqqqqqq8="));
 

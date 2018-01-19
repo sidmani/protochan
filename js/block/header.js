@@ -22,17 +22,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat(
-  require('./hash/blakeTests.js'),
-  require('./hash/bmwTests.js'),
-  require('./hash/cubehashTests.js'),
-  require('./hash/echoTests.js'),
-  require('./hash/groestlTests.js'),
-  require('./hash/jhTests.js'),
-  require('./hash/keccakTests.js'),
-  require('./hash/luffaTests.js'),
-  require('./hash/shaviteTests.js'),
-  require('./hash/simdTests.js'),
-  require('./hash/skeinTests.js'),
-  require('./hash/x11Tests.js')
-);
+var Util = require('../util.js');
+
+module.exports = class Header {
+  constructor(data) {
+    Util.assert(data, 'Data does not exist.');
+    Util.assert(data instanceof Uint8Array, 'Data is of wrong type.');
+    Util.assert(data.byteLength == 80, 'Data is of wrong length.');
+
+    this.data = data;
+  }
+
+  /// Protocol version
+  protocolVersion_raw() {
+    return this.data.subarray(0, 1);
+  }
+
+  /// Block type
+  blockType_raw() {
+    return this.data.subarray(1, 2);
+  }
+
+  // Unix timestamp
+  timestamp_raw() {
+    return this.data.subarray(2, 6);
+  }
+
+  // nonce
+  nonce_raw() {
+    return this.data.subarray(6, 10);
+  }
+
+  prevHash() {
+    return this.data.subarray(10, 42);
+  }
+
+  dataHash() {
+    return this.data.subarray(42, 74);
+  }
+
+  reserved() {
+    return this.data.subarray(75, 80);
+  }
+};

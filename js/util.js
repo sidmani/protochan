@@ -54,3 +54,9 @@ module.exports.Uint8ArrayFromInt = function(val) {
     ]);
   }
 }
+
+module.exports.assert = function(condition, description) {
+  if (!condition) {
+    throw new Error(description)
+  }
+}

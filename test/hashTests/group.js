@@ -22,19 +22,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const THREAD_BLOCK_ID = 0x00000001;
-
-var Util = require('../util.js');
-var Header = require('./header.js');
-
-module.exports = class PostBlock {
-  constructor(header, data) {
-    Util.assert(header, 'Header does not exist.');
-    Util.assert(header instanceof Header, 'Header is of wrong type.');
-    Util.assert(Util.parseIntFromUint8Array(header.blockType_raw()) === THREAD_BLOCK_ID, 'Header block type is incorrect.');
-    Util.assert(data, 'Data does not exist.');
-
-    this.header = header;
-    this.data = data;
-  }
-}
+module.exports = [].concat(
+  require('./blakeTests.js'),
+  require('./bmwTests.js'),
+  require('./cubehashTests.js'),
+  require('./echoTests.js'),
+  require('./groestlTests.js'),
+  require('./jhTests.js'),
+  require('./keccakTests.js'),
+  require('./luffaTests.js'),
+  require('./shaviteTests.js'),
+  require('./simdTests.js'),
+  require('./skeinTests.js'),
+  require('./x11Tests.js')
+);

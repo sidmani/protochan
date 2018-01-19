@@ -482,10 +482,11 @@ module.exports = function(input, format, output) {
   else {
     msg = h.string2bytes(input);
   }
-  var ctx = {};
-  ctx.state = V_INIT;
-  ctx.ptr = 0;
-  ctx.buffer = new Array(32);
+  var ctx = {
+    state: V_INIT,
+    ptr: 0,
+    buffer: new Array(32)
+  };
   luffa5(ctx, msg);
   var r = luffa5Close(ctx, 0, 0);
   var out;

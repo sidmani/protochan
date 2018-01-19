@@ -22,19 +22,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const THREAD_BLOCK_ID = 0x00000001;
+var Header = require('../../js/block/header.js');
 
-var Util = require('../util.js');
-var Header = require('./header.js');
-
-module.exports = class PostBlock {
-  constructor(header, data) {
-    Util.assert(header, 'Header does not exist.');
-    Util.assert(header instanceof Header, 'Header is of wrong type.');
-    Util.assert(Util.parseIntFromUint8Array(header.blockType_raw()) === THREAD_BLOCK_ID, 'Header block type is incorrect.');
-    Util.assert(data, 'Data does not exist.');
-
-    this.header = header;
-    this.data = data;
+module.exports = [
+  { description: "Block header rejects undefined data",
+    fn: function() {
+      try {
+        var h = new Header(undefined);
+        return false;
+      } catch(e) {
+        return true;
+      }
+    }
+  },
+  { description: "Block header rejects data of wrong type",
+    fn: function() {
+      try {
+        var h = new Header(new Array());
+        return false;
+      } catch(e) {
+        return true;
+      }
+    }
+  },
+  { description: "Block header rejects data of wrong length",
+    fn: function() {
+      try {
+        var h = new Header(new Uint8Array(12));
+        return false;
+      } catch(e) {
+        return true;
+      }
+    }
+  },
+  { description: "Block header accepts properly formatted data",
+    fn: function() {
+      var h = new Header(new Uint8Array(80));
+      return (h instanceof Header);
+    }
   }
-}
+]

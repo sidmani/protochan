@@ -23,7 +23,8 @@
 // SOFTWARE.
 
 var allTests = {
-  hashTests: require('./hashTests.js'),
+  hashTests: require('./hashTests/group.js'),
+  blockTests: require('./blockTests/group.js')
 }
 
 function runTests() {
@@ -76,6 +77,6 @@ function runTests() {
   '.\n':'s.\n'));
 
   process.exit(numFailure);
-}
+};
 
 runTests();

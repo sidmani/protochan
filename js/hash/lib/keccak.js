@@ -140,42 +140,7 @@ Keccak.prototype.finalize = function() {
 };
 
 Keccak.prototype.hex = function() {
-  this.finalize();
-
-  var blockCount = this.blockCount,
-    s = this.s,
-    outputBlocks = this.outputBlocks,
-    extraBytes = this.extraBytes,
-    i = 0,
-    j = 0;
-  var hex = '',
-    block;
-  while (j < outputBlocks) {
-    for (i = 0; i < blockCount && j < outputBlocks; ++i, ++j) {
-      block = s[i];
-      hex += HEX_CHARS[(block >> 4) & 0x0F] + HEX_CHARS[block & 0x0F] +
-        HEX_CHARS[(block >> 12) & 0x0F] + HEX_CHARS[(block >> 8) & 0x0F] +
-        HEX_CHARS[(block >> 20) & 0x0F] + HEX_CHARS[(block >> 16) & 0x0F] +
-        HEX_CHARS[(block >> 28) & 0x0F] + HEX_CHARS[(block >> 24) & 0x0F];
-    }
-    if (j % blockCount == 0) {
-      f(s);
-      i = 0;
-    }
-  }
-  if (extraBytes) {
-    block = s[i];
-    if (extraBytes > 0) {
-      hex += HEX_CHARS[(block >> 4) & 0x0F] + HEX_CHARS[block & 0x0F];
-    }
-    if (extraBytes > 1) {
-      hex += HEX_CHARS[(block >> 12) & 0x0F] + HEX_CHARS[(block >> 8) & 0x0F];
-    }
-    if (extraBytes > 2) {
-      hex += HEX_CHARS[(block >> 20) & 0x0F] + HEX_CHARS[(block >> 16) & 0x0F];
-    }
-  }
-  return hex;
+  return h.int8ArrayToHexString(this.array());
 };
 
 Keccak.prototype.buffer = function() {

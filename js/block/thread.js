@@ -21,9 +21,18 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+const THREAD_BLOCK_ID = 0x00000000;
+
+var Util = require('../util.js');
+var Header = require('./header.js');
 
 module.exports = class ThreadBlock {
   constructor(header, data) {
+    Util.assert(header, 'Header does not exist.');
+    Util.assert(header instanceof Header, 'Header is of wrong type.');
+    Util.assert(Util.parseIntFromUint8Array(header.blockType_raw()) === THREAD_BLOCK_ID, 'Header block type is incorrect.');
+    Util.assert(data, 'Data does not exist.');
+
     this.header = header;
     this.data = data;
   }

@@ -348,21 +348,7 @@ module.exports.u64 = u64;
 module.exports.u = function(h, l) {
   return new u64(h, l);
 }
-/*
-module.exports.add64 = function(a, b) {
-  var lowest, lowMid, highMid, highest; //four parts of the whole 64 bit number..
 
-  //need to add the respective parts from each number and the carry if on is present..
-  lowest = (a.lo & 0XFFFF) + (b.lo & 0XFFFF);
-  lowMid = (a.lo >>> 16) + (b.lo >>> 16) + (lowest >>> 16);
-  highMid = (a.hi & 0XFFFF) + (b.hi & 0XFFFF) + (lowMid >>> 16);
-  highest = (a.hi >>> 16) + (b.hi >>> 16) + (highMid >>> 16);
-
-  var r = new this.u64((highest << 16) | (highMid & 0XFFFF), (lowMid << 16) | (lowest & 0XFFFF));
-
-  return r;
-};
-*/
 module.exports.xor64 = function() {
   var a = arguments,
     h = a[0].hi,
@@ -421,13 +407,7 @@ module.exports.swap32Array = function(a) {
 module.exports.xnd64 = function(x, y, z) {
   return new this.u64(x.hi ^ ((~y.hi) & z.hi), x.lo ^ ((~y.lo) & z.lo));
 }
-/*
-module.exports.load64 = function(x, i) {
-  var l = x[i] | (x[i + 1] << 8) | (x[i + 2] << 16) | (x[i + 3] << 24);
-  var h = x[i + 4] | (x[i + 5] << 8) | (x[i + 6] << 16) | (x[i + 7] << 24);
-  return new this.u64(h, l);
-}
-*/
+
 module.exports.bufferInsert = function(buffer, bufferOffset, data, len, dataOffset) {
   dataOffset = dataOffset | 0;
   var i = 0;
