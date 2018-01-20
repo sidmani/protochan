@@ -29,22 +29,27 @@ var allTests = {
 
 function runTests() {
   var verbose = (process.argv.indexOf('-v') > -1);
+  var noCatch = (process.argv.indexOf('-n') > -1);
   var numSuccess = 0;
   var numFailure = 0;
   console.log('RUNNING TESTS...');
   for (var groupName in allTests) {
     var testGroup = allTests[groupName];
     var success = true;
-    process.stdout.write('🤖 RUNNING GROUP: ' + groupName + (verbose?'\n':' '));
+    process.stdout.write('🤖 RUNNING GROUP: ' + groupName + ' (' + testGroup.length + (verbose?')\n':') '));
     for (testCase in testGroup) {
       var testPass = false;
       var error;
-      try {
+      if (noCatch) {
         testPass = testGroup[testCase].fn();
-      }
-      catch (e) {
-        error = e;
-        testPass = false;
+      } else {
+        try {
+          testPass = testGroup[testCase].fn();
+        }
+        catch (e) {
+          error = e;
+          testPass = false;
+        }
       }
       if (testPass) {
         if (verbose) {

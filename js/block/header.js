@@ -25,43 +25,49 @@
 var Util = require('../util.js');
 
 module.exports = class Header {
-  constructor(data) {
-    Util.assert(data, 'Data does not exist.');
-    Util.assert(data instanceof Uint8Array, 'Data is of wrong type.');
-    Util.assert(data.byteLength == 80, 'Data is of wrong length.');
+  constructor(buffer) {
+    Util.assert(buffer, 'Data does not exist.');
+    Util.assert(buffer instanceof ArrayBuffer, 'Data is of wrong type.');
+    Util.assert(buffer.byteLength == 80, 'Data is of wrong length.');
 
-    this.data = data;
+    this.data = new DataView(buffer);
   }
 
-  /// Protocol version
-  protocolVersion_raw() {
-    return this.data.subarray(0, 1);
+  /// Protocol version (uint16)
+  protocolVersion() {
+    return this.data.getUint16(0);
   }
 
-  /// Block type
-  blockType_raw() {
-    return this.data.subarray(1, 2);
+  /// Block type (uint8)
+  blockType() {
+    return this.data.getUint8(2);
   }
 
-  // Unix timstamp
-  timestamp_raw() {
-    return this.data.subarray(2, 6);
+  // Unix timestamp (uint32)
+  timestamp() {
+    return this.data.getUint32(3);
   }
 
-  // nonce
-  nonce_raw() {
-    return this.data.subarray(6, 10);
+  // nonce (uint32)
+  nonce() {
+    return this.data.getUint32(7);
   }
 
-  prevHash() {
-    return this.data.subarray(10, 42);
+  prevHash() { // 32 bytes
+    return new DataView(this.data.buffer, 11, 32);
   }
 
+  // 32 bytes
   dataHash() {
-    return this.data.subarray(42, 74);
+    return new DataView(this.data.buffer, 43, 32);
+  }
+
+  // 4 bytes
+  board() {
+    return this.data.getUint32(75);
   }
 
   reserved() {
-    return this.data.subarray(75, 80);
+    return this.data.getUint8(79);
   }
 };

@@ -328,6 +328,5 @@ module.exports = function(input) {
     buffer: new Array(128)
   };
   var r = bmw(ctx, input);
-  //var r = bmwClose(ctx);
   return h.int32Buffer2Bytes(r)
 }

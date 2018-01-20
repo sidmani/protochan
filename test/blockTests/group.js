@@ -23,5 +23,6 @@
 // SOFTWARE.
 
 module.exports = [].concat (
-  require('./headerTests.js')
+  require('./headerTests.js'),
+  require('./blockTests.js')
 );

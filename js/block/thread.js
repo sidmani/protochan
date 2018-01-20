@@ -22,22 +22,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const THREAD_BLOCK_ID = 0x00000000;
+const THREAD_BLOCK_ID = 0x00;
 
 var Util = require('../util.js');
 var Header = require('./header.js');
-var Hash = require('../hash/hash.js');
+var Block = require('./block.js');
 
-module.exports = class ThreadBlock {
+module.exports = class ThreadBlock extends Block {
   constructor(header, data) {
-    Util.assert(header, 'Header does not exist.');
-    Util.assert(header instanceof Header, 'Header is of wrong type.');
-    Util.assert(Util.parseIntFromUint8Array(header.blockType_raw()) === THREAD_BLOCK_ID, 'Header block type is incorrect.');
-    Util.assert(data, 'Data does not exist.');
-    Util.assert(data instanceof Uint8Array, 'Data is of wrong type');
-    Util.assert(Hash.digest(data, 1, 1) === )
-
-    this.header = header;
-    this.data = data;
+    super(header, data)
+    Util.assert(header.blockType() === THREAD_BLOCK_ID, 'Header block type is incorrect.');
   }
 }

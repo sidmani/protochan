@@ -28,7 +28,7 @@ var helper = require('../../js/hash/lib/helper.js');
 var inputString = 'The great experiment continues.';
 var outputString = '64394bcb9d7844070c8516480ea5f03f68386f33c3829e08bf38bea11f09eba5806aa7831cfbe8e515678b0cad7d4ac888ea2b9ea8f63f0cc918d5a6a76b7ae9';
 module.exports = [
-  { description: 'Cubehash hash function uint8[] -> uint8[]',
+  { description: 'Cubehash hash function',
     fn: function() { return helper.int8ArrayToHexString(cubehash(helper.string2bytes(inputString), 0, 1)) === outputString; }
   }
 ];

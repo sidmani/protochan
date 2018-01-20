@@ -22,13 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var bmw = require('../../js/hash/lib/bmw.js');
-var helper = require('../../js/hash/lib/helper.js');
+var Util = require('../util.js');
+var Header = require('./header.js');
 
-var inputString = 'The great experiment continues.';
-var outputString = '7b30b4f1ccd83692bc6a01b1f7e374b59b81da6b21421679ae59d84c4f73afec5a0857565b6ebc1b9ddf9da5e75bf1ecd0ba6f5a75b7926ba9278385fb83533c';
-module.exports = [
-  { description: 'BMW hash function',
-    fn: function() { return helper.int8ArrayToHexString(bmw(helper.string2bytes(inputString), 0, 1)) === outputString; }
+module.exports = class Block {
+  constructor(header, data) {
+    Util.assert(header, 'Header does not exist.');
+    Util.assert(header instanceof Header, 'Header is of wrong type.');
+
+    Util.assert(data, 'Data does not exist.');
+    Util.assert(data instanceof ArrayBuffer, 'Data is of wrong type');
+
+    this.header = header;
+    this.data = data;
   }
-];
+}

@@ -294,6 +294,7 @@ var cubehash = function(ctx, data) {
 	ctx.state = x;
 	ctx.ptr = ptr;
 }
+
 var cubehashClose = function(ctx) {
 	var buf = ctx.buffer;
 	var ptr = ctx.ptr;
