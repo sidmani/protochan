@@ -147,12 +147,10 @@ var blakeClose = function(ctx) {
   if (ptr === 0) {
     ctx.T0 = o.u(0xFFFFFFFF, 0xFFFFFC00);
     ctx.T1 = o.u(0xFFFFFFFF, 0xFFFFFFFF);
-  }
-  else if (ctx.T0.isZero()) {
+  } else if (ctx.T0.isZero()) {
     ctx.T0 = o.u(0xFFFFFFFF, 0xFFFFFC00).plus(bitLen);
     ctx.T1 = ctx.T1.minus(o.u(0, 1));
-  }
-  else {
+  } else {
     ctx.T0 = ctx.T0.minus(o.u(0, 1024).minus(bitLen));
   }
   if (bitLen.lo <= 894) {
@@ -181,37 +179,17 @@ var blakeClose = function(ctx) {
   return out;
 }
 
-
-module.exports = function(input, format, output) {
-  var msg;
-  if (format === 1) {
-    msg = input;
-  }
-  else if (format === 2) {
-    msg = h.int32Buffer2Bytes(input);
-  }
-  else {
-    msg = h.string2bytes(input);
-  }
-  var ctx = {};
-  ctx.state = o.clone64Array(initialValues);
+module.exports = function(input) {
   var zero = o.u(0,0);
-  ctx.salt = [zero, zero, zero, zero];
-  ctx.T0 = zero.clone();
-  ctx.T1 = zero.clone();
-  ctx.ptr = 0;
-  ctx.buffer = new Array(128);
-  blake(ctx, msg, msg.length);
+  var ctx = {
+    state: o.clone64Array(initialValues),
+    salt: [zero, zero, zero, zero],
+    T0: zero.clone(),
+    T1: zero.clone(),
+    ptr: 0,
+    buffer: new Array(128)
+  };
+  blake(ctx, input, input.length);
   var r = blakeClose(ctx, 0, 0);
-  var out;
-  if (output === 2) {
-    out = r;
-  }
-  else if (output === 1) {
-    out = h.int32Buffer2Bytes(r)
-  }
-  else {
-    out = h.int32ArrayToHexString(r)
-  }
-  return out;
+  return h.int32Buffer2Bytes(r);
 }

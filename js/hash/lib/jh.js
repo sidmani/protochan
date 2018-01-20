@@ -349,34 +349,14 @@ var jhClose = function(ctx) {
   return out;
 }
 
-module.exports = function(input, format, output) {
-  var msg;
-  if (format === 1) {
-    msg = input;
-  }
-  else if (format === 2) {
-    msg = he.int32Buffer2Bytes(input);
-  }
-  else {
-    msg = he.string2bytes(input);
-  }
+module.exports = function(input) {
   var ctx = {};
   ctx.state = op.swap32Array(IV512);
   ctx.ptr = 0;
   ctx.buffer = new Array(Jh_BlockSize);
   ctx.blockCountHigh = 0;
   ctx.blockCountLow = 0;
-  jh(ctx, msg);
+  jh(ctx, input);
   var r = jhClose(ctx);
-  var out;
-  if (output === 2) {
-    out = r;
-  }
-  else if (output === 1) {
-    out = he.int32Buffer2Bytes(r)
-  }
-  else {
-    out = he.int32ArrayToHexString(r)
-  }
-  return out;
+  return he.int32Buffer2Bytes(r)
 }

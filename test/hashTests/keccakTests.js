@@ -28,13 +28,7 @@ var helper = require('../../js/hash/lib/helper.js');
 var inputString = 'The great experiment continues.';
 var outputString = '4c7e9c893fcdc87a2fd604574a4a5b9a0b6864665ed19057dedf24858314690ba45d6bbcfb86cd7182d1677e2d30dad9716ee99eb8ea267c6638f47ef20e0226';
 module.exports = [
-  { description: 'Keccak hash function string -> string',
-    fn: function() { return keccak(inputString, 0, 0) === outputString; }
-  },
   { description: 'Keccak hash function uint8[] -> uint8[]',
-    fn: function() { return helper.int8ArrayToHexString(keccak(inputString, 0, 1)) === outputString; }
-  },
-  { description: 'Keccak hash function uint32 -> uint32[]',
-    fn: function() { return helper.int32ArrayToHexString(keccak(inputString, 0, 2)) === outputString; }
+    fn: function() { return helper.int8ArrayToHexString(keccak(helper.string2bytes(inputString))) === outputString; }
   }
 ];

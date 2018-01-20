@@ -28,13 +28,7 @@ var helper = require('../../js/hash/lib/helper.js');
 var inputString = 'The great experiment continues.';
 var outputString = '7b30b4f1ccd83692bc6a01b1f7e374b59b81da6b21421679ae59d84c4f73afec5a0857565b6ebc1b9ddf9da5e75bf1ecd0ba6f5a75b7926ba9278385fb83533c';
 module.exports = [
-  { description: 'BMW hash function string -> string',
-    fn: function() { return bmw(inputString, 0, 0) === outputString; }
-  },
   { description: 'BMW hash function uint8[] -> uint8[]',
-    fn: function() { return helper.int8ArrayToHexString(bmw(inputString, 0, 1)) === outputString; }
-  },
-  { description: 'BMW hash function uint32 -> uint32[]',
-    fn: function() { return helper.int32ArrayToHexString(bmw(inputString, 0, 2)) === outputString; }
+    fn: function() { return helper.int8ArrayToHexString(bmw(helper.string2bytes(inputString), 0, 1)) === outputString; }
   }
 ];

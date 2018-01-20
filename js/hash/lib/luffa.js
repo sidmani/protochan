@@ -471,33 +471,13 @@ var luffa5Close = function(ctx, ub, n) {
   return out;
 }
 
-module.exports = function(input, format, output) {
-  var msg;
-  if (format === 1) {
-    msg = input;
-  }
-  else if (format === 2) {
-    msg = h.int32Buffer2Bytes(input);
-  }
-  else {
-    msg = h.string2bytes(input);
-  }
+module.exports = function(input) {
   var ctx = {
     state: V_INIT,
     ptr: 0,
     buffer: new Array(32)
   };
-  luffa5(ctx, msg);
+  luffa5(ctx, input);
   var r = luffa5Close(ctx, 0, 0);
-  var out;
-  if (output === 2) {
-    out = r;
-  }
-  else if (output === 1) {
-    out = h.int32Buffer2Bytes(r)
-  }
-  else {
-    out = h.int32ArrayToHexString(r)
-  }
-  return out;
+  return h.int32Buffer2Bytes(r)
 }

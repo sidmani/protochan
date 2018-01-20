@@ -401,23 +401,6 @@ var f = function(s) {
   }
 }
 
-module.exports = function(input, format, output) {
-  var msg = input;
-  if (format === 1) {
-    msg = input;
-  }
-  else if (format === 2) {
-    msg = h.int32Buffer2Bytes(input);
-  }
-  else {
-    msg = h.string2bytes(input);
-  }
-
-  if (output === 2) {
-    return h.bytes2Int32Buffer(new Keccak(512, KECCAK_PADDING, 512).update(msg).array());
-  } else if (output === 1) {
-    return new Keccak(512, KECCAK_PADDING, 512).update(msg).array();
-  } else {
-    return new Keccak(512, KECCAK_PADDING, 512).update(msg).hex();
-  }
+module.exports = function(input) {
+  return new Keccak(512, KECCAK_PADDING, 512).update(input).array();
 }

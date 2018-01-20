@@ -21,10 +21,12 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
 const THREAD_BLOCK_ID = 0x00000000;
 
 var Util = require('../util.js');
 var Header = require('./header.js');
+var Hash = require('../hash/hash.js');
 
 module.exports = class ThreadBlock {
   constructor(header, data) {
@@ -32,6 +34,8 @@ module.exports = class ThreadBlock {
     Util.assert(header instanceof Header, 'Header is of wrong type.');
     Util.assert(Util.parseIntFromUint8Array(header.blockType_raw()) === THREAD_BLOCK_ID, 'Header block type is incorrect.');
     Util.assert(data, 'Data does not exist.');
+    Util.assert(data instanceof Uint8Array, 'Data is of wrong type');
+    Util.assert(Hash.digest(data, 1, 1) === )
 
     this.header = header;
     this.data = data;

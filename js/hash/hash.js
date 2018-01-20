@@ -23,7 +23,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 'use strict';
 
 var blake = require('./lib/blake');
@@ -51,26 +50,18 @@ module.exports.shavite = shavite;
 module.exports.simd = simd;
 module.exports.skein = skein;
 
-module.exports.digest = function(str,format, output) {
-  var a = blake(str,format,2);
-  a = bmw(a,2,2);
-  a = groestl(a,2,2);
-  a = skein(a,2,2);
-  a = jh(a,2,2);
-  a = keccak(a,2,2);
-  a = luffa(a,2,2);
-  a = cubehash(a,2,2);
-  a = shavite(a,2,2);
-  a = simd(a,2,2);
-  a = echo(a,2,2);
-  a = a.slice(0,8);
-  if (output === 2) {
-    return a;
-  }
-  else if (output === 1) {
-    return h.int32Buffer2Bytes(a);
-  }
-  else {
-    return h.int32ArrayToHexString(a);
-  }
+module.exports.digest = function(input) {
+  var a = blake(input);
+  a = bmw(a);
+  a = groestl(a);
+  a = skein(a);
+  a = jh(a);
+  a = keccak(a);
+  a = luffa(a);
+  a = cubehash(a);
+  a = shavite(a);
+  a = simd(a);
+  a = echo(a);
+  a = a.slice(0,32);
+  return a;
 }

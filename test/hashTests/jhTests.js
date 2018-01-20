@@ -28,13 +28,7 @@ var helper = require('../../js/hash/lib/helper.js');
 var inputString = 'The great experiment continues.';
 var outputString = '90c7090e9d9a45bc79f476ae7fa3e7e4416d1c26b127d1d418ee9bd96b541933b0f144a0d4c6594944393e39fb6b98ceb54752af55198e00953d638183482521';
 module.exports = [
-  { description: 'Jh hash function string -> string',
-    fn: function() { return jh(inputString, 0, 0) === outputString; }
-  },
   { description: 'Jh hash function uint8[] -> uint8[]',
-    fn: function() { return helper.int8ArrayToHexString(jh(inputString, 0, 1)) === outputString; }
-  },
-  { description: 'Jh hash function uint32 -> uint32[]',
-    fn: function() { return helper.int32ArrayToHexString(jh(inputString, 0, 2)) === outputString; }
+    fn: function() { return helper.int8ArrayToHexString(jh(helper.string2bytes(inputString))) === outputString; }
   }
 ];

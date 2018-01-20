@@ -8,17 +8,7 @@
 var op = require('./op');
 var h = require('./helper');
 
-module.exports = function(input, format, output) {
-	var msg;
-	if (format === 1) {
-		msg = input;
-	}
-	else if (format === 2) {
-		msg = h.int32Buffer2Bytes(input);
-	}
-	else {
-		msg = h.string2bytes(input);
-	}
+module.exports = function(input) {
 	// final: 0x80; first: 0x40; conf: 0x4; msg: 0x30; out: 0x3f
 	var tweak = [
 			[0, 32],
@@ -31,16 +21,16 @@ module.exports = function(input, format, output) {
 		[0, 0],
 		[(0x40 + 0x30) << 24, 0]
 	];
-	var len = msg.length,
+	var len = input.length,
 		pos = 0;
 	for (; len > 64; len -= 64, pos += 64) {
 		tweak[0][1] += 64;
-		block(c, tweak, msg, pos);
+		block(c, tweak, input, pos);
 		tweak[1][0] = 0x30 << 24;
 	}
 	tweak[0][1] += len;
 	tweak[1][0] |= 0x80 << 24;
-	block(c, tweak, msg, pos);
+	block(c, tweak, input, pos);
 	tweak[0][1] = 8;
 	tweak[1][0] = (0x80 + 0x40 + 0x3f) << 24;
 	block(c, tweak, [], 0);
@@ -50,13 +40,7 @@ module.exports = function(input, format, output) {
 		hash.push(b);
 	}
 
-  if (output === 2) {
-    return h.bytes2Int32Buffer(hash);
-  } else if (output === 1) {
-    return hash;
-  } else {
-    return h.int8ArrayToHexString(hash);
-  }
+  return hash;
 }
 
 function shiftLeft(x, n) {

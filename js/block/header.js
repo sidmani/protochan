@@ -43,7 +43,7 @@ module.exports = class Header {
     return this.data.subarray(1, 2);
   }
 
-  // Unix timestamp
+  // Unix timstamp
   timestamp_raw() {
     return this.data.subarray(2, 6);
   }

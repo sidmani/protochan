@@ -28,13 +28,7 @@ var helper = require('../../js/hash/lib/helper.js');
 var inputString = 'The great experiment continues.';
 var outputString = '8f257723af0741fb7d3d8c264a5ea86a57d4ae833557de04f5f78fad1ac17d6dfa1ae4a78a7564c08fc21d5d8cdd2793ca17d5500ecc2b43eb8aaf9c220d7b49';
 module.exports = [
-  { description: 'Blake hash function string -> string',
-    fn: function() { return blake(inputString, 0, 0) === outputString; }
-  },
   { description: 'Blake hash function uint8[] -> uint8[]',
-    fn: function() { return helper.int8ArrayToHexString(blake(inputString, 0, 1)) === outputString; }
-  },
-  { description: 'Blake hash function uint32 -> uint32[]',
-    fn: function() { return helper.int32ArrayToHexString(blake(inputString, 0, 2)) === outputString; }
+    fn: function() { return helper.int8ArrayToHexString(blake(helper.string2bytes(inputString), 0, 1)) === outputString; }
   }
 ];

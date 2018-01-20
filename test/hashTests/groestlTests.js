@@ -28,13 +28,7 @@ var helper = require('../../js/hash/lib/helper.js');
 var inputString = 'The great experiment continues.';
 var outputString = '6cea044acf31194eab7d1adb704712c34dd4f0b6a470b0f297832addab691faa459474c651efdbebddb138a2a9adb41705e0fb75741775314ddd8e5449ace986';
 module.exports = [
-  { description: 'Groestl hash function string -> string',
-    fn: function() { return groestl(inputString, 0, 0) === outputString; }
-  },
   { description: 'Groestl hash function uint8[] -> uint8[]',
-    fn: function() { return helper.int8ArrayToHexString(groestl(inputString, 0, 1)) === outputString; }
-  },
-  { description: 'Groestl hash function uint32 -> uint32[]',
-    fn: function() { return helper.int32ArrayToHexString(groestl(inputString, 0, 2)) === outputString; }
+    fn: function() { return helper.int8ArrayToHexString(groestl(helper.string2bytes(inputString))) === outputString; }
   }
 ];

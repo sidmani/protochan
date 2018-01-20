@@ -68,12 +68,6 @@ var alpha_tab = [
   95, 40, 98, 163
 ];
 
-// console.log(alpha_tab);
-
-//console.log(h.b64Encode(alpha_tab));
-
-
-
 /*
  * beta^(255*i) mod 257
  */
@@ -461,34 +455,15 @@ var simdClose = function(ctx, ub, n) {
   return out;
 }
 
-module.exports = function(input, format, output) {
-  var msg;
-  if (format === 1) {
-    msg = input;
-  }
-  else if (format === 2) {
-    msg = h.int32Buffer2Bytes(input);
-  }
-  else {
-    msg = h.string2bytes(input);
-  }
-  var ctx = {};
-  ctx.state = IV512.slice();
-  ctx.ptr = 0;
-  ctx.countLow = 0;
-  ctx.countHigh = 0;
-  ctx.buffer = new Array(128);
-  simd(ctx, msg);
+module.exports = function(input) {
+  var ctx = {
+    state: IV512.slice(),
+    ptr: 0,
+    countLow: 0,
+    countHigh: 0,
+    buffer: new Array(128)
+  };
+  simd(ctx, input);
   var r = simdClose(ctx, 0, 0);
-  var out;
-  if (output === 2) {
-    out = r;
-  }
-  else if (output === 1) {
-    out = h.int32Buffer2Bytes(r)
-  }
-  else {
-    out = h.int32ArrayToHexString(r)
-  }
-  return out;
+  return h.int32Buffer2Bytes(r)
 }

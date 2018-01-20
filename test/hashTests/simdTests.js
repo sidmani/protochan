@@ -28,13 +28,7 @@ var helper = require('../../js/hash/lib/helper.js');
 var inputString = 'The great experiment continues.';
 var outputString = '13ae2c08260f7d5abcfa791446800c1eaed8c5332ec437222428a28823aa2ba19a5907a2c860c12c0b894bdf9c0d64f807cb9512f1ed42980d15747ff4a26c1c';
 module.exports = [
-  { description: 'SIMD hash function string -> string',
-    fn: function() { return simd(inputString, 0, 0) === outputString; }
-  },
   { description: 'SIMD hash function uint8[] -> uint8[]',
-    fn: function() { return helper.int8ArrayToHexString(simd(inputString, 0, 1)) === outputString; }
-  },
-  { description: 'SIMD hash function uint32 -> uint32[]',
-    fn: function() { return helper.int32ArrayToHexString(simd(inputString, 0, 2)) === outputString; }
+    fn: function() { return helper.int8ArrayToHexString(simd(helper.string2bytes(inputString))) === outputString; }
   }
 ];

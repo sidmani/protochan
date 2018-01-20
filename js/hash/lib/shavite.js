@@ -676,34 +676,14 @@ var shaviteClose = function(ctx, ub, n) {
   return out;
 }
 
-module.exports = function(input, format, output) {
-  var msg;
-  if (format === 1) {
-    msg = input;
-  }
-  else if (format === 2) {
-    msg = h.int32Buffer2Bytes(input);
-  }
-  else {
-    msg = h.string2bytes(input);
-  }
+module.exports = function(input) {
   var ctx = {};
   ctx.ptr = 0;
   ctx.count = new Array(4);
   op.bufferSet(ctx.count, 0, 0, 4);
   ctx.h = IV512.slice();
   ctx.buffer = new Array(128);
-  shavite(ctx, msg);
+  shavite(ctx, input);
   var r = shaviteClose(ctx, 0, 0);
-  var out;
-  if (output === 2) {
-    out = r;
-  }
-  else if (output === 1) {
-    out = h.int32Buffer2Bytes(r)
-  }
-  else {
-    out = h.int32ArrayToHexString(r)
-  }
-  return out;
+  return h.int32Buffer2Bytes(r)
 }

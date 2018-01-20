@@ -291,18 +291,14 @@ var bmw = function(ctx, data) {
       ptr = 0;
     }
   }
-  ctx.ptr = ptr;
+
   if (h1 !== ctx.state)
     o.bufferInsert(ctx.state, 0, h1, ctx.state.length);
-}
 
-var bmwClose = function(ctx) {
   var h1;
   var h2 = new Array(16);
 
-  var buf = ctx.buffer;
-  var ptr = ctx.ptr;
-  var len = buf.length;
+  len = buf.length;
   buf[ptr++] = 0x80;
   var hState = ctx.state;
   if (ptr > len - 8) {
@@ -324,33 +320,14 @@ var bmwClose = function(ctx) {
   return out;
 }
 
-module.exports = function(input, format, output) {
-  var msg;
-  if (format === 1) {
-    msg = input;
-  }
-  else if (format === 2) {
-    msg = h.int32Buffer2Bytes(input);
-  }
-  else {
-    msg = h.string2bytes(input);
-  }
-  var ctx = {};
-  ctx.state = o.clone64Array(V_INIT);
-  ctx.ptr = 0;
-  ctx.bitCount = o.u(0,0);
-  ctx.buffer = new Array(128);
-  bmw(ctx, msg);
-  var r = bmwClose(ctx, 0, 0);
-  var out;
-  if (output === 2) {
-    out = r;
-  }
-  else if (output === 1) {
-    out = h.int32Buffer2Bytes(r)
-  }
-  else {
-    out = h.int32ArrayToHexString(r)
-  }
-  return out;
+module.exports = function(input) {
+  var ctx = {
+    state: o.clone64Array(V_INIT),
+    ptr: 0,
+    bitCount: o.u(0,0),
+    buffer: new Array(128)
+  };
+  var r = bmw(ctx, input);
+  //var r = bmwClose(ctx);
+  return h.int32Buffer2Bytes(r)
 }
