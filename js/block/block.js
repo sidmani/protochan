@@ -35,7 +35,5 @@ module.exports = class Block {
 
     this.header = header;
     this.data = new DataView(dataBuffer);
-
-    // first 32 bytes are zeros for the genesis thread's id
   }
 }

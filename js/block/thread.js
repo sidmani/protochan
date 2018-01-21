@@ -25,7 +25,6 @@
 const THREAD_BLOCK_ID = 0x00;
 
 var Util = require('../util.js');
-var Header = require('./header.js');
 var Block = require('./block.js');
 
 module.exports = class ThreadBlock extends Block {
@@ -41,15 +40,19 @@ module.exports = class ThreadBlock extends Block {
                 this.data.getUint32(16) === 0 &&
                 this.data.getUint32(20) === 0 &&
                 this.data.getUint32(24) === 0 &&
-                this.data.getUint32(28) === 0, 'Data is malformed.')
-
+                this.data.getUint32(28) === 0, 'Data is malformed.');
   }
 
+  // data is pairs of 32-byte hashes
+  // { thread hash, post hash}
+  // first row is { 0, post hash } (genesis)
   threadData(index) {
     Util.assert(index < this.data.byteLength / 64);
-    return {
-      thread: new DataView(this.data.buffer, index*64, 32),
-      post: new DataView(this.data.buffer, index*64 + 32, 32)
-    };
+    return new DataView(this.data.buffer, index*64, 32)
+  }
+
+  postData(index) {
+    Util.assert(index < this.data.byteLength / 64);
+    return new DataView(this.data.buffer, index*64 + 32, 32)
   }
 };

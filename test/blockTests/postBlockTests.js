@@ -32,21 +32,71 @@ module.exports = [
       try {
         let buf = new ArrayBuffer(80);
         (new DataView(buf)).setUint8(2, 0x00);
-        var b = new Post(new Header(buf), new ArrayBuffer(64));
+        let d_buf = new ArrayBuffer(40);
+        (new DataView(d_buf)).setUint32(0, 0x0024ffff);
+        let p = new Post(new Header(buf), d_buf);
         return false;
       } catch (e) {
         return true;
       }
     }
   },
-  { description: "Post block accepts correct block type",
+  { description: "Post block rejects malformed data length",
     fn: function() {
       let buf = new ArrayBuffer(80);
       (new DataView(buf)).setUint8(2, 0x01);
-      var b = new Post(new Header(buf), new ArrayBuffer(256));
-      Util.assert(b);
-      Util.assert(b instanceof Post);
+      let d_buf = new ArrayBuffer(40);
+      // data is 40 - 4 = 36 bytes long. 0x0027 !== 36 base 10.
+      (new DataView(d_buf)).setUint32(0, 0x0027ffff);
+      try {
+        let p = new Post(new Header(buf), d_buf);
+        return false;
+      } catch (e) {
+        return true;
+      }
+    }
+  },
+  { description: "Post block accepts correct block type and data length",
+    fn: function() {
+      let buf = new ArrayBuffer(80);
+      (new DataView(buf)).setUint8(2, 0x01);
+      let d_buf = new ArrayBuffer(41);
+      let view = new DataView(d_buf);
+      view.setUint32(0, 0x0024ffff);
+      view.setUint8(40, 0xff);
+      let p = new Post(new Header(buf), d_buf);
+      Util.assert(p);
+      Util.assert(p instanceof Post);
       return true;
     }
   },
+  { description: "Post block returns correct content length",
+    fn: function() {
+      let buf = new ArrayBuffer(80);
+      (new DataView(buf)).setUint8(2, 0x01);
+      let d_buf = new ArrayBuffer(41);
+      let view = new DataView(d_buf);
+      view.setUint32(0, 0x0024ffff);
+      view.setUint8(40, 0xff);
+      let p = new Post(new Header(buf), d_buf);
+      Util.assert(p.contentLength() === 36);
+      return true;
+    }
+  },
+  { description: "Post block returns correct content",
+    fn: function() {
+      let buf = new ArrayBuffer(80);
+      (new DataView(buf)).setUint8(2, 0x01);
+      let d_buf = new ArrayBuffer(41);
+      let view = new DataView(d_buf);
+      view.setUint32(0, 0x0024ffff);
+      view.setUint32(12, 0xcccccccc);
+      view.setUint8(40, 0xff);
+      let content = new Post(new Header(buf), d_buf).content();
+      for (let i = 0; i < 9; i++) {
+        Util.assert(content.getUint32(i*4) === (i===2?0xcccccccc:0));
+      }
+      return true;
+    }
+  }
 ];

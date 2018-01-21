@@ -25,12 +25,26 @@
 const THREAD_BLOCK_ID = 0x01;
 
 var Util = require('../util.js');
-var Header = require('./header.js');
 var Block = require('./block.js');
 
 module.exports = class PostBlock extends Block {
   constructor(header, data) {
     super(header, data);
     Util.assert(header.blockType() === THREAD_BLOCK_ID, 'Header block type is incorrect.');
+    Util.assert(this.data.getUint16(2) === 0xffff);
+    Util.assert(this.data.byteLength === this.contentLength() + 5);
+    Util.assert(this.data.getUint8(this.data.byteLength - 1) === 0xff);
+
+    // TODO: error correction if 0xff end byte is present but length is wrong
+  }
+
+  // data is 2 bytes length, 0xff, 0xff, data, 0xff
+  contentLength() {
+    return this.data.getUint16(0);
+  }
+
+  content() {
+    let length = this.contentLength();
+    return new DataView(this.data.buffer, 4, length);
   }
 }

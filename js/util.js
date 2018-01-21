@@ -35,13 +35,13 @@ module.exports.assertArrayEquality = function(arr1, arr2) {
   }
 }
 
-module.exports.assertBufferEquality = function(buf1, buf2) {
-  if (buf1.byteLength !== buf2.byteLength) {
-    throw new Error('Length mismatch.');
-  }
-  let arr1 = Uint32Array(buf1);
-  let arr2 = Uint32Array(buf2);
-  for (let i = 0; i < arr1.byteLength; i++) {
-    if (arr1[i] !== arr2[i]) { throw new Error('Arrays are unequal.'); } 
-  }
-}
+// module.exports.assertBufferEquality = function(buf1, buf2) {
+//   if (buf1.byteLength !== buf2.byteLength) {
+//     throw new Error('Length mismatch.');
+//   }
+//   let arr1 = Uint32Array(buf1);
+//   let arr2 = Uint32Array(buf2);
+//   for (let i = 0; i < arr1.byteLength; i++) {
+//     if (arr1[i] !== arr2[i]) { throw new Error('Arrays are unequal.'); }
+//   }
+// }

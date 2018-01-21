@@ -31,10 +31,10 @@ var Thread = require('../block/thread.js');
 
 class Chain {
   constructor(board) {
-    Util.assert(typeof(board) == 'number', 'Invalid board');
+    Util.assert(typeof(board) == 'number', 'Invalid board id.');
     this.board = board;
     this.map = new HashMap();
-    this.head = undefined; // replace with array hash of genesis block
+    this.head = undefined; // replace with hash array of genesis block
   }
 
   push(block) {
@@ -53,9 +53,9 @@ class Chain {
       Util.assertArrayEquality(this.head, Array.from(block.header.prevHash()));
 
       // TODO: check that block matches difficulty requirement
+      let blockHash = Hash.digest(block);
 
       // block is OK
-      var blockHash = Hash.digest(block);
       map.set(blockHash, block);
       this.head = blockHash;
   }
