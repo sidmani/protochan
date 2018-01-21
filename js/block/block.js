@@ -26,14 +26,16 @@ var Util = require('../util.js');
 var Header = require('./header.js');
 
 module.exports = class Block {
-  constructor(header, data) {
+  constructor(header, dataBuffer) {
     Util.assert(header, 'Header does not exist.');
     Util.assert(header instanceof Header, 'Header is of wrong type.');
 
-    Util.assert(data, 'Data does not exist.');
-    Util.assert(data instanceof ArrayBuffer, 'Data is of wrong type');
+    Util.assert(dataBuffer, 'Data does not exist.');
+    Util.assert(dataBuffer instanceof ArrayBuffer, 'Data is of wrong type');
 
     this.header = header;
-    this.data = data;
+    this.data = new DataView(dataBuffer);
+
+    // first 32 bytes are zeros for the genesis thread's id
   }
 }

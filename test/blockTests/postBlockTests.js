@@ -22,6 +22,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-class Chain {
+var Header = require('../../js/block/header.js');
+var Post = require('../../js/block/post.js');
+var Util = require('../../js/util.js');
 
-}
+module.exports = [
+  { description: "Post block rejects incorrect block type",
+    fn: function() {
+      try {
+        let buf = new ArrayBuffer(80);
+        (new DataView(buf)).setUint8(2, 0x00);
+        var b = new Post(new Header(buf), new ArrayBuffer(64));
+        return false;
+      } catch (e) {
+        return true;
+      }
+    }
+  },
+  { description: "Post block accepts correct block type",
+    fn: function() {
+      let buf = new ArrayBuffer(80);
+      (new DataView(buf)).setUint8(2, 0x01);
+      var b = new Post(new Header(buf), new ArrayBuffer(256));
+      Util.assert(b);
+      Util.assert(b instanceof Post);
+      return true;
+    }
+  },
+];

@@ -22,26 +22,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports.assert = function(condition, description) {
-  if (!condition) {
-    throw new Error(description)
-  }
-}
+var HashMap = require('../../js/chain/orderedHashMap.js');
+var Block = require('../../js/block/block.js');
+var Header = require('../../js/block/header.js');
+var Util = require('../../js/util.js');
 
-module.exports.assertArrayEquality = function(arr1, arr2) {
-  if (arr1.length !== arr2.length) { throw new Error('Length mismatch.'); }
-  for (let i = 0; i < arr1.length; i++) {
-    if (arr1[i] !== arr2[i]) { throw new Error('Arrays are unequal.'); }
+module.exports = [
+  { description: "Hashmap stores and retrieves object",
+    fn: function() {
+        var block = new Block(new Header(new ArrayBuffer(80)), new ArrayBuffer(64));
+        var hashMap = new HashMap();
+        hashMap.set([0x00, 0x33, 0x5f], block);
+        Util.assert(hashMap.get([0x00, 0x33, 0x5f]) === block);
+        return true;
+    }
+  },
+  { description: "Hashmap automatically sets index",
+    fn: function() {
+      var block = new Block(new Header(new ArrayBuffer(80)), new ArrayBuffer(64));
+      var hashMap = new HashMap();
+      hashMap.set([0x00, 0x33, 0x5f], block);
+      Util.assert(hashMap.getIdx(0) === block);
+      return true;
+    }
+  },
+  { description: "Hashmap returns undefined for nonexistent object",
+    fn: function() {
+        var hashMap = new HashMap();
+        Util.assert(hashMap.get([0x00, 0x33, 0x5f]) === undefined);
+        return true;
+    }
   }
-}
-
-module.exports.assertBufferEquality = function(buf1, buf2) {
-  if (buf1.byteLength !== buf2.byteLength) {
-    throw new Error('Length mismatch.');
-  }
-  let arr1 = Uint32Array(buf1);
-  let arr2 = Uint32Array(buf2);
-  for (let i = 0; i < arr1.byteLength; i++) {
-    if (arr1[i] !== arr2[i]) { throw new Error('Arrays are unequal.'); } 
-  }
-}
+]

@@ -32,5 +32,24 @@ module.exports = class ThreadBlock extends Block {
   constructor(header, data) {
     super(header, data)
     Util.assert(header.blockType() === THREAD_BLOCK_ID, 'Header block type is incorrect.');
+    Util.assert(data.byteLength >= 64 && data.byteLength % 64 === 0, 'Data is malformed.');
+
+    Util.assert(this.data.getUint32(0) === 0 &&
+                this.data.getUint32(4) === 0 &&
+                this.data.getUint32(8) === 0 &&
+                this.data.getUint32(12) === 0 &&
+                this.data.getUint32(16) === 0 &&
+                this.data.getUint32(20) === 0 &&
+                this.data.getUint32(24) === 0 &&
+                this.data.getUint32(28) === 0, 'Data is malformed.')
+
   }
-}
+
+  threadData(index) {
+    Util.assert(index < this.data.byteLength / 64);
+    return {
+      thread: new DataView(this.data.buffer, index*64, 32),
+      post: new DataView(this.data.buffer, index*64 + 32, 32)
+    };
+  }
+};

@@ -24,7 +24,8 @@
 
 var allTests = {
   hashTests: require('./hashTests/group.js'),
-  blockTests: require('./blockTests/group.js')
+  blockTests: require('./blockTests/group.js'),
+  chainTests: require('./chainTests/group.js')
 }
 
 function runTests() {

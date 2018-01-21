@@ -42,29 +42,29 @@ module.exports.int8ArrayToHexString = function toString(array) {
 	return string;
 }
 
-module.exports.int32ArrayToHexString = function toString(array) {
-	var string = '';
-	var len = array.length;
-	for (var i = 0; i < len; i++) {
-		var s = array[i];
-		if (s < 0) {
-			s = 0xFFFFFFFF + array[i] + 1;
-		}
-		var l = s.toString(16);
-		var padding = 8;
-		while (l.length < padding) {
-			l = "0" + l;
-		}
-		string += l;
-	}
-	return string;
-}
+// module.exports.int32ArrayToHexString = function toString(array) {
+// 	var string = '';
+// 	var len = array.length;
+// 	for (var i = 0; i < len; i++) {
+// 		var s = array[i];
+// 		if (s < 0) {
+// 			s = 0xFFFFFFFF + array[i] + 1;
+// 		}
+// 		var l = s.toString(16);
+// 		var padding = 8;
+// 		while (l.length < padding) {
+// 			l = "0" + l;
+// 		}
+// 		string += l;
+// 	}
+// 	return string;
+// }
 
-module.exports.hex2string = function toString(s) {
-	for (var c = [], len = s.length, i = 0; i < len; i += 2)
-		c.push(String.fromCharCode(parseInt(s.substring(i, i + 2), 16)));
-	return c.join('');
-}
+// module.exports.hex2string = function toString(s) {
+// 	for (var c = [], len = s.length, i = 0; i < len; i += 2)
+// 		c.push(String.fromCharCode(parseInt(s.substring(i, i + 2), 16)));
+// 	return c.join('');
+// }
 
 module.exports.string2bytes = function(s) {
 	var len = s.length;
@@ -75,7 +75,7 @@ module.exports.string2bytes = function(s) {
 		i++;
 	}
 	return b;
-}
+};
 
 module.exports.bytes2Int32Buffer = function(b) {
 	if (!b) return [];
@@ -87,7 +87,7 @@ module.exports.bytes2Int32Buffer = function(b) {
 		j++;
 	}
 	return buffer;
-}
+};
 
 module.exports.bytes2Int64Buffer = function(b) {
 	if (!b) return [];
@@ -99,7 +99,7 @@ module.exports.bytes2Int64Buffer = function(b) {
 		j++;
 	}
 	return buffer;
-}
+};
 
 module.exports.bytes2Int64BufferLeAligned = function(b) {
 	if (!b) return [];
@@ -111,7 +111,7 @@ module.exports.bytes2Int64BufferLeAligned = function(b) {
 		j++;
 	}
 	return buffer;
-}
+};
 
 module.exports.bufferEncode64leAligned = function(buffer, offset, uint64) {
 	buffer[offset + 7] = uint64.hi >>> 24;
@@ -122,7 +122,7 @@ module.exports.bufferEncode64leAligned = function(buffer, offset, uint64) {
 	buffer[offset + 2] = uint64.lo >>> 16 & 0xFF;
 	buffer[offset + 1] = uint64.lo >>> 8 & 0xFF;
 	buffer[offset + 0] = uint64.lo & 0xFF;
-}
+};
 
 module.exports.bufferEncode64 = function(buffer, offset, uint64) {
 	buffer[offset] = uint64.hi >>> 24;
@@ -133,7 +133,7 @@ module.exports.bufferEncode64 = function(buffer, offset, uint64) {
 	buffer[offset + 5] = uint64.lo >>> 16 & 0xFF;
 	buffer[offset + 6] = uint64.lo >>> 8 & 0xFF;
 	buffer[offset + 7] = uint64.lo & 0xFF;
-}
+};
 
 module.exports.int32Buffer2Bytes = function(b) {
 	var buffer = new Array(b.length);
@@ -147,7 +147,7 @@ module.exports.int32Buffer2Bytes = function(b) {
 		i++;
 	}
 	return buffer;
-}
+};
 
 var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 

@@ -22,26 +22,4 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports.assert = function(condition, description) {
-  if (!condition) {
-    throw new Error(description)
-  }
-}
-
-module.exports.assertArrayEquality = function(arr1, arr2) {
-  if (arr1.length !== arr2.length) { throw new Error('Length mismatch.'); }
-  for (let i = 0; i < arr1.length; i++) {
-    if (arr1[i] !== arr2[i]) { throw new Error('Arrays are unequal.'); }
-  }
-}
-
-module.exports.assertBufferEquality = function(buf1, buf2) {
-  if (buf1.byteLength !== buf2.byteLength) {
-    throw new Error('Length mismatch.');
-  }
-  let arr1 = Uint32Array(buf1);
-  let arr2 = Uint32Array(buf2);
-  for (let i = 0; i < arr1.byteLength; i++) {
-    if (arr1[i] !== arr2[i]) { throw new Error('Arrays are unequal.'); } 
-  }
-}
+module.exports = [];

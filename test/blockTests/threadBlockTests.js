@@ -22,58 +22,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Block = require('../../js/block/block.js');
 var Header = require('../../js/block/header.js');
-var Post = require('../../js/block/post.js');
+var Thread = require('../../js/block/thread.js');
 var Util = require('../../js/util.js');
 
 module.exports = [
-  { description: "Block rejects undefined header",
+  { description: "Thread block rejects incorrect block type",
     fn: function() {
       try {
-        var b = new Block(undefined, new ArrayBuffer(64));
+        let buf = new ArrayBuffer(80);
+        (new DataView(buf)).setUint8(2, 0x02);
+        var b = new Thread(new Header(buf), new ArrayBuffer(192));
         return false;
-      } catch(e) {
+      } catch (e) {
         return true;
       }
     }
   },
-  { description: "Block rejects header of wrong type",
+  { description: "Thread block accepts correct block type",
     fn: function() {
-      try {
-        var b = new Block(new Array(), new ArrayBuffer(64));
-        return false;
-      } catch(e) {
-        return true;
-      }
-    }
-  },
-  { description: "Block rejects undefined data",
-    fn: function() {
-      try {
-        var b = new Block(new Header(new ArrayBuffer(80)), undefined);
-        return false;
-      } catch(e) {
-        return true;
-      }
-    }
-  },
-  { description: "Block rejects data of wrong type",
-    fn: function() {
-      try {
-        var b = new Block(new Header(new ArrayBuffer(80)), new Array());
-        return false;
-      } catch(e) {
-        return true;
-      }
-    }
-  },
-  { description: "Block accepts valid header and data",
-    fn: function() {
-      var b = new Block(new Header(new ArrayBuffer(80)), new ArrayBuffer(128));
+      let buf = new ArrayBuffer(80);
+      (new DataView(buf)).setUint8(2, 0x00);
+      var b = new Thread(new Header(buf), new ArrayBuffer(64));
       Util.assert(b);
-      Util.assert(b instanceof Block);
+      Util.assert(b instanceof Thread);
       return true;
     }
   },
-]
+  { description: "Thread block rejects non-zero genesis row",
+    fn: function() {
+      let d_buf = new ArrayBuffer(64);
+      let arr = new Uint8Array(d_buf);
+      arr.fill(9, 0, 16);
+      try {
+        let t = new Thread(new Header(new ArrayBuffer(80)), d_buf);
+        return false;
+      } catch (e) {
+        return true;
+      }
+    }
+  },
+  { description: "Thread block returns correct post hash",
+    fn: function() {
+      let d_buf = new ArrayBuffer(64);
+      let arr = new Uint8Array(d_buf);
+      arr.fill(9, 32, 48);
+      let t = new Thread(new Header(new ArrayBuffer(80)), d_buf);
+      let firstThread = t.threadData(0).post;
+      for (let i = 0; i < 32; i++) {
+          Util.assert(firstThread.getUint8(i) === (i<16?9:0));
+      }
+      return true;
+    }
+  }
+];

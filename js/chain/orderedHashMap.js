@@ -22,26 +22,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports.assert = function(condition, description) {
-  if (!condition) {
-    throw new Error(description)
-  }
-}
+var Helper = require('../hash/lib/helper.js');
+var Util = require('../util.js');
+var Block = require('../block/block.js');
 
-module.exports.assertArrayEquality = function(arr1, arr2) {
-  if (arr1.length !== arr2.length) { throw new Error('Length mismatch.'); }
-  for (let i = 0; i < arr1.length; i++) {
-    if (arr1[i] !== arr2[i]) { throw new Error('Arrays are unequal.'); }
+module.exports = class OrderedHashMap {
+  constructor() {
+    this.arr = [];
   }
-}
 
-module.exports.assertBufferEquality = function(buf1, buf2) {
-  if (buf1.byteLength !== buf2.byteLength) {
-    throw new Error('Length mismatch.');
+  set(hash, block, idx) {
+    Util.assert(hash instanceof Array);
+    Util.assert(block instanceof Block);
+    if (idx) {
+      Util.assert(typeof(idx) === 'number');
+      Util.assert(idx < this.arr.length);
+      this.arr[idx] = block;
+    } else {
+      this.arr.push(block);
+    }
+    this[Helper.int8ArrayToHexString(hash)] = block;
   }
-  let arr1 = Uint32Array(buf1);
-  let arr2 = Uint32Array(buf2);
-  for (let i = 0; i < arr1.byteLength; i++) {
-    if (arr1[i] !== arr2[i]) { throw new Error('Arrays are unequal.'); } 
+
+  get(hash) {
+    Util.assert(hash instanceof Array);
+    return this[Helper.int8ArrayToHexString(hash)];
+  }
+
+  getIdx(idx) {
+    Util.assert(typeof(idx) === 'number');
+    Util.assert(idx < this.arr.length);
+    return this.arr[idx];
+  }
+
+  count() {
+    return this.arr.length;
   }
 }
