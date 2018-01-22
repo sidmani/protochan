@@ -31,25 +31,31 @@ var Thread = require('../block/thread.js');
 
 class Chain {
   constructor(board) {
-    Util.assert(typeof(board) == 'number', 'Invalid board id.');
+    Util.assert(typeof(board) === 'number', 'Invalid board id.');
     this.board = board;
     this.map = new HashMap();
     this.head = undefined; // replace with hash array of genesis block
   }
 
-  push(block) {
+  push(block, now) {
       Util.assert(block);
       Util.assert(block instanceof Block, 'Invalid block.');
 
-      // check that block board id is correct
+      Util.assert(now);
+      Util.assert(typeof(now) === 'number');
+
+      // assert that block is no more than 1 second in the future.
+      Util.assert(block.header.timestamp() <= now + 1);
+
+      // assert that block board id is correct
       Util.assert(block.header.board() === this.board);
 
-      // check that data hash in header is as expected
+      // assert that data hash in header is as expected
       let calculatedDataHash = Hash.digest(Array.from(block.data));
       let storedDataHash = Array.from(block.header.dataHash());
       Util.assertArrayEquality(calculatedDataHash, storedDataHash);
 
-      // check that block points to head, otherwise we're missing blocks
+      // assert that block points to head, otherwise we're missing blocks
       Util.assertArrayEquality(this.head, Array.from(block.header.prevHash()));
 
       // TODO: check that block matches difficulty requirement

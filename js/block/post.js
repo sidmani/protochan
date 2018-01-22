@@ -34,7 +34,6 @@ module.exports = class PostBlock extends Block {
     Util.assert(this.data.getUint16(2) === 0xffff);
     Util.assert(this.data.byteLength === this.contentLength() + 5);
     Util.assert(this.data.getUint8(this.data.byteLength - 1) === 0xff);
-
     // TODO: error correction if 0xff end byte is present but length is wrong
   }
 
@@ -46,5 +45,9 @@ module.exports = class PostBlock extends Block {
   content() {
     let length = this.contentLength();
     return new DataView(this.data.buffer, 4, length);
+  }
+
+  prune() {
+    // TODO: prune data
   }
 }

@@ -22,13 +22,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var skein = require('../../js/hash/lib/skein.js');
-var helper = require('../../js/hash/lib/helper.js');
+var Util = require('../util.js');
 
-var inputString = 'The great experiment continues.';
-var outputString = '88a9dd727bb9b7cbd59612edbcd6b321427f473acc5673d7dffb16071dc71821d0cc1b94dccf7e5f71a0a94019a7e764d3315c3f4a40f73aee4ad98c75bcc2f7';
-module.exports = [
-  { description: 'Skein hash function uint8[] -> uint8[]',
-    fn: function() { return helper.int8ArrayToHexString(skein(helper.string2bytes(inputString))) === outputString; }
+module.exports.verifyDifficulty = function(hash, leadingZeroes) {
+  Util.assert(hash);
+  Util.assert(hash instanceof Array);
+  Util.assert(hash.length === 32);
+
+  Util.assert(leadingZeroes);
+  Util.assert(typeof(leadingZeroes) === 'number');
+  Util.assert(leadingZeroes <= 256);
+
+  Util.assert(countLeadingZeroes(hash) >= leadingZeroes)
+}
+module.exports.countLeadingZeroes = countLeadingZeroes;
+
+function countLeadingZeroes(arr) {
+  let zeroes = 0;
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] === 0) {
+      zeroes += 8;
+    } else {
+      let curr = arr[i];
+      let finalByteZeroes = 0;
+      while (curr !== 0) {
+        curr >>= 1;
+        finalByteZeroes += 1;
+      }
+      return zeroes + (8-finalByteZeroes);
+    }
   }
-];
+  return zeroes;
+}

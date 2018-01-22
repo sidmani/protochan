@@ -37,6 +37,7 @@ module.exports = class OrderedHashMap {
     if (idx) {
       Util.assert(typeof(idx) === 'number');
       Util.assert(idx < this.arr.length);
+      // FIXME: fix memory leak here
       this.arr[idx] = block;
     } else {
       this.arr.push(block);

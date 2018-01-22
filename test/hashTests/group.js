@@ -23,16 +23,6 @@
 // SOFTWARE.
 
 module.exports = [].concat(
-  require('./blakeTests.js'),
-  require('./bmwTests.js'),
-  require('./cubehashTests.js'),
-  require('./echoTests.js'),
-  require('./groestlTests.js'),
-  require('./jhTests.js'),
-  require('./keccakTests.js'),
-  require('./luffaTests.js'),
-  require('./shaviteTests.js'),
-  require('./simdTests.js'),
-  require('./skeinTests.js'),
-  require('./x11Tests.js')
+  require('./functionTests.js'),
+  require('./difficultyTests.js')
 );

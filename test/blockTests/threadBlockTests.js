@@ -68,7 +68,7 @@ module.exports = [
       let arr = new Uint8Array(d_buf);
       arr.fill(9, 32, 48);
       let t = new Thread(new Header(new ArrayBuffer(80)), d_buf);
-      let firstThread = t.postData(0);
+      let firstThread = t.getPost(0);
       for (let i = 0; i < 32; i++) {
           Util.assert(firstThread.getUint8(i) === (i<16?9:0));
       }
@@ -81,7 +81,7 @@ module.exports = [
       let arr = new Uint8Array(d_buf);
       arr.fill(9, 64, 68);
       let t = new Thread(new Header(new ArrayBuffer(80)), d_buf);
-      let firstThread = t.threadData(1);
+      let firstThread = t.getThread(1);
       for (let i = 0; i < 32; i++) {
           Util.assert(firstThread.getUint8(i) === (i<4?9:0));
       }

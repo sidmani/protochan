@@ -46,13 +46,17 @@ module.exports = class ThreadBlock extends Block {
   // data is pairs of 32-byte hashes
   // { thread hash, post hash}
   // first row is { 0, post hash } (genesis)
-  threadData(index) {
+  getThread(index) {
     Util.assert(index < this.data.byteLength / 64);
     return new DataView(this.data.buffer, index*64, 32)
   }
 
-  postData(index) {
+  getPost(index) {
     Util.assert(index < this.data.byteLength / 64);
     return new DataView(this.data.buffer, index*64 + 32, 32)
+  }
+
+  prune() {
+    // TODO: prune data
   }
 };
