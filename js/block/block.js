@@ -35,4 +35,8 @@ module.exports = class Block {
     this.header = header;
     this.data = new DataView(dataBuffer);
   }
+
+  verifyDataHash(hashFunction) {
+    // TODO: does this go here or in the chain?
+  }
 };

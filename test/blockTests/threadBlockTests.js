@@ -28,15 +28,11 @@ var Util = require('../../js/util.js');
 
 module.exports = [
   { description: "Thread block rejects incorrect block type",
+    shouldFail: true,
     fn: function() {
-      try {
         let buf = new ArrayBuffer(80);
         (new DataView(buf)).setUint8(2, 0x02);
-        var b = new Thread(new Header(buf), new ArrayBuffer(192));
-        return false;
-      } catch (e) {
-        return true;
-      }
+        new Thread(new Header(buf), new ArrayBuffer(192));
     }
   },
   { description: "Thread block accepts correct block type",
@@ -46,20 +42,15 @@ module.exports = [
       var b = new Thread(new Header(buf), new ArrayBuffer(64));
       Util.assert(b);
       Util.assert(b instanceof Thread);
-      return true;
     }
   },
   { description: "Thread block rejects non-zero genesis row",
+    shouldFail: true,
     fn: function() {
       let d_buf = new ArrayBuffer(64);
       let arr = new Uint8Array(d_buf);
       arr.fill(9, 0, 16);
-      try {
-        let t = new Thread(new Header(new ArrayBuffer(80)), d_buf);
-        return false;
-      } catch (e) {
-        return true;
-      }
+      new Thread(new Header(new ArrayBuffer(80)), d_buf);
     }
   },
   { description: "Thread block returns correct post hash",
@@ -72,7 +63,6 @@ module.exports = [
       for (let i = 0; i < 32; i++) {
           Util.assert(firstThread.getUint8(i) === (i<16?9:0));
       }
-      return true;
     }
   },
   { description: "Thread block returns correct thread hash",
@@ -85,7 +75,6 @@ module.exports = [
       for (let i = 0; i < 32; i++) {
           Util.assert(firstThread.getUint8(i) === (i<4?9:0));
       }
-      return true;
     }
   }
 ];

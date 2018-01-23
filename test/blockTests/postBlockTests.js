@@ -25,35 +25,28 @@
 var Header = require('../../js/block/header.js');
 var Post = require('../../js/block/post.js');
 var Util = require('../../js/util.js');
+var testCommon = require('../testCommon.js');
 
 module.exports = [
   { description: "Post block rejects incorrect block type",
+    shouldFail: true,
     fn: function() {
-      try {
-        let buf = new ArrayBuffer(80);
-        (new DataView(buf)).setUint8(2, 0x00);
-        let d_buf = new ArrayBuffer(40);
-        (new DataView(d_buf)).setUint32(0, 0x0024ffff);
-        let p = new Post(new Header(buf), d_buf);
-        return false;
-      } catch (e) {
-        return true;
-      }
+      let buf = new ArrayBuffer(80);
+      (new DataView(buf)).setUint8(2, 0x00);
+      let d_buf = new ArrayBuffer(40);
+      (new DataView(d_buf)).setUint32(0, 0x0024ffff);
+      new Post(new Header(buf), d_buf);
     }
   },
   { description: "Post block rejects malformed data length",
+    shouldFail: true,
     fn: function() {
       let buf = new ArrayBuffer(80);
       (new DataView(buf)).setUint8(2, 0x01);
       let d_buf = new ArrayBuffer(40);
       // data is 40 - 4 = 36 bytes long. 0x0027 !== 36 base 10.
       (new DataView(d_buf)).setUint32(0, 0x0027ffff);
-      try {
-        let p = new Post(new Header(buf), d_buf);
-        return false;
-      } catch (e) {
-        return true;
-      }
+      new Post(new Header(buf), d_buf);
     }
   },
   { description: "Post block accepts correct block type and data length",
@@ -67,7 +60,6 @@ module.exports = [
       let p = new Post(new Header(buf), d_buf);
       Util.assert(p);
       Util.assert(p instanceof Post);
-      return true;
     }
   },
   { description: "Post block returns correct content length",
@@ -80,7 +72,6 @@ module.exports = [
       view.setUint8(40, 0xff);
       let p = new Post(new Header(buf), d_buf);
       Util.assert(p.contentLength() === 36);
-      return true;
     }
   },
   { description: "Post block returns correct content",
@@ -96,7 +87,6 @@ module.exports = [
       for (let i = 0; i < 9; i++) {
         Util.assert(content.getUint32(i*4) === (i===2?0xcccccccc:0));
       }
-      return true;
     }
   }
 ];

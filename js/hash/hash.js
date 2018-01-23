@@ -63,5 +63,5 @@ module.exports.digest = function(input) {
   a = simd(a);
   a = echo(a);
   a = a.slice(0,32);
-  return a;
+  return new Uint8Array(a);
 }

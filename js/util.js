@@ -22,19 +22,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports.assert = function(condition, description) {
+module.exports.assert = assert = function(condition, description) {
   if (!condition) {
     throw new Error(description)
   }
 }
 
 module.exports.assertArrayEquality = function(arr1, arr2) {
-  if (arr1.length !== arr2.length) { throw new Error('Length mismatch.'); }
+  assert(arr1.length === arr2.length);
   for (let i = 0; i < arr1.length; i++) {
-    if (arr1[i] !== arr2[i]) { throw new Error('Arrays are unequal.'); }
+    assert(arr1[i] === arr2[i]);
+  }
+}
+
+module.exports.assertDataViewEquality = function(d1, d2) {
+  assert(d1.byteLength === d2.byteLength);
+  for (let i = 0; i < d1.byteLength; i++) {
+    assert(d1.getUint8(i) === d2.getUint8(i));
+    // XXX: maybe use getUint32 to decrease # of comparisons?
   }
 }
 
 module.exports.time = function() {
+  // XXX: is this the most efficient way?
   return Math.round((new Date()).getTime() / 1000);
+}
+
+module.exports.dataViewToUint8Array = function(view) {
+  return new Uint8Array(view.buffer, view.byteOffset, view.byteLength);
+}
+
+module.exports.uint8ArrToHex = function(arr) {
+	let str = '';
+
+	for (let i = 0; i < arr.byteLength; i++) {
+		// if (arr[i] < 16) {
+			str += (arr[i]<16?'0':'') + arr[i].toString(16);
+		// }
+		// else {
+		// 	string += arr[i].toString(16);
+		// }
+	}
+	return str;
 }

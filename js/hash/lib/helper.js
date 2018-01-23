@@ -28,55 +28,6 @@
 
 var op = require('./op.js');
 
-module.exports.int8ArrayToHexString = function toString(array) {
-	var string = '';
-
-	for (var i = 0; i < array.length; i++) {
-		if (array[i] < 16) {
-			string += '0' + array[i].toString(16);
-		}
-		else {
-			string += array[i].toString(16);
-		}
-	}
-	return string;
-}
-
-// module.exports.int32ArrayToHexString = function toString(array) {
-// 	var string = '';
-// 	var len = array.length;
-// 	for (var i = 0; i < len; i++) {
-// 		var s = array[i];
-// 		if (s < 0) {
-// 			s = 0xFFFFFFFF + array[i] + 1;
-// 		}
-// 		var l = s.toString(16);
-// 		var padding = 8;
-// 		while (l.length < padding) {
-// 			l = "0" + l;
-// 		}
-// 		string += l;
-// 	}
-// 	return string;
-// }
-
-// module.exports.hex2string = function toString(s) {
-// 	for (var c = [], len = s.length, i = 0; i < len; i += 2)
-// 		c.push(String.fromCharCode(parseInt(s.substring(i, i + 2), 16)));
-// 	return c.join('');
-// }
-
-module.exports.string2bytes = function(s) {
-	var len = s.length;
-	var b = new Array(len);
-	var i = 0;
-	while (i < len) {
-		b[i] = s.charCodeAt(i);
-		i++;
-	}
-	return b;
-};
-
 module.exports.bytes2Int32Buffer = function(b) {
 	if (!b) return [];
 	var len = b.length ? (((b.length - 1) >>> 2) + 1) : 0;

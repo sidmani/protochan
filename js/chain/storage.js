@@ -22,38 +22,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Helper = require('../hash/lib/helper.js');
 var Util = require('../util.js');
 var Block = require('../block/block.js');
 
-module.exports = class OrderedHashMap {
+module.exports = class Storage {
   constructor() {
     this.arr = [];
   }
 
-  set(hash, block, idx) {
-    Util.assert(hash instanceof Array);
+  push(hash, block) {
+    Util.assert(hash instanceof Uint8Array);
     Util.assert(block instanceof Block);
-    if (idx) {
-      Util.assert(typeof(idx) === 'number');
-      Util.assert(idx < this.arr.length);
-      // FIXME: fix memory leak here
-      this.arr[idx] = block;
-    } else {
-      this.arr.push(block);
-    }
-    this[Helper.int8ArrayToHexString(hash)] = block;
+
+    let str = Util.uint8ArrToHex(hash);
+    Util.assert(this[str] === undefined);
+
+    this.arr.push({
+      block: block,
+      hash: str
+    });
+    this[str] = block;
+  }
+
+  pop(idx) {
+    Util.assert(typeof(idx) === 'number');
+    Util.assert(idx < this.arr.length);
+    // TODO detach blocks from chain
   }
 
   get(hash) {
-    Util.assert(hash instanceof Array);
-    return this[Helper.int8ArrayToHexString(hash)];
+    Util.assert(hash instanceof Uint8Array);
+    return this[Util.uint8ArrToHex(hash)];
   }
 
   getIdx(idx) {
     Util.assert(typeof(idx) === 'number');
     Util.assert(idx < this.arr.length);
-    return this.arr[idx];
+    return this.arr[idx].block;
   }
 
   count() {

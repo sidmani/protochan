@@ -21,36 +21,20 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+var Post = require('../js/block/post.js');
+var Header = require('../js/block/header.js');
+var Block = require('../js/block/block.js');
 
-var HashMap = require('../../js/chain/orderedHashMap.js');
-var Block = require('../../js/block/block.js');
-var Header = require('../../js/block/header.js');
-var Util = require('../../js/util.js');
+module.exports.validPost = function() {
+  let buf = new ArrayBuffer(80);
+  (new DataView(buf)).setUint8(2, 0x01);
+  let d_buf = new ArrayBuffer(41);
+  let view = new DataView(d_buf);
+  view.setUint32(0, 0x0024ffff);
+  view.setUint8(40, 0xff);
+  return new Post(new Header(buf), d_buf);
+};
 
-module.exports = [
-  { description: "Hashmap stores and retrieves object",
-    fn: function() {
-        var block = new Block(new Header(new ArrayBuffer(80)), new ArrayBuffer(64));
-        var hashMap = new HashMap();
-        hashMap.set([0x00, 0x33, 0x5f], block);
-        Util.assert(hashMap.get([0x00, 0x33, 0x5f]) === block);
-        return true;
-    }
-  },
-  { description: "Hashmap automatically sets index",
-    fn: function() {
-      var block = new Block(new Header(new ArrayBuffer(80)), new ArrayBuffer(64));
-      var hashMap = new HashMap();
-      hashMap.set([0x00, 0x33, 0x5f], block);
-      Util.assert(hashMap.getIdx(0) === block);
-      return true;
-    }
-  },
-  { description: "Hashmap returns undefined for nonexistent object",
-    fn: function() {
-        var hashMap = new HashMap();
-        Util.assert(hashMap.get([0x00, 0x33, 0x5f]) === undefined);
-        return true;
-    }
-  }
-]
+module.exports.validBlock = function() {
+  return new Block(new Header(new ArrayBuffer(80)), new ArrayBuffer(64));
+}

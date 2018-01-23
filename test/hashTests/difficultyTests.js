@@ -28,7 +28,7 @@ var Util = require('../../js/util.js');
 module.exports = [
   { description: "countLeadingZeroes counts number of zeroes in a single byte",
     fn: function() {
-      var arr = new Array(32);
+      var arr = new Uint8Array(32);
       arr[0] = 0b00011011;
       Util.assert(Difficulty.countLeadingZeroes(arr) === 3);
       return true;
@@ -36,7 +36,7 @@ module.exports = [
   },
   { description: "countLeadingZeroes counts number of zeroes in multiple bytes",
     fn: function() {
-      var arr = new Array(32);
+      var arr = new Uint8Array(32);
       arr[0] = 0;
       arr[1] = 0;
       arr[2] = 0;
@@ -45,76 +45,63 @@ module.exports = [
       return true;
     }
   },
-  { description: "verifyDifficulty rejects invalid hash",
+  { description: "countLeadingZeroes returns 0 for empty array",
     fn: function() {
-      try {
-        Difficulty.verify(undefined, 4);
-        return false;
-      } catch (e) {
-        return true;
-      }
+      Util.assert(Difficulty.countLeadingZeroes([]) === 0);
+      return true;
+    }
+  },
+  { description: "verifyDifficulty rejects invalid hash",
+    shouldFail: true,
+    fn: function() {
+      Difficulty.verify(undefined, 4);
     }
   },
   { description: "verifyDifficulty rejects wrong length hash",
+    shouldFail: true,
     fn: function() {
-      try {
-        Difficulty.verify(new Array(31), 4);
-        return false;
-      } catch (e) {
-        return true;
-      }
+      Difficulty.verify(new Uint8Array(31), 4);
     }
   },
   { description: "verifyDifficulty accepts zero array", // XXX: this is pretty weird. code shouldn't allow this?
     fn: function() {
-      Difficulty.verify(new Array(32), 4);
-      return true;
+      Difficulty.verify(new Uint8Array(32), 4);
     }
   },
   { description: "verifyDifficulty rejects too few leading zeroes (single byte)",
+    shouldFail: true,
     fn: function() {
-      var arr = new Array(32);
+      var arr = new Uint8Array(32);
       arr[0] = 0b00011011; // 3 leading zeroes
-      try {
-        Difficulty.verify(arr, 4);
-        return false;
-      } catch (e) {
-        return true;
-      }
+      Difficulty.verify(arr, 4);
     }
   },
   { description: "verifyDifficulty rejects too few leading zeroes (multiple bytes)",
+    shouldFail: true,
     fn: function() {
-      var arr = new Array(32);
+      var arr = new Uint8Array(32);
       arr[0] = 0;
       arr[1] = 0;
       arr[2] = 0b00011001; // 19 leading zeroes
-      try {
-        Difficulty.verify(arr, 20);
-        return false;
-      } catch (e) {
-        return true;
-      }
+      Difficulty.verify(arr, 20);
     }
   },
   { description: "verifyDifficulty accepts enough leading zeroes (single byte)",
     fn: function() {
-      var arr = new Array(32);
+      var arr = new Uint8Array(32);
       arr[0] = 0b00000110; // 5 leading zeroes
       Difficulty.verify(arr, 3);
-      return true;
     }
   },
   { description: "verifyDifficulty accepts enough leading zeroes (multiple bytes)",
     fn: function() {
-      var arr = new Array(32);
+      var arr = new Uint8Array(32);
       arr[0] = 0;
       arr[1] = 0;
       arr[2] = 0;
       arr[3] = 0;
       arr[4] = 0b00000110; // 37 leading zeroes
       Difficulty.verify(arr, 37);
-      return true;
     }
   }
 ];

@@ -41,33 +41,26 @@ function runTests() {
     for (testCase in testGroup) {
       var testPass = false;
       var error;
-      if (noCatch) {
-        testPass = testGroup[testCase].fn();
+      if (noCatch && !testGroup[testCase].shouldFail) {
+        testGroup[testCase].fn();
+        testPass = true;
       } else {
         try {
-          testPass = testGroup[testCase].fn();
-        }
-        catch (e) {
+          testGroup[testCase].fn();
+          testPass = true;
+        } catch (e) {
           error = e;
           testPass = false;
         }
       }
+
+      testPass = !(testPass ^ !testGroup[testCase].shouldFail);
+
+      printTestOutput(testGroup[testCase], testPass, error, verbose);
+
       if (testPass) {
-        if (verbose) {
-          process.stdout.write('✅   ' + testGroup[testCase].description + '\n');
-        } else {
-          process.stdout.write('✅');
-        }
         numSuccess += 1;
       } else {
-        if (verbose) {
-          process.stdout.write('🚫   ' + testGroup[testCase].description + '\n');
-          if (error) {
-            process.stdout.write('     ↳ ERROR: ' + error +'\n');
-          }
-        } else {
-          process.stdout.write('🚫');
-        }
         numFailure += 1;
         success = false;
       }
@@ -84,5 +77,24 @@ function runTests() {
 
   process.exit(numFailure);
 };
+
+function printTestOutput(testCase, pass, error, verbose) {
+  if (pass) {
+    if (verbose) {
+      process.stdout.write('✅   ' + testCase.description + '\n');
+    } else {
+      process.stdout.write('✅');
+    }
+  } else {
+    if (verbose) {
+      process.stdout.write('🚫   ' + testCase.description + '\n');
+      if (error) {
+        process.stdout.write('     ↳ ERROR: ' + error +'\n');
+      }
+    } else {
+      process.stdout.write('🚫');
+    }
+  }
+}
 
 runTests();

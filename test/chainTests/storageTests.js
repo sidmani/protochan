@@ -21,15 +21,42 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
+var Storage = require('../../js/chain/storage.js');
 var Util = require('../../js/util.js');
-var Chain = require('../../js/chain/chain.js');
 var testCommon = require('../testCommon.js');
 
 module.exports = [
-  { description: "Chain rejects mistyped genesis block",
-    shouldFail: true,
+  { description: "Storage stores and retrieves object",
     fn: function() {
-      new Chain(new Array(5), testCommon.validPost());
+      var block = testCommon.validBlock();
+      var hashMap = new Storage();
+      hashMap.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
+      Util.assert(hashMap.get(new Uint8Array([0x00, 0x33, 0x5f])) === block);
+    }
+  },
+  { description: "Storage automatically sets index",
+    fn: function() {
+      var block = testCommon.validBlock();
+      var hashMap = new Storage();
+      hashMap.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
+      Util.assert(hashMap.getIdx(0) === block);
+    }
+  },
+  {
+    description: "Storage count is correct",
+     fn: function() {
+       var block = testCommon.validBlock();
+       var hashMap = new Storage();
+       hashMap.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
+       hashMap.push(new Uint8Array([0x05, 0x33, 0x5f]), block);
+       Util.assert(hashMap.count() === 2);
+    }
+  },
+  { description: "Storage returns undefined for nonexistent object",
+    fn: function() {
+      var hashMap = new Storage();
+      Util.assert(hashMap.get(new Uint8Array([0x00, 0x33, 0x5f])) === undefined);
     }
   }
-];
+]

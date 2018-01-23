@@ -28,6 +28,7 @@ var Util = require('../../js/util.js');
 
 module.exports = [
   { description: "Genesis block rejects non-zero previous hash",
+    shouldFail: true,
     fn: function() {
       let buf = new ArrayBuffer(80);
       let view = new DataView(buf)
@@ -35,12 +36,7 @@ module.exports = [
       for (let i = 11; i < 43; i++) {
         view.setUint8(i, 0x01);
       }
-      try {
-        var b = new Genesis(new Header(buf), new ArrayBuffer(64));
-        return false;
-      } catch (e) {
-        return true;
-      }
+      new Genesis(new Header(buf), new ArrayBuffer(64));
     }
   },
   { description: "Genesis block accepts all-zero previous hash",
@@ -54,7 +50,6 @@ module.exports = [
       var b = new Genesis(new Header(buf), new ArrayBuffer(64));
       Util.assert(b);
       Util.assert(b instanceof Genesis);
-      return true;
     }
   }
 ];

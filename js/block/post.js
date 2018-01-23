@@ -35,6 +35,7 @@ module.exports = class PostBlock extends Block {
     Util.assert(this.data.byteLength === this.contentLength() + 5);
     Util.assert(this.data.getUint8(this.data.byteLength - 1) === 0xff);
     // TODO: error correction if 0xff end byte is present but length is wrong
+    // would require rechecking hash
   }
 
   // data is 2 bytes length, 0xff, 0xff, data, 0xff

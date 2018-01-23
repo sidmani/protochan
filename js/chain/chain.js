@@ -22,21 +22,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var HashMap = require('./orderedHashMap.js');
+var Storage = require('./storage.js');
 var Util = require('../util.js');
 var Hash = require('../hash/hash.js');
 var Block = require('../block/block.js');
 var Post = require('../block/post.js');
 var Thread = require('../block/thread.js');
+var Genesis = require('../block/genesis.js');
+var Difficulty = require('../hash/difficulty.js');
 
-class Chain {
+module.exports = class Chain {
   constructor(genesis, genesisPost) {
-    Util.assert(typeof(board) === 'number', 'Invalid board id.');
+    Util.assert(genesis);
+    Util.assert(genesis instanceof Genesis);
 
-    this.board = board;
-    this.map = new HashMap();
+    Util.assert(genesisPost);
+    Util.assert(genesisPost instanceof Post);
 
-    this.head = undefined; // replace with hash array of genesis block
+    // if post contains additional settings, handle them here
+    // check that genesis dataHash is equal to data
+    this.threadStorage = Storage();
+    // FIXME: sort out arrays vs dataviews
+    // check that genesis post hash equals getPost(0)
+    this.genesis = genesis;
+
+    // this.map = new HashMap();
+    //
+    // this.head = undefined; // replace with hash array of genesis block
   }
 
   push(block, now) {
@@ -67,13 +79,13 @@ class Chain {
       map.set(blockHash, block);
       this.head = blockHash;
   }
-
-  validate() {
-    let count = map.count();
-    let prevBlock = ; // genesis
-    for (let i = 1; i < count; i++) {
-      let currentBlock = map.getIdx(i);
-      Util.assertArrayEquality(Hash.digest(Array.from(prevBlock.header.buffer)), Array.from(currentBlock.header.prevHash()));
-    }
-  }
+  //
+  // validate() {
+  //   let count = map.count();
+  //   let prevBlock = ; // genesis
+  //   for (let i = 1; i < count; i++) {
+  //     let currentBlock = map.getIdx(i);
+  //     Util.assertArrayEquality(Hash.digest(Array.from(prevBlock.header.buffer)), Array.from(currentBlock.header.prevHash()));
+  //   }
+  // }
 }

@@ -24,16 +24,25 @@
 
 var ThreadBlock = require('./thread.js');
 var Difficulty = require('../hash/difficulty.js');
+var Util = require('../util.js');
 
 module.exports = class Genesis extends ThreadBlock {
   constructor(header, dataBuffer) {
     super(header, dataBuffer);
     // prevHash has maximum difficulty (all zeroes)
-    Difficulty.verify_dataView(header.prevHash(), 256);
+    Difficulty.verify(Util.dataViewToUint8Array(header.prevHash()), 256);
+
+    // data is exactly 64 bytes, since the genesis block
+    // can only have one post associated with it
+    Util.assert(this.data.byteLength === 64);
   }
 
   // reserved byte in the header is used to designate max threads
   maxThreads() {
     return this.reserved();
   }
+
+  // to extend the protocol with options, store additional
+  // bytes in the post block's data and parse them with
+  // additional functions here
 }

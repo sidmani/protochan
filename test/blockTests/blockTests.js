@@ -29,43 +29,27 @@ var Util = require('../../js/util.js');
 
 module.exports = [
   { description: "Block rejects undefined header",
+    shouldFail: true,
     fn: function() {
-      try {
-        var b = new Block(undefined, new ArrayBuffer(64));
-        return false;
-      } catch(e) {
-        return true;
-      }
+      new Block(undefined, new ArrayBuffer(64));
     }
   },
   { description: "Block rejects header of wrong type",
+    shouldFail: true,
     fn: function() {
-      try {
-        var b = new Block(new Array(), new ArrayBuffer(64));
-        return false;
-      } catch(e) {
-        return true;
-      }
+      new Block(new Array(), new ArrayBuffer(64));
     }
   },
   { description: "Block rejects undefined data",
+    shouldFail: true,
     fn: function() {
-      try {
-        var b = new Block(new Header(new ArrayBuffer(80)), undefined);
-        return false;
-      } catch(e) {
-        return true;
-      }
+      new Block(new Header(new ArrayBuffer(80)), undefined);
     }
   },
   { description: "Block rejects data of wrong type",
+    shouldFail: true,
     fn: function() {
-      try {
-        var b = new Block(new Header(new ArrayBuffer(80)), new Array());
-        return false;
-      } catch(e) {
-        return true;
-      }
+      new Block(new Header(new ArrayBuffer(80)), new Array());
     }
   },
   { description: "Block accepts valid header and data",
@@ -73,7 +57,6 @@ module.exports = [
       var b = new Block(new Header(new ArrayBuffer(80)), new ArrayBuffer(128));
       Util.assert(b);
       Util.assert(b instanceof Block);
-      return true;
     }
   },
 ]
