@@ -22,56 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Util = require('../util.js');
+var ThreadBlock = require('./thread.js');
+var Difficulty = require('../hash/difficulty.js');
 
-module.exports = class Header {
-  constructor(buffer) {
-    Util.assert(buffer, 'Data does not exist.');
-    Util.assert(buffer instanceof ArrayBuffer, 'Data is of wrong type.');
-    Util.assert(buffer.byteLength === 80, 'Data is of wrong length.');
-
-    this.data = new DataView(buffer);
+module.exports = class Genesis extends ThreadBlock {
+  constructor(header, dataBuffer) {
+    super(header, dataBuffer);
+    // prevHash has maximum difficulty (all zeroes)
+    Difficulty.verify_dataView(header.prevHash(), 256);
   }
 
-  /// Protocol version (uint16)
-  protocolVersion() {
-    return this.data.getUint16(0);
+  // reserved byte in the header is used to designate max threads
+  maxThreads() {
+    return this.reserved();
   }
-
-  /// Block type (uint8)
-  blockType() {
-    return this.data.getUint8(2);
-  }
-
-  // Unix timestamp (uint32)
-  timestamp() {
-    return this.data.getUint32(3);
-  }
-
-  // nonce (uint32)
-  nonce() {
-    return this.data.getUint32(7);
-  }
-
-  // 32 bytes
-  prevHash() {
-    return new DataView(this.data.buffer, 11, 32);
-  }
-
-  // 32 bytes
-  dataHash() {
-    return new DataView(this.data.buffer, 43, 32);
-  }
-
-  // 4 bytes
-  board() {
-    return this.data.getUint32(75);
-  }
-
-  // genesis block uses this for max thread count
-  // if the protocol needs to be extended with further options,
-  // place the data in the post referenced by the genesis block
-  reserved() {
-    return this.data.getUint8(79);
-  }
-};
+}

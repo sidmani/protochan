@@ -26,5 +26,6 @@ module.exports = [].concat (
   require('./headerTests.js'),
   require('./blockTests.js'),
   require('./threadBlockTests.js'),
-  require('./postBlockTests.js')
+  require('./postBlockTests.js'),
+  require('./genesisBlockTests.js')
 );

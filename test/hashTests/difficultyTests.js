@@ -48,7 +48,7 @@ module.exports = [
   { description: "verifyDifficulty rejects invalid hash",
     fn: function() {
       try {
-        Difficulty.verifyDifficulty(undefined, 4);
+        Difficulty.verify(undefined, 4);
         return false;
       } catch (e) {
         return true;
@@ -58,7 +58,7 @@ module.exports = [
   { description: "verifyDifficulty rejects wrong length hash",
     fn: function() {
       try {
-        Difficulty.verifyDifficulty(new Array(31), 4);
+        Difficulty.verify(new Array(31), 4);
         return false;
       } catch (e) {
         return true;
@@ -67,7 +67,7 @@ module.exports = [
   },
   { description: "verifyDifficulty accepts zero array", // XXX: this is pretty weird. code shouldn't allow this?
     fn: function() {
-      Difficulty.verifyDifficulty(new Array(32), 4);
+      Difficulty.verify(new Array(32), 4);
       return true;
     }
   },
@@ -76,7 +76,7 @@ module.exports = [
       var arr = new Array(32);
       arr[0] = 0b00011011; // 3 leading zeroes
       try {
-        Difficulty.verifyDifficulty(arr, 4);
+        Difficulty.verify(arr, 4);
         return false;
       } catch (e) {
         return true;
@@ -90,7 +90,7 @@ module.exports = [
       arr[1] = 0;
       arr[2] = 0b00011001; // 19 leading zeroes
       try {
-        Difficulty.verifyDifficulty(arr, 20);
+        Difficulty.verify(arr, 20);
         return false;
       } catch (e) {
         return true;
@@ -101,7 +101,7 @@ module.exports = [
     fn: function() {
       var arr = new Array(32);
       arr[0] = 0b00000110; // 5 leading zeroes
-      Difficulty.verifyDifficulty(arr, 3);
+      Difficulty.verify(arr, 3);
       return true;
     }
   },
@@ -113,7 +113,7 @@ module.exports = [
       arr[2] = 0;
       arr[3] = 0;
       arr[4] = 0b00000110; // 37 leading zeroes
-      Difficulty.verifyDifficulty(arr, 37);
+      Difficulty.verify(arr, 37);
       return true;
     }
   }

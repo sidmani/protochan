@@ -24,7 +24,6 @@
 
 var Util = require('../util.js');
 var Header = require('./header.js');
-
 module.exports = class Block {
   constructor(header, dataBuffer) {
     Util.assert(header, 'Header does not exist.');

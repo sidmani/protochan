@@ -22,56 +22,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Util = require('../util.js');
+var Genesis = require('../../js/block/genesis.js');
+var Header = require('../../js/block/header.js');
+var Util = require('../../js/util.js');
 
-module.exports = class Header {
-  constructor(buffer) {
-    Util.assert(buffer, 'Data does not exist.');
-    Util.assert(buffer instanceof ArrayBuffer, 'Data is of wrong type.');
-    Util.assert(buffer.byteLength === 80, 'Data is of wrong length.');
-
-    this.data = new DataView(buffer);
+module.exports = [
+  { description: "Genesis block rejects non-zero previous hash",
+    fn: function() {
+      let buf = new ArrayBuffer(80);
+      let view = new DataView(buf)
+      view.setUint8(2, 0x00);
+      for (let i = 11; i < 43; i++) {
+        view.setUint8(i, 0x01);
+      }
+      try {
+        var b = new Genesis(new Header(buf), new ArrayBuffer(64));
+        return false;
+      } catch (e) {
+        return true;
+      }
+    }
+  },
+  { description: "Genesis block accepts all-zero previous hash",
+    fn: function() {
+      let buf = new ArrayBuffer(80);
+      let view = new DataView(buf)
+      view.setUint8(2, 0x00);
+      for (let i = 11; i < 43; i++) {
+        view.setUint8(i, 0x00);
+      }
+      var b = new Genesis(new Header(buf), new ArrayBuffer(64));
+      Util.assert(b);
+      Util.assert(b instanceof Genesis);
+      return true;
+    }
   }
-
-  /// Protocol version (uint16)
-  protocolVersion() {
-    return this.data.getUint16(0);
-  }
-
-  /// Block type (uint8)
-  blockType() {
-    return this.data.getUint8(2);
-  }
-
-  // Unix timestamp (uint32)
-  timestamp() {
-    return this.data.getUint32(3);
-  }
-
-  // nonce (uint32)
-  nonce() {
-    return this.data.getUint32(7);
-  }
-
-  // 32 bytes
-  prevHash() {
-    return new DataView(this.data.buffer, 11, 32);
-  }
-
-  // 32 bytes
-  dataHash() {
-    return new DataView(this.data.buffer, 43, 32);
-  }
-
-  // 4 bytes
-  board() {
-    return this.data.getUint32(75);
-  }
-
-  // genesis block uses this for max thread count
-  // if the protocol needs to be extended with further options,
-  // place the data in the post referenced by the genesis block
-  reserved() {
-    return this.data.getUint8(79);
-  }
-};
+];

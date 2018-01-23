@@ -140,7 +140,7 @@ module.exports = [
       return true;
     }
   },
-  { description: "Header returns correct previous hash",
+  { description: "Header returns correct data hash",
     fn: function() {
       var h = new Header(valid_buffer);
       var dataHash = h.dataHash();

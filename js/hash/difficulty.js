@@ -24,26 +24,57 @@
 
 var Util = require('../util.js');
 
-module.exports.verifyDifficulty = function(hash, leadingZeroes) {
+module.exports.verify = function(hash, leadingZeroes) {
   Util.assert(hash);
   Util.assert(hash instanceof Array);
   Util.assert(hash.length === 32);
 
   Util.assert(leadingZeroes);
   Util.assert(typeof(leadingZeroes) === 'number');
-  Util.assert(leadingZeroes <= 256);
 
   Util.assert(countLeadingZeroes(hash) >= leadingZeroes)
 }
-module.exports.countLeadingZeroes = countLeadingZeroes;
 
-function countLeadingZeroes(arr) {
+module.exports.verify_dataView = function(hash, leadingZeroes) {
+  Util.assert(hash);
+  Util.assert(hash instanceof DataView);
+  Util.assert(hash.byteLength === 32);
+
+  Util.assert(leadingZeroes);
+  Util.assert(typeof(leadingZeroes) === 'number');
+
+  Util.assert(countLeadingZeroes_dataView(hash) >= leadingZeroes)
+}
+
+// this function is used during PoW calculations.
+// optimization is key
+module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
   let zeroes = 0;
   for (let i = 0; i < arr.length; i++) {
     if (arr[i] === 0) {
       zeroes += 8;
     } else {
       let curr = arr[i];
+      let finalByteZeroes = 0;
+      while (curr !== 0) {
+        curr >>= 1;
+        finalByteZeroes += 1;
+      }
+      return zeroes + (8-finalByteZeroes);
+    }
+  }
+  return zeroes;
+};
+
+// this function is used mainly during verification
+// since block headers return DataViews
+module.exports.countLeadingZeroes_dataView = countLeadingZeroes_dataView = function(dView) {
+  let zeroes = 0;
+  for (let i = 0; i < dView.byteLength; i++) {
+    if (dView.getUint8(i) === 0) {
+      zeroes += 8;
+    } else {
+      let curr = dView.getUint8(i);
       let finalByteZeroes = 0;
       while (curr !== 0) {
         curr >>= 1;

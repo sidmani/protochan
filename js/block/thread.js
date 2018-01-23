@@ -47,7 +47,10 @@ module.exports = class ThreadBlock extends Block {
   // { thread hash, post hash}
   // first row is { 0, post hash } (genesis)
   getThread(index) {
-    Util.assert(index < this.data.byteLength / 64);
+    // index must not be zero
+    // since the zeroth thread's id is the hash of this block
+    // which obviously can't be stored in the block itself
+    Util.assert(index < this.data.byteLength / 64 && index !== 0);
     return new DataView(this.data.buffer, index*64, 32)
   }
 

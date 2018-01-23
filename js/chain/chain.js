@@ -30,10 +30,12 @@ var Post = require('../block/post.js');
 var Thread = require('../block/thread.js');
 
 class Chain {
-  constructor(board) {
+  constructor(genesis, genesisPost) {
     Util.assert(typeof(board) === 'number', 'Invalid board id.');
+
     this.board = board;
     this.map = new HashMap();
+
     this.head = undefined; // replace with hash array of genesis block
   }
 
