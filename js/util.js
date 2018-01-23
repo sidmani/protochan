@@ -28,13 +28,6 @@ module.exports.assert = assert = function(condition, description) {
   }
 }
 
-module.exports.assertArrayEquality = function(arr1, arr2) {
-  assert(arr1.length === arr2.length);
-  for (let i = 0; i < arr1.length; i++) {
-    assert(arr1[i] === arr2[i]);
-  }
-}
-
 module.exports.assertDataViewEquality = function(d1, d2) {
   assert(d1.byteLength === d2.byteLength);
   for (let i = 0; i < d1.byteLength; i++) {
@@ -54,14 +47,8 @@ module.exports.dataViewToUint8Array = function(view) {
 
 module.exports.uint8ArrToHex = function(arr) {
 	let str = '';
-
 	for (let i = 0; i < arr.byteLength; i++) {
-		// if (arr[i] < 16) {
 			str += (arr[i]<16?'0':'') + arr[i].toString(16);
-		// }
-		// else {
-		// 	string += arr[i].toString(16);
-		// }
 	}
 	return str;
 }

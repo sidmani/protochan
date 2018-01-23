@@ -39,22 +39,23 @@ function runTests() {
     var success = true;
     process.stdout.write('🤖 RUNNING GROUP: ' + groupName + ' (' + testGroup.length + (verbose?')\n':') '));
     for (testCase in testGroup) {
-      var testPass = false;
+      var testPass;
       var error;
-      if (noCatch && !testGroup[testCase].shouldFail) {
+      try {
         testGroup[testCase].fn();
         testPass = true;
-      } else {
-        try {
-          testGroup[testCase].fn();
-          testPass = true;
-        } catch (e) {
+      } catch (e) {
+        if (noCatch && !testGroup[testCase].shouldFail) {
+          throw e;
+        } else {
           error = e;
           testPass = false;
         }
       }
 
-      testPass = !(testPass ^ !testGroup[testCase].shouldFail);
+      if (testGroup[testCase].shouldFail) {
+        testPass = !testPass;
+      }
 
       printTestOutput(testGroup[testCase], testPass, error, verbose);
 
