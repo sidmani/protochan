@@ -26,35 +26,64 @@ var Block = require('../../js/block/block.js');
 var Header = require('../../js/block/header.js');
 var Post = require('../../js/block/post.js');
 var Util = require('../../js/util.js');
+var testCommon = require('../testCommon.js');
 
 module.exports = [
-  { description: "Block rejects undefined header",
-    shouldFail: true,
-    fn: function() {
-      new Block(undefined, new ArrayBuffer(64));
+  { description: "Block validates header",
+    dual: true,
+    fn: function(shouldPass) {
+      let buf = new ArrayBuffer(64);
+      let header;
+      if (shouldPass) {
+        header = testCommon.validHeaderFromData(buf);
+      } else {
+        header = undefined;
+      }
+      new Block(header, buf);
     }
   },
-  { description: "Block rejects header of wrong type",
-    shouldFail: true,
-    fn: function() {
-      new Block(new Array(), new ArrayBuffer(64));
+  { description: "Block validates header type",
+    dual: true,
+    fn: function(shouldPass) {
+      let buf = new ArrayBuffer(64);
+      let header;
+      if (shouldPass) {
+        header = testCommon.validHeaderFromData(buf);
+      } else {
+        header = new Array();
+      }
+      new Block(header, buf);
     }
   },
-  { description: "Block rejects undefined data",
-    shouldFail: true,
-    fn: function() {
-      new Block(new Header(new ArrayBuffer(80)), undefined);
+  { description: "Block validates data",
+    dual: true,
+    fn: function(shouldPass) {
+      let buf = new ArrayBuffer(64);
+      let header = testCommon.validHeaderFromData(buf);
+      if (shouldPass) {
+        new Block(header, buf);
+      } else {
+        new Block(header, undefined);
+      }
     }
   },
-  { description: "Block rejects data of wrong type",
-    shouldFail: true,
-    fn: function() {
-      new Block(new Header(new ArrayBuffer(80)), new Array());
+  { description: "Block validates data type",
+    dual: true,
+    fn: function(shouldPass) {
+      let buf = new ArrayBuffer(64);
+      let header = testCommon.validHeaderFromData(buf);
+      if (shouldPass) {
+        new Block(header, buf);
+      } else {
+        new Block(header, new Array());
+      }
     }
   },
   { description: "Block accepts valid header and data",
     fn: function() {
-      var b = new Block(new Header(new ArrayBuffer(80)), new ArrayBuffer(128));
+      var buf = new ArrayBuffer(128);
+      var header = testCommon.validHeaderFromData(buf);
+      var b = new Block(header, buf);
       Util.assert(b);
       Util.assert(b instanceof Block);
     }

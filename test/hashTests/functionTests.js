@@ -2,10 +2,6 @@
 // https://github.com/sidmani/protochan
 // https://www.sidmani.com/?postid=3
 
-// Parts of this file are from
-// https://github.com/dcposch/blakejs/blob/master/test_blake2s.js
-// Released under CC0
-
 // Copyright (c) 2018 Sid Mani
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,7 +28,7 @@ var blake2s = require('../../js/hash/blake2s.js');
 module.exports = [
   { description: "Blake2s produces correct results",
     fn: function() {
-      Util.assert(Util.uint8ArrToHex(blake2s(new Uint8Array([97, 98, 99]))) ===
+      Util.assert(Util.uint8ArrToHex(blake2s.digest(new Uint8Array([97, 98, 99]))) ===
   '508c5e8c327c14e2e1a72ba34eeb452f37458b209ed63a294d999b4c86675982');
     }
   }

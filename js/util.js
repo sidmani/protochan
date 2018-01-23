@@ -36,6 +36,13 @@ module.exports.assertDataViewEquality = function(d1, d2) {
   }
 }
 
+module.exports.assertArrayEquality = function(arr1, arr2) {
+  assert(arr1.byteLength === arr2.byteLength);
+  for (let i = 0; i < arr1.byteLength; i++) {
+    assert(arr1[i] === arr2[i]);
+  }
+}
+
 module.exports.time = function() {
   // XXX: is this the most efficient way?
   return Math.round((new Date()).getTime() / 1000);

@@ -24,6 +24,8 @@
 
 var Util = require('../util.js');
 var Header = require('./header.js');
+var Hash = require('../hash/blake2s.js');
+
 module.exports = class Block {
   constructor(header, dataBuffer) {
     Util.assert(header, 'Header does not exist.');
@@ -32,11 +34,18 @@ module.exports = class Block {
     Util.assert(dataBuffer, 'Data does not exist.');
     Util.assert(dataBuffer instanceof ArrayBuffer, 'Data is of wrong type');
 
+    // TODO: fix this in tests
+  //  console.log(Util.dataViewToUint8Array(header.dataHash()));
+    Util.assertArrayEquality(
+      Hash.digest(new Uint8Array(dataBuffer)),
+      Util.dataViewToUint8Array(header.dataHash())
+    );
+
     this.header = header;
     this.data = new DataView(dataBuffer);
   }
-
-  verifyDataHash(hashFunction) {
-    // TODO: does this go here or in the chain?
-  }
+  //
+  // verifyDataHash(hashFunction) {
+  //   // TODO: does this go here or in the chain?
+  // }
 };

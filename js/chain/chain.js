@@ -24,7 +24,7 @@
 
 var Storage = require('./storage.js');
 var Util = require('../util.js');
-// var Hash = require('../hash/hash.js');
+var Hash = require('../hash/blake2s.js');
 var Block = require('../block/block.js');
 var Post = require('../block/post.js');
 var Thread = require('../block/thread.js');
@@ -42,6 +42,7 @@ module.exports = class Chain {
     // if post contains additional settings, handle them here
     // check that genesis dataHash is equal to data
     this.threadStorage = Storage();
+
 
     // check that genesis post hash equals getPost(0)
     //////

@@ -25,32 +25,34 @@
 var Header = require('../../js/block/header.js');
 var Thread = require('../../js/block/thread.js');
 var Util = require('../../js/util.js');
+var testCommon = require('../testCommon.js');
 
 module.exports = [
-  { description: "Thread block rejects incorrect block type",
-    shouldFail: true,
-    fn: function() {
-        let buf = new ArrayBuffer(80);
-        (new DataView(buf)).setUint8(2, 0x02);
-        new Thread(new Header(buf), new ArrayBuffer(192));
-    }
-  },
-  { description: "Thread block accepts correct block type",
-    fn: function() {
-      let buf = new ArrayBuffer(80);
-      (new DataView(buf)).setUint8(2, 0x00);
-      var b = new Thread(new Header(buf), new ArrayBuffer(64));
-      Util.assert(b);
-      Util.assert(b instanceof Thread);
-    }
-  },
-  { description: "Thread block rejects non-zero genesis row",
-    shouldFail: true,
-    fn: function() {
+  { description: "Thread block validates block type",
+    dual: true,
+    fn: function(shouldPass) {
       let d_buf = new ArrayBuffer(64);
-      let arr = new Uint8Array(d_buf);
-      arr.fill(9, 0, 16);
-      new Thread(new Header(new ArrayBuffer(80)), d_buf);
+      let header = testCommon.validHeaderFromData(d_buf);
+      if (shouldPass) {
+        header.data.setUint8(2, 0x00);
+      } else {
+        header.data.setUint8(2, 0x01);
+      }
+      new Thread(header, d_buf);
+    }
+  },
+  { description: "Thread block validates zero genesis row",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(64);
+      if (shouldPass) {
+        new Uint8Array(d_buf).fill(0, 0, 16);
+      } else {
+        new Uint8Array(d_buf).fill(9, 0, 16);
+      }
+      let header = testCommon.validHeaderFromData(d_buf);
+      header.data.setUint8(2, 0x00);
+      new Thread(header, d_buf);
     }
   },
   { description: "Thread block returns correct post hash",
@@ -58,7 +60,8 @@ module.exports = [
       let d_buf = new ArrayBuffer(64);
       let arr = new Uint8Array(d_buf);
       arr.fill(9, 32, 48);
-      let t = new Thread(new Header(new ArrayBuffer(80)), d_buf);
+      let header = testCommon.validHeaderFromData(d_buf);
+      let t = new Thread(header, d_buf);
       let firstThread = t.getPost(0);
       for (let i = 0; i < 32; i++) {
           Util.assert(firstThread.getUint8(i) === (i<16?9:0));
@@ -70,7 +73,8 @@ module.exports = [
       let d_buf = new ArrayBuffer(128);
       let arr = new Uint8Array(d_buf);
       arr.fill(9, 64, 68);
-      let t = new Thread(new Header(new ArrayBuffer(80)), d_buf);
+      let header = testCommon.validHeaderFromData(d_buf);
+      let t = new Thread(header, d_buf);
       let firstThread = t.getThread(1);
       for (let i = 0; i < 32; i++) {
           Util.assert(firstThread.getUint8(i) === (i<4?9:0));

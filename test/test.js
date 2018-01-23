@@ -39,25 +39,44 @@ function runTests() {
     var success = true;
     process.stdout.write('🤖 RUNNING GROUP: ' + groupName + ' (' + testGroup.length + (verbose?')\n':') '));
     for (testCase in testGroup) {
-      var testPass;
+      var testPass = true;
       var error;
-      try {
-        testGroup[testCase].fn();
-        testPass = true;
-      } catch (e) {
-        if (noCatch && !testGroup[testCase].shouldFail) {
-          throw e;
-        } else {
-          error = e;
+      if (testGroup[testCase].dual) {
+        try {
+          testGroup[testCase].fn(true);
+          // ok
+        } catch (e) {
+          if (noCatch) {
+            throw e;
+          }
           testPass = false;
+        }
+
+        try {
+          testGroup[testCase].fn(false);
+          testPass = false;
+        } catch (e) {
+          // ok
+        }
+      } else {
+        try {
+          testGroup[testCase].fn();
+          testPass = true;
+        } catch (e) {
+          if (noCatch && !testGroup[testCase].shouldFail) {
+            throw e;
+          } else {
+            error = e;
+            testPass = false;
+          }
+        }
+
+        if (testGroup[testCase].shouldFail) {
+          testPass = !testPass;
         }
       }
 
-      if (testGroup[testCase].shouldFail) {
-        testPass = !testPass;
-      }
-
-      printTestOutput(testGroup[testCase], testPass, error, verbose);
+      printTestOutput(testGroup[testCase], testPass, error, verbose, testGroup[testCase].dual);
 
       if (testPass) {
         numSuccess += 1;
@@ -79,21 +98,27 @@ function runTests() {
   process.exit(numFailure);
 };
 
-function printTestOutput(testCase, pass, error, verbose) {
+function printTestOutput(testCase, pass, error, verbose, dual) {
   if (pass) {
+    process.stdout.write('✅');
     if (verbose) {
-      process.stdout.write('✅   ' + testCase.description + '\n');
-    } else {
-      process.stdout.write('✅');
+      if (dual) {
+        process.stdout.write(' 🔄 ' + testCase.description + '\n');
+      } else {
+        process.stdout.write('   ' + testCase.description + '\n');
+      }
     }
   } else {
+    process.stdout.write('🚫');
     if (verbose) {
-      process.stdout.write('🚫   ' + testCase.description + '\n');
+      if (dual) {
+        process.stdout.write(' 🔄 ' + testCase.description + '\n');
+      } else {
+        process.stdout.write('   ' + testCase.description + '\n');
+      }
       if (error) {
         process.stdout.write('     ↳ ERROR: ' + error +'\n');
       }
-    } else {
-      process.stdout.write('🚫');
     }
   }
 }

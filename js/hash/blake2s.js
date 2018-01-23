@@ -158,7 +158,7 @@ function blake2sFinal (ctx) {
 //
 // Parameters:
 // - input - the input bytes, as a Uint8Array
-module.exports = function blake2s(input) {
+module.exports.digest = function blake2s(input) {
   var ctx = blake2sInit()
   blake2sUpdate(ctx, input)
   return blake2sFinal(ctx)

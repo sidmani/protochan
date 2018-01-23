@@ -28,62 +28,80 @@ var Util = require('../../js/util.js');
 var testCommon = require('../testCommon.js');
 
 module.exports = [
-  { description: "Post block rejects incorrect block type",
-    shouldFail: true,
-    fn: function() {
-      let buf = new ArrayBuffer(80);
-      (new DataView(buf)).setUint8(2, 0x00);
-      let d_buf = new ArrayBuffer(40);
-      (new DataView(d_buf)).setUint32(0, 0x0024ffff);
-      new Post(new Header(buf), d_buf);
+  { description: "Post block validates block type",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(41);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0024ffff);
+      dataView.setUint8(40, 0xff);
+      let header = testCommon.validHeaderFromData(d_buf);
+      if (shouldPass) {
+        header.data.setUint8(2, 0x01);
+      } else {
+        header.data.setUint8(2, 0x00);
+      }
+      new Post(header, d_buf);
     }
   },
-  { description: "Post block rejects malformed data length",
-    shouldFail: true,
-    fn: function() {
-      let buf = new ArrayBuffer(80);
-      (new DataView(buf)).setUint8(2, 0x01);
-      let d_buf = new ArrayBuffer(40);
-      // data is 40 - 4 = 36 bytes long. 0x0027 !== 36 base 10.
-      (new DataView(d_buf)).setUint32(0, 0x0027ffff);
-      new Post(new Header(buf), d_buf);
+  { description: "Post block validates data length",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(41);
+      let dataView = new DataView(d_buf);
+      dataView.setUint8(40, 0xff);
+      if (shouldPass) {
+        dataView.setUint32(0, 0x0024ffff);
+      } else {
+        dataView.setUint32(0, 0x0025ffff);
+      }
+      let header = testCommon.validHeaderFromData(d_buf);
+      header.data.setUint8(2, 0x01);
+
+      new Post(header, d_buf);
     }
   },
   { description: "Post block accepts correct block type and data length",
     fn: function() {
-      let buf = new ArrayBuffer(80);
-      (new DataView(buf)).setUint8(2, 0x01);
       let d_buf = new ArrayBuffer(41);
       let view = new DataView(d_buf);
       view.setUint32(0, 0x0024ffff);
       view.setUint8(40, 0xff);
-      let p = new Post(new Header(buf), d_buf);
+
+      let header = testCommon.validHeaderFromData(d_buf);
+      header.data.setUint8(2, 0x01);
+
+      let p = new Post(header, d_buf);
       Util.assert(p);
       Util.assert(p instanceof Post);
     }
   },
   { description: "Post block returns correct content length",
     fn: function() {
-      let buf = new ArrayBuffer(80);
-      (new DataView(buf)).setUint8(2, 0x01);
       let d_buf = new ArrayBuffer(41);
       let view = new DataView(d_buf);
       view.setUint32(0, 0x0024ffff);
       view.setUint8(40, 0xff);
-      let p = new Post(new Header(buf), d_buf);
+
+      let header = testCommon.validHeaderFromData(d_buf);
+      header.data.setUint8(2, 0x01);
+
+      let p = new Post(header, d_buf);
       Util.assert(p.contentLength() === 36);
     }
   },
   { description: "Post block returns correct content",
     fn: function() {
-      let buf = new ArrayBuffer(80);
-      (new DataView(buf)).setUint8(2, 0x01);
       let d_buf = new ArrayBuffer(41);
       let view = new DataView(d_buf);
       view.setUint32(0, 0x0024ffff);
       view.setUint32(12, 0xcccccccc);
       view.setUint8(40, 0xff);
-      let content = new Post(new Header(buf), d_buf).content();
+
+      let header = testCommon.validHeaderFromData(d_buf);
+      header.data.setUint8(2, 0x01);
+
+      let content = new Post(header, d_buf).content();
       for (let i = 0; i < 9; i++) {
         Util.assert(content.getUint32(i*4) === (i===2?0xcccccccc:0));
       }
