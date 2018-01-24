@@ -24,8 +24,9 @@
 
 var allTests = {
   hashTests: require('./hashTests/group.js'),
+  headerTests: require('./headerTests/headerTests.js'),
   blockTests: require('./blockTests/group.js'),
-  chainTests: require('./chainTests/group.js')
+  chainTests: require('./chainTests/group.js'),
 }
 
 function runTests() {
@@ -105,7 +106,7 @@ function printTestOutput(testCase, pass, error, verbose, dual) {
       if (dual) {
         process.stdout.write(' 🔄 ' + testCase.description + '\n');
       } else {
-        process.stdout.write('   ' + testCase.description + '\n');
+        process.stdout.write('    ' + testCase.description + '\n');
       }
     }
   } else {
@@ -114,7 +115,7 @@ function printTestOutput(testCase, pass, error, verbose, dual) {
       if (dual) {
         process.stdout.write(' 🔄 ' + testCase.description + '\n');
       } else {
-        process.stdout.write('   ' + testCase.description + '\n');
+        process.stdout.write('    ' + testCase.description + '\n');
       }
       if (error) {
         process.stdout.write('     ↳ ERROR: ' + error +'\n');

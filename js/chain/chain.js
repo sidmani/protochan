@@ -39,13 +39,11 @@ module.exports = class Chain {
     Util.assert(genesisPost);
     Util.assert(genesisPost instanceof Post);
 
-    // if post contains additional settings, handle them here
-    // check that genesis dataHash is equal to data
-    this.threadStorage = Storage();
-
-
     // check that genesis post hash equals getPost(0)
-    //////
+    Util.assertArrayEquality(genesis.getPost(0), Hash.digest(new Uint8Array(genesisPost.header.data.buffer)));
+
+    // if post contains additional settings, handle them here
+    this.threadStorage = Storage();
 
     this.genesis = genesis;
 
