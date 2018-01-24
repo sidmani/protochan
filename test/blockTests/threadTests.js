@@ -22,52 +22,62 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Genesis = require('../../js/block/genesis.js');
 var Header = require('../../js/block/header.js');
+var Thread = require('../../js/block/thread.js');
 var Util = require('../../js/util.js');
 var testCommon = require('../testCommon.js');
+
 module.exports = [
-  { description: "Genesis block validates data length",
-    dual: true,
-    fn: function(shouldPass) {
-      let d_buf;
-      if (shouldPass) {
-        d_buf = new ArrayBuffer(64);
-      } else {
-        d_buf = new ArrayBuffer(63);
-      }
-
-      let dataView = new DataView(d_buf);
-      for (let i = 11; i < 43; i++) {
-        dataView.setUint8(i, 0x00);
-      }
-
-      let header = testCommon.validHeaderFromData(d_buf);
-      header.data.setUint8(2, 0x00);
-
-      new Genesis(header, d_buf);
-    }
-  },
-
-  { description: "Genesis block validates zero prevHash",
+  { description: "Thread block validates block type",
     dual: true,
     fn: function(shouldPass) {
       let d_buf = new ArrayBuffer(64);
-      let dataView = new DataView(d_buf);
-      if (shouldPass) {
-        for (let i = 11; i < 43; i++) {
-          dataView.setUint8(i, 0x00);
-        }
-      } else {
-        for (let i = 11; i < 43; i++) {
-          dataView.setUint8(i, 0x01);
-        }
-      }
-
       let header = testCommon.validHeaderFromData(d_buf);
-      header.data.setUint8(2, 0x00);
-
-      new Genesis(header, d_buf);
+      if (shouldPass) {
+        header.data.setUint8(2, 0x00);
+      } else {
+        header.data.setUint8(2, 0x01);
+      }
+      new Thread(header, d_buf);
     }
   },
+  { description: "Thread block validates zero genesis row",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(64);
+      if (shouldPass) {
+        new Uint8Array(d_buf).fill(0, 0, 16);
+      } else {
+        new Uint8Array(d_buf).fill(9, 0, 16);
+      }
+      let header = testCommon.validThreadHeaderFromData(d_buf);
+      new Thread(header, d_buf);
+    }
+  },
+  { description: "Thread block returns correct post hash",
+    fn: function() {
+      let d_buf = new ArrayBuffer(64);
+      let arr = new Uint8Array(d_buf);
+      arr.fill(9, 32, 48);
+      let header = testCommon.validThreadHeaderFromData(d_buf);
+      let t = new Thread(header, d_buf);
+      let firstThread = t.getPost(0);
+      for (let i = 0; i < 32; i++) {
+          Util.assert(firstThread.getUint8(i) === (i<16?9:0));
+      }
+    }
+  },
+  { description: "Thread block returns correct thread hash",
+    fn: function() {
+      let d_buf = new ArrayBuffer(128);
+      let arr = new Uint8Array(d_buf);
+      arr.fill(9, 64, 68);
+      let header = testCommon.validThreadHeaderFromData(d_buf);
+      let t = new Thread(header, d_buf);
+      let firstThread = t.getThread(1);
+      for (let i = 0; i < 32; i++) {
+          Util.assert(firstThread.getUint8(i) === (i<4?9:0));
+      }
+    }
+  }
 ];

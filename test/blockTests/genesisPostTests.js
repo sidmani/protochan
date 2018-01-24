@@ -21,11 +21,30 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+var GenesisPost = require('../../js/block/genesisPost.js');
+var Header = require('../../js/block/header.js');
+var Util = require('../../js/util.js');
+var testCommon = require('../testCommon.js');
 
-module.exports = [].concat (
-  require('./blockTests.js'),
-  require('./threadTests.js'),
-  require('./postTests.js'),
-  require('./genesisTests.js'),
-  require('./genesisPostTests.js')
-);
+module.exports = [
+  { description: "GenesisPost validates zero prevHash",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(41);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0024ffff);
+      dataView.setUint8(40, 0xff);
+      let header = testCommon.validPostHeaderFromData(d_buf);
+      if (shouldPass) {
+        for (let i = 11; i < 43; i++) {
+          header.data.setUint8(i, 0);
+        }
+      } else {
+        for (let i = 11; i < 43; i++) {
+          header.data.setUint8(i, 1);
+        }
+      }
+      new GenesisPost(header, d_buf);
+    }
+  }
+]

@@ -24,32 +24,53 @@
 var Post = require('../js/block/post.js');
 var Header = require('../js/block/header.js');
 var Block = require('../js/block/block.js');
+var Genesis = require('../js/block/genesis.js');
+var GenesisPost = require('../js/block/genesisPost.js');
 var Hash = require('../js/hash/blake2s.js');
+var Util = require('../js/util.js');
 
 module.exports.validPost = function() {
-  let h_buf = new ArrayBuffer(80);
-  let h_arr = new Uint8Array(h_buf);
-  arr[2] = 1;
-  //(new DataView(buf)).setUint8(2, 0x01);
-
   let d_buf = new ArrayBuffer(41);
   let view = new DataView(d_buf);
   view.setUint32(0, 0x0024ffff);
   view.setUint8(40, 0xff);
 
-  let hash = Hash.digest(new Uint8Array(d_buf));
-  console.log(hash);
-  // let hash = new Uint8Array(
-  //   [84, 130, 61, 129, 27, 123, 26, 180,
-  //   119, 159, 229, 70, 48, 228, 231, 89,
-  //   146, 144, 143, 141, 119, 38, 248, 88,
-  //   37, 62, 188, 89, 173, 87, 140, 2]);
-  for (let i = 43; i < 75; i++) {
-    h_arr[i] = hash[i-43];
+  let header = validPostHeaderFromData(d_buf);
+
+  return new Post(header, d_buf);
+};
+
+module.exports.validGenesisPost = function() {
+  let d_buf = new ArrayBuffer(41);
+  let view = new DataView(d_buf);
+  view.setUint32(0, 0x0024ffff);
+  view.setUint8(40, 0xff);
+
+  let header = validPostHeaderFromData(d_buf);
+  for (let i = 11; i < 43; i++) {
+    header.data.setUint8(i, 0);
   }
 
-  return new Post(new Header(h_buf), d_buf);
+  return new GenesisPost(header, d_buf);
 };
+
+module.exports.validGenesis = function(post) {
+  Util.assert(post instanceof GenesisPost)
+  let d_buf = new ArrayBuffer(64);
+  let arr = new Uint8Array(d_buf);
+  for (let i = 0; i < 32; i++) {
+    arr[i] = 0x00;
+  }
+  let postHash = Hash.digest(Util.dataViewToUint8Array(post.header.data));
+
+  for (let i = 32; i < 64; i++) {
+    arr[i] = postHash[i-32];
+  }
+
+  let header = validThreadHeaderFromData(d_buf);
+
+  return new Genesis(header, d_buf);
+}
 
 module.exports.validBlock = function() {
   var buf = new ArrayBuffer(128);
@@ -64,6 +85,17 @@ module.exports.validHeaderFromData = validHeaderFromData = function(dataBuffer) 
   for (let i = 43; i < 75; i++) {
     h_arr[i] = hash[i-43];
   }
-
   return new Header(h_buf);
+}
+
+module.exports.validPostHeaderFromData = validPostHeaderFromData = function(dataBuffer) {
+  let h = validHeaderFromData(dataBuffer);
+  h.data.setUint8(2, 0x01);
+  return h;
+}
+
+module.exports.validThreadHeaderFromData = validThreadHeaderFromData = function(dataBuffer) {
+  let h = validHeaderFromData(dataBuffer);
+  h.data.setUint8(2, 0x00);
+  return h;
 }

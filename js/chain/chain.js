@@ -29,21 +29,27 @@ var Block = require('../block/block.js');
 var Post = require('../block/post.js');
 var Thread = require('../block/thread.js');
 var Genesis = require('../block/genesis.js');
+var GenesisPost = require('../block/genesisPost.js');
+
 var Difficulty = require('../hash/difficulty.js');
 
 module.exports = class Chain {
   constructor(genesis, genesisPost) {
+    // validate parameters
     Util.assert(genesis);
     Util.assert(genesis instanceof Genesis);
 
     Util.assert(genesisPost);
-    Util.assert(genesisPost instanceof Post);
+    Util.assert(genesisPost instanceof GenesisPost);
 
-    // check that genesis post hash equals getPost(0)
-    Util.assertArrayEquality(genesis.getPost(0), Hash.digest(new Uint8Array(genesisPost.header.data.buffer)));
+    // check that the post hash referenced in the data sector of the genesis block equals the hash of the parameter genesisPost
+    Util.assertArrayEquality(
+      Util.dataViewToUint8Array(genesis.getPost(0)),
+      Hash.digest(Util.dataViewToUint8Array(genesisPost.header.data))
+    );
 
     // if post contains additional settings, handle them here
-    this.threadStorage = Storage();
+  //  this.threadStorage = Storage();
 
     this.genesis = genesis;
 

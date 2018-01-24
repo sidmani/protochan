@@ -55,8 +55,7 @@ module.exports = [
       } else {
         dataView.setUint32(0, 0x0025ffff);
       }
-      let header = testCommon.validHeaderFromData(d_buf);
-      header.data.setUint8(2, 0x01);
+      let header = testCommon.validPostHeaderFromData(d_buf);
 
       new Post(header, d_buf);
     }
@@ -68,8 +67,7 @@ module.exports = [
       view.setUint32(0, 0x0024ffff);
       view.setUint8(40, 0xff);
 
-      let header = testCommon.validHeaderFromData(d_buf);
-      header.data.setUint8(2, 0x01);
+      let header = testCommon.validPostHeaderFromData(d_buf);
 
       let p = new Post(header, d_buf);
       Util.assert(p);
@@ -83,8 +81,7 @@ module.exports = [
       view.setUint32(0, 0x0024ffff);
       view.setUint8(40, 0xff);
 
-      let header = testCommon.validHeaderFromData(d_buf);
-      header.data.setUint8(2, 0x01);
+      let header = testCommon.validPostHeaderFromData(d_buf);
 
       let p = new Post(header, d_buf);
       Util.assert(p.contentLength() === 36);
@@ -98,8 +95,7 @@ module.exports = [
       view.setUint32(12, 0xcccccccc);
       view.setUint8(40, 0xff);
 
-      let header = testCommon.validHeaderFromData(d_buf);
-      header.data.setUint8(2, 0x01);
+      let header = testCommon.validPostHeaderFromData(d_buf);
 
       let content = new Post(header, d_buf).content();
       for (let i = 0; i < 9; i++) {

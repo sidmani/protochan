@@ -41,8 +41,4 @@ module.exports = class Genesis extends ThreadBlock {
   maxThreads() {
     return this.reserved();
   }
-
-  // to extend the protocol with options, store additional
-  // bytes in the post block's data and parse them with
-  // additional functions here
 }

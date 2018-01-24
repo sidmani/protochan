@@ -27,6 +27,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+var Util = require('../util.js');
+
 // Little-endian byte access.
 // Expects a Uint8Array and an index
 // Returns the little-endian uint32 at v[i..i+3]
@@ -152,13 +154,14 @@ function blake2sFinal (ctx) {
   return out;
 }
 
-// Computes the BLAKE2S hash of a string or byte array, and returns a Uint8Array
+// Computes the BLAKE2S hash of Uint8Array array, and returns a Uint8Array
 //
 // Returns a n-byte Uint8Array
 //
 // Parameters:
 // - input - the input bytes, as a Uint8Array
 module.exports.digest = function blake2s(input) {
+  Util.assert(input instanceof Uint8Array);
   var ctx = blake2sInit()
   blake2sUpdate(ctx, input)
   return blake2sFinal(ctx)

@@ -24,12 +24,40 @@
 var Util = require('../../js/util.js');
 var Chain = require('../../js/chain/chain.js');
 var testCommon = require('../testCommon.js');
+var GenesisPost = require('../../js/block/genesisPost.js');
 
 module.exports = [
-  { description: "Chain rejects mistyped genesis block",
-    shouldFail: true,
-    fn: function() {
-      new Chain(new Array(5), testCommon.validPost());
+  { description: "Chain validates genesis block type",
+    dual: true,
+    fn: function(shouldPass) {
+      let post = testCommon.validGenesisPost();
+      if (shouldPass) {
+        new Chain(testCommon.validGenesis(post), post);
+      } else {
+        new Chain(new Array(5), post);
+      }
+    }
+  },
+  { description: "Chain validates genesis post type",
+    dual: true,
+    fn: function(shouldPass) {
+      let post = testCommon.validGenesisPost();
+      if (shouldPass) {
+        new Chain(testCommon.validGenesis(post), post);
+      } else {
+        new Chain(testCommon.validGenesis(post), new Array(5));
+      }
+    }
+  },
+  { description: "Chain validates post hash against genesis block data",
+    dual: true,
+    fn: function(shouldPass) {
+      let post = testCommon.validGenesisPost();
+      let genesis = testCommon.validGenesis(post)
+      if (!shouldPass) {
+        post.header.data.setUint8(15, 0x05); // change a byte to break the hash
+      }
+      new Chain(genesis, post);
     }
   }
 ];

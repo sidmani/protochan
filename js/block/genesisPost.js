@@ -22,10 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-module.exports = [].concat (
-  require('./blockTests.js'),
-  require('./threadTests.js'),
-  require('./postTests.js'),
-  require('./genesisTests.js'),
-  require('./genesisPostTests.js')
-);
+var Util = require('../util.js');
+var Post = require('./post.js');
+var Difficulty = require('../hash/difficulty.js');
+
+module.exports = class GenesisPost extends Post {
+  constructor(header, data) {
+    super(header, data);
+    // check that header prevHash has 256 difficulty
+    Difficulty.verify(Util.dataViewToUint8Array(header.prevHash()), 256);
+  }
+  
+  // to extend the protocol with options, store additional
+  // bytes in the post block's data and parse them with
+  // additional functions here
+}

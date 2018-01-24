@@ -45,12 +45,12 @@ module.exports = [
   },
   {
     description: "Storage count is correct",
-     fn: function() {
-       var block = testCommon.validBlock();
-       var hashMap = new Storage();
-       hashMap.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
-       hashMap.push(new Uint8Array([0x05, 0x33, 0x5f]), block);
-       Util.assert(hashMap.count() === 2);
+    fn: function() {
+     var block = testCommon.validBlock();
+     var hashMap = new Storage();
+     hashMap.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
+     hashMap.push(new Uint8Array([0x05, 0x33, 0x5f]), block);
+     Util.assert(hashMap.count() === 2);
     }
   },
   { description: "Storage returns undefined for nonexistent object",
@@ -59,4 +59,4 @@ module.exports = [
       Util.assert(hashMap.get(new Uint8Array([0x00, 0x33, 0x5f])) === undefined);
     }
   }
-]
+];
