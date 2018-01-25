@@ -39,7 +39,7 @@ module.exports = class Storage {
 
     this.arr.push({
       block: block,
-      hash: str
+      hash: hash
     });
     this[str] = block;
   }
@@ -50,12 +50,17 @@ module.exports = class Storage {
     // TODO detach blocks from chain
   }
 
+  head() {
+    Util.assert(this.arr.length !== 0);
+    return this.arr[this.arr.length-1];
+  }
+
   get(hash) {
     Util.assert(hash instanceof Uint8Array);
     return this[Util.uint8ArrToHex(hash)];
   }
 
-  getIdx(idx) {
+  getIndex(idx) {
     Util.assert(typeof(idx) === 'number');
     Util.assert(idx < this.arr.length);
     return this.arr[idx].block;

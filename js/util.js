@@ -48,10 +48,6 @@ module.exports.time = function() {
   return Math.round((new Date()).getTime() / 1000);
 }
 
-module.exports.dataViewToUint8Array = function(view) {
-  return new Uint8Array(view.buffer, view.byteOffset, view.byteLength);
-}
-
 module.exports.uint8ArrToHex = function(arr) {
 	let str = '';
 	for (let i = 0; i < arr.byteLength; i++) {

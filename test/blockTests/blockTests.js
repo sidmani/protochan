@@ -79,6 +79,17 @@ module.exports = [
       }
     }
   },
+  { description: "Block validates data hash",
+    dual: true,
+    fn: function(shouldPass) {
+      let buf = new ArrayBuffer(64);
+      let header = testCommon.validHeaderFromData(buf);
+      if (!shouldPass) {
+        (new Uint8Array(buf))[5] = 0x05;
+      }
+      new Block(header, buf);
+    }
+  },
   { description: "Block accepts valid header and data",
     fn: function() {
       var buf = new ArrayBuffer(128);

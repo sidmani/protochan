@@ -37,9 +37,9 @@ module.exports = [
       dataView.setUint8(40, 0xff);
       let header = testCommon.validHeaderFromData(d_buf);
       if (shouldPass) {
-        header.data.setUint8(2, 0x01);
+        header.data[2] = 0x01;
       } else {
-        header.data.setUint8(2, 0x00);
+        header.data[2] = 0x00;
       }
       new Post(header, d_buf);
     }

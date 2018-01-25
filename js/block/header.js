@@ -28,50 +28,52 @@ module.exports = class Header {
   constructor(buffer) {
     Util.assert(buffer, 'Data does not exist.');
     Util.assert(buffer instanceof ArrayBuffer, 'Data is of wrong type.');
+
+    // Assert that the buffer is exactly 80 bytes long
     Util.assert(buffer.byteLength === 80, 'Data is of wrong length.');
 
-    this.data = new DataView(buffer);
+    this._data = new DataView(buffer);
+    this.data = new Uint8Array(buffer);
   }
 
   /// Protocol version (uint16)
   protocolVersion() {
-    return this.data.getUint16(0);
+    return this._data.getUint16(0);
   }
 
   /// Block type (uint8)
   blockType() {
-    return this.data.getUint8(2);
+    return this._data.getUint8(2);
   }
 
   // Unix timestamp (uint32)
   timestamp() {
-    return this.data.getUint32(3);
+    return this._data.getUint32(3);
   }
 
   // nonce (uint32)
   nonce() {
-    return this.data.getUint32(7);
+    return this._data.getUint32(7);
   }
 
   // 32 bytes
   prevHash() {
-    return new DataView(this.data.buffer, 11, 32);
+    return new Uint8Array(this.data.buffer, 11, 32);
   }
 
   // 32 bytes
   dataHash() {
-    return new DataView(this.data.buffer, 43, 32);
+    return new Uint8Array(this.data.buffer, 43, 32);
   }
 
-  // 4 bytes
+  // board id (uint32)
   board() {
-    return this.data.getUint32(75);
+    return this._data.getUint32(75);
   }
 
   // genesis block uses this for max thread count
-  // if the protocol needs to be extended with further options,
-  // place the data in the post referenced by the genesis block
+  // for other blocks, can be used for additional flags
   reserved() {
-    return this.data.getUint8(79);
+    return this._data.getUint8(79);
   }
 };

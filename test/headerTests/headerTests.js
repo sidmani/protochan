@@ -120,7 +120,7 @@ module.exports = [
   { description: "Header returns correct previous hash",
     fn: function() {
       var h = new Header(valid_buffer);
-      var prevHash = h.prevHash();
+      var prevHash = new DataView(h.prevHash().buffer, 11, 32);
       for (let i = 0; i < 8; i++) {
         Util.assert(prevHash.getUint32(i*4) === prev_hash_result[i], 'incorrect hash byte');
       }
@@ -129,7 +129,7 @@ module.exports = [
   { description: "Header returns correct data hash",
     fn: function() {
       var h = new Header(valid_buffer);
-      var dataHash = h.dataHash();
+      var dataHash = new DataView(h.dataHash().buffer, 43, 32);
       for (let i = 0; i < 8; i++) {
         Util.assert(dataHash.getUint32(i*4) === data_hash_result[i], 'incorrect hash byte');
       }

@@ -55,7 +55,7 @@ module.exports = [
       let post = testCommon.validGenesisPost();
       let genesis = testCommon.validGenesis(post)
       if (!shouldPass) {
-        post.header.data.setUint8(15, 0x05); // change a byte to break the hash
+        post.header.data[15] = 0x05; // change a byte to break the hash
       }
       new Chain(genesis, post);
     }

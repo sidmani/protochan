@@ -32,17 +32,26 @@ module.exports = class PostBlock extends Block {
   constructor(header, data) {
     super(header, data);
     Util.assert(header.blockType() === POST_BLOCK_ID, 'Header block type is incorrect.');
-    Util.assert(this.data.getUint16(2) === 0xffff);
+
+    // 0xffff between len and data so that data starts at
+    // a byte index divisible by 4.
+    Util.assert(this.data[2] === 0xff);
+    Util.assert(this.data[3] === 0xff);
+
+    // data length = 2b len + 2b padding + #b content + 1b final
     Util.assert(this.data.byteLength === this.contentLength() + 5);
-    Util.assert(this.data.getUint8(this.data.byteLength - 1) === 0xff);
+
+    // last byte is 0xff
+    Util.assert(this.data[this.data.byteLength - 1] === 0xff);
 
     // TODO: error correction if 0xff end byte is present but length is wrong
     // would require rechecking hash
   }
 
   // data is 2 bytes length, 0xff, 0xff, data, 0xff
+  // big endian
   contentLength() {
-    return this.data.getUint16(0);
+    return (this.data[0] << 8) + this.data[1];
   }
 
   content() {

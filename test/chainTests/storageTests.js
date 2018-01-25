@@ -30,33 +30,33 @@ module.exports = [
   { description: "Storage stores and retrieves object",
     fn: function() {
       var block = testCommon.validBlock();
-      var hashMap = new Storage();
-      hashMap.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
-      Util.assert(hashMap.get(new Uint8Array([0x00, 0x33, 0x5f])) === block);
+      var storage = new Storage();
+      storage.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
+      Util.assert(storage.get(new Uint8Array([0x00, 0x33, 0x5f])) === block);
     }
   },
   { description: "Storage automatically sets index",
     fn: function() {
       var block = testCommon.validBlock();
-      var hashMap = new Storage();
-      hashMap.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
-      Util.assert(hashMap.getIdx(0) === block);
+      var storage = new Storage();
+      storage.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
+      Util.assert(storage.getIndex(0) === block);
     }
   },
   {
     description: "Storage count is correct",
     fn: function() {
      var block = testCommon.validBlock();
-     var hashMap = new Storage();
-     hashMap.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
-     hashMap.push(new Uint8Array([0x05, 0x33, 0x5f]), block);
-     Util.assert(hashMap.count() === 2);
+     var storage = new Storage();
+     storage.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
+     storage.push(new Uint8Array([0x05, 0x33, 0x5f]), block);
+     Util.assert(storage.count() === 2);
     }
   },
   { description: "Storage returns undefined for nonexistent object",
     fn: function() {
-      var hashMap = new Storage();
-      Util.assert(hashMap.get(new Uint8Array([0x00, 0x33, 0x5f])) === undefined);
+      var storage = new Storage();
+      Util.assert(storage.get(new Uint8Array([0x00, 0x33, 0x5f])) === undefined);
     }
   }
 ];

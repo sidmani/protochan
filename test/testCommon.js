@@ -48,7 +48,7 @@ module.exports.validGenesisPost = function() {
 
   let header = validPostHeaderFromData(d_buf);
   for (let i = 11; i < 43; i++) {
-    header.data.setUint8(i, 0);
+    header.data[i] = 0;
   }
 
   return new GenesisPost(header, d_buf);
@@ -61,7 +61,7 @@ module.exports.validGenesis = function(post) {
   for (let i = 0; i < 32; i++) {
     arr[i] = 0x00;
   }
-  let postHash = Hash.digest(Util.dataViewToUint8Array(post.header.data));
+  let postHash = Hash.digest(post.header.data);
 
   for (let i = 32; i < 64; i++) {
     arr[i] = postHash[i-32];
@@ -90,12 +90,12 @@ module.exports.validHeaderFromData = validHeaderFromData = function(dataBuffer) 
 
 module.exports.validPostHeaderFromData = validPostHeaderFromData = function(dataBuffer) {
   let h = validHeaderFromData(dataBuffer);
-  h.data.setUint8(2, 0x01);
+  h.data[2] = 0x01;
   return h;
 }
 
 module.exports.validThreadHeaderFromData = validThreadHeaderFromData = function(dataBuffer) {
   let h = validHeaderFromData(dataBuffer);
-  h.data.setUint8(2, 0x00);
+  h.data[2] = 0x00;
   return h;
 }

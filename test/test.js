@@ -40,8 +40,8 @@ function runTests() {
     var success = true;
     process.stdout.write('🤖 RUNNING GROUP: ' + groupName + ' (' + testGroup.length + (verbose?')\n':') '));
     for (testCase in testGroup) {
-      var testPass = true;
-      var error;
+      let testPass = true;
+      let error = undefined;
       if (testGroup[testCase].dual) {
         try {
           testGroup[testCase].fn(true);

@@ -29,10 +29,10 @@ var Difficulty = require('../hash/difficulty.js');
 module.exports = class GenesisPost extends Post {
   constructor(header, data) {
     super(header, data);
-    // check that header prevHash has 256 difficulty
-    Difficulty.verify(Util.dataViewToUint8Array(header.prevHash()), 256);
+    // Assert that prevHash has maximum difficulty
+    Difficulty.verify(header.prevHash(), 256);
   }
-  
+
   // to extend the protocol with options, store additional
   // bytes in the post block's data and parse them with
   // additional functions here

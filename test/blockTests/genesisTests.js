@@ -64,11 +64,11 @@ module.exports = [
       let header = testCommon.validThreadHeaderFromData(d_buf);
       if (shouldPass) {
         for (let i = 11; i < 43; i++) {
-          header.data.setUint8(i, 0);
+          header.data[i] = 0;
         }
       } else {
         for (let i = 11; i < 43; i++) {
-          header.data.setUint8(i, 1);
+          header.data[i] = 1;
         }
       }
       new Genesis(header, d_buf);

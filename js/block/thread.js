@@ -26,40 +26,38 @@ const THREAD_BLOCK_ID = 0x00;
 
 var Util = require('../util.js');
 var Block = require('./block.js');
+var Difficulty = require('../hash/difficulty.js');
 
 module.exports = class ThreadBlock extends Block {
   constructor(header, data) {
-    super(header, data)
+    super(header, data);
     Util.assert(header.blockType() === THREAD_BLOCK_ID, 'Header block type is incorrect.');
+
+    // Data comes in sets of 64 bytes (32 thread, 32 post)
     Util.assert(data.byteLength >= 64 && data.byteLength % 64 === 0, 'Data is malformed.');
 
-    Util.assert(this.data.getUint32(0) === 0 &&
-                this.data.getUint32(4) === 0 &&
-                this.data.getUint32(8) === 0 &&
-                this.data.getUint32(12) === 0 &&
-                this.data.getUint32(16) === 0 &&
-                this.data.getUint32(20) === 0 &&
-                this.data.getUint32(24) === 0 &&
-                this.data.getUint32(28) === 0, 'Data is malformed.');
+    // the first thread has a zero hash
+    Difficulty.verify(this.getThread(0), 256);
   }
 
   // data is pairs of 32-byte hashes
   // { thread hash, post hash}
   // first row is { 0, post hash } (genesis)
   getThread(index) {
-    // index must not be zero
+    // getThread(0) returns 32 zeroes
     // since the zeroth thread's id is the hash of this block
     // which obviously can't be stored in the block itself
-    Util.assert(index < this.data.byteLength / 64 && index !== 0);
-    return new DataView(this.data.buffer, index*64, 32)
+    Util.assert(index < this.data.byteLength / 64);
+    return new Uint8Array(this.data.buffer, index*64, 32);
   }
 
   getPost(index) {
     Util.assert(index < this.data.byteLength / 64);
-    return new DataView(this.data.buffer, index*64 + 32, 32)
+    return new Uint8Array(this.data.buffer, index*64 + 32, 32);
   }
 
   prune() {
     // TODO: prune data
+    // what can be pruned? write details on this
   }
 };

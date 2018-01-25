@@ -34,9 +34,9 @@ module.exports = [
       let d_buf = new ArrayBuffer(64);
       let header = testCommon.validHeaderFromData(d_buf);
       if (shouldPass) {
-        header.data.setUint8(2, 0x00);
+        header.data[2] = 0x00;
       } else {
-        header.data.setUint8(2, 0x01);
+        header.data[2] = 0x01;
       }
       new Thread(header, d_buf);
     }
@@ -63,7 +63,7 @@ module.exports = [
       let t = new Thread(header, d_buf);
       let firstThread = t.getPost(0);
       for (let i = 0; i < 32; i++) {
-          Util.assert(firstThread.getUint8(i) === (i<16?9:0));
+          Util.assert(firstThread[i] === (i<16?9:0));
       }
     }
   },
@@ -76,7 +76,7 @@ module.exports = [
       let t = new Thread(header, d_buf);
       let firstThread = t.getThread(1);
       for (let i = 0; i < 32; i++) {
-          Util.assert(firstThread.getUint8(i) === (i<4?9:0));
+          Util.assert(firstThread[i] === (i<4?9:0));
       }
     }
   }

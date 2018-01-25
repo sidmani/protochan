@@ -44,48 +44,43 @@ module.exports = class Chain {
 
     // check that the post hash referenced in the data sector of the genesis block equals the hash of the parameter genesisPost
     Util.assertArrayEquality(
-      Util.dataViewToUint8Array(genesis.getPost(0)),
-      Hash.digest(Util.dataViewToUint8Array(genesisPost.header.data))
+      genesis.getPost(0),
+      Hash.digest(genesisPost.header.data)
     );
-
-    // if post contains additional settings, handle them here
-  //  this.threadStorage = Storage();
 
     this.genesis = genesis;
 
-    // this.map = new HashMap();
-    //
-    // this.head = undefined; // replace with hash array of genesis block
+    // this.head = undefined; // replace with hash array of genesis block?
   }
 
-  push(block, now) {
-      Util.assert(block);
-      Util.assert(block instanceof Block, 'Invalid block.');
-
-      Util.assert(now);
-      Util.assert(typeof(now) === 'number');
-
-      // assert that block is no more than 1 second in the future.
-      Util.assert(block.header.timestamp() <= now + 1);
-
-      // assert that block board id is correct
-      Util.assert(block.header.board() === this.board);
-
-      // assert that data hash in header is as expected
-      let calculatedDataHash = Hash.digest(Array.from(block.data));
-      let storedDataHash = Array.from(block.header.dataHash());
-      Util.assertArrayEquality(calculatedDataHash, storedDataHash);
-
-      // assert that block points to head, otherwise we're missing blocks
-      Util.assertArrayEquality(this.head, Array.from(block.header.prevHash()));
-
-      // TODO: check that block matches difficulty requirement
-      let blockHash = Hash.digest(block);
-
-      // block is OK
-      map.set(blockHash, block);
-      this.head = blockHash;
-  }
+  // push(block, now) {
+  //     Util.assert(block);
+  //     Util.assert(block instanceof Block, 'Invalid block.');
+  //
+  //     Util.assert(now);
+  //     Util.assert(typeof(now) === 'number');
+  //
+  //     // assert that block is no more than 1 second in the future.
+  //     Util.assert(block.header.timestamp() <= now + 1);
+  //
+  //     // assert that block board id is correct
+  //     Util.assert(block.header.board() === this.board);
+  //
+  //     // assert that data hash in header is as expected
+  //     let calculatedDataHash = Hash.digest(Array.from(block.data));
+  //     let storedDataHash = Array.from(block.header.dataHash());
+  //     Util.assertArrayEquality(calculatedDataHash, storedDataHash);
+  //
+  //     // assert that block points to head, otherwise we're missing blocks
+  //     Util.assertArrayEquality(this.head, Array.from(block.header.prevHash()));
+  //
+  //     // TODO: check that block matches difficulty requirement
+  //     let blockHash = Hash.digest(block);
+  //
+  //     // block is OK
+  //     map.set(blockHash, block);
+  //     this.head = blockHash;
+  // }
 
   // validate() {
   //   let count = map.count();

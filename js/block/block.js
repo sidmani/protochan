@@ -34,14 +34,16 @@ module.exports = class Block {
     Util.assert(dataBuffer, 'Data does not exist.');
     Util.assert(dataBuffer instanceof ArrayBuffer, 'Data is of wrong type');
 
-    // TODO: fix this in tests
-  //  console.log(Util.dataViewToUint8Array(header.dataHash()));
-    Util.assertArrayEquality(
-      Hash.digest(new Uint8Array(dataBuffer)),
-      Util.dataViewToUint8Array(header.dataHash())
-    );
+
+    // TODO: check for max size
 
     this.header = header;
-    this.data = new DataView(dataBuffer);
+    this.data = new Uint8Array(dataBuffer);
+
+    // Assert that the hash of the data is equal to the
+    // hash stored in the header
+    Util.assertArrayEquality(
+      Hash.digest(this.data), header.dataHash()
+    );
   }
 };

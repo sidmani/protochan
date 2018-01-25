@@ -29,10 +29,11 @@ var Util = require('../util.js');
 module.exports = class Genesis extends ThreadBlock {
   constructor(header, dataBuffer) {
     super(header, dataBuffer);
-    // prevHash has maximum difficulty (all zeroes)
-    Difficulty.verify(Util.dataViewToUint8Array(header.prevHash()), 256);
 
-    // data is exactly 64 bytes, since the genesis block
+    // Assert that prevHash has maximum difficulty
+    Difficulty.verify(this.header.prevHash(), 256);
+
+    // Assert that data is 64 bytes, since the genesis block
     // can only have one post associated with it
     Util.assert(this.data.byteLength === 64);
   }
