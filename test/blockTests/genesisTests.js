@@ -31,6 +31,8 @@ module.exports = [
     dual: true,
     fn: function(shouldPass) {
       let d_buf;
+
+      // set the correct length (64) if should pass
       if (shouldPass) {
         d_buf = new ArrayBuffer(64);
       } else {
@@ -42,6 +44,7 @@ module.exports = [
         dataView.setUint8(i, 0x00);
       }
 
+      // end index is different for data, avoid overflow err
       if (shouldPass) {
         for (let i = 32; i < 64; i++) {
           dataView.setUint8(i, 0x01);
@@ -57,6 +60,7 @@ module.exports = [
       new Genesis(header, d_buf);
     }
   },
+  // prevHash = 0 identifies this as a genesis block
   { description: "Genesis block validates zero prevHash",
     dual: true,
     fn: function(shouldPass) {
@@ -72,6 +76,18 @@ module.exports = [
         }
       }
       new Genesis(header, d_buf);
+    }
+  },
+  { description: "Genesis block returns correct max threads",
+    fn: function() {
+      let d_buf = new ArrayBuffer(64);
+      let header = testCommon.validThreadHeaderFromData(d_buf);
+      header.data[79] = 0xff;
+      for (let i = 11; i < 43; i++) {
+        header.data[i] = 0;
+      }
+      let gen = new Genesis(header, d_buf);
+      Util.assert(gen.maxThreads() === 0xff);
     }
   }
 ];

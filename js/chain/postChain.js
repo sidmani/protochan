@@ -22,68 +22,71 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Storage = require('./storage.js');
 var Thread = require('../block/thread.js');
 var GenesisPost = require('../block/genesisPost.js');
 var Post = require('../block/post.js');
 var Util = require('../util.js');
 var Hash = require('../hash/blake2s.js');
+var HashMap = require('../hash/hashMap.js');
 
 module.exports = class PostChain {
-  constructor(originalPost, thread) {
+  constructor(originalPost, thread, map) {
     Util.assert(originalPost);
     Util.assert(originalPost instanceof GenesisPost);
 
     Util.assert(thread);
     Util.assert(thread instanceof Thread);
 
-    this.thread = thread;
+    Util.assert(map);
+    Util.assert(map instanceof HashMap);
 
-    this.storage = Storage();
+    // check that the original post hash referenced in the data sector of the thread block equals the hash of the parameter genesisPost
+    Util.assertArrayEquality(
+      thread.getPost(0),
+      originalPost.hash()
+    );
+
+    this.thread = thread.hash();
+    this.map = map;
+    this.posts = new Array();
+
+    this.map.set(thread);
     this.push(originalPost);
   }
 
   push(post) {
     Util.assert(post);
     Util.assert(post instanceof Post);
-    let hash = Hash.digest(post.header.data);
 
-    if (this.storage.count() === 0) {
-      // if this is the original post, just add it
+    if (this.posts.length === 0) {
       Util.assert(post instanceof GenesisPost);
+      // if this is the original post, just add it
+      // since we already checked that the thread points to it
+      // TODO: difficulty checks
     } else {
       // otherwise, check that its prevHash points to head of chain
       Util.assertArrayEquality(
-        this.storage.head().hash, post.header.prevHash()
+        this.head().hash(),
+        post.header.prevHash()
       );
-      // TODO: difficulty checks
-    }
 
-    this.storage.push(hash, post);
+      // TODO: difficulty checks
+
+      // TODO: check if the prevHash exists (i.e. a fork)
+    }
+    post.thread = this.threadHash;
+    post.index = this.posts.length;
+    this.posts.push(post);
+    this.map.set(post);
   }
 
-  // technically, this shouldn't be necessary if
-  // all blocks are added using push()
-  verify() {
-    let count = this.storage.count();
-    if (count === 0) { // an empty chain is trivially valid
-      return;
-    }
+  head() {
+    Util.assert(this.posts.length > 0);
+    return this.posts[this.posts.length-1];
+  }
 
-    // assert that thread block points to genesis post
-    Util.assertArrayEquality(
-      this.thread.getPost(0),
-      Hash.digest(this.storage.getIndex(0).data)
-    );
-
-    for (let i = 1; i < count; i++) {
-      // assert that idx (i-1)'s hash equals i's prevHash
-      Util.assertArrayEquality(
-        Hash.digest(this.storage.getIndex(i-1).data),
-        this.storage.getIndex(i).header.prevHash()
-      );
-
-      // TODO: assert difficulty requirements 
-    }
+  getIndex(idx) {
+    Util.assert(idx >= 0 && idx < this.posts.length);
+    return this.posts[idx];
   }
 }

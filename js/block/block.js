@@ -34,7 +34,6 @@ module.exports = class Block {
     Util.assert(dataBuffer, 'Data does not exist.');
     Util.assert(dataBuffer instanceof ArrayBuffer, 'Data is of wrong type');
 
-
     // TODO: check for max size
 
     this.header = header;
@@ -45,5 +44,9 @@ module.exports = class Block {
     Util.assertArrayEquality(
       Hash.digest(this.data), header.dataHash()
     );
+  }
+
+  hash() {
+    return Hash.digest(this.header.data);
   }
 };

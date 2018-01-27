@@ -66,8 +66,10 @@ for (let i = 0; i < 8; i++) {
 }
 
 view.setUint32(75, 0x4e5be7e9);
+view.setUint8(79, 0x7c);
 
 module.exports = [
+  // these are all one-liners, so no need to use dual testing
   { description: "Header rejects undefined data",
     shouldFail: true,
     fn: function() {
@@ -121,6 +123,9 @@ module.exports = [
     fn: function() {
       var h = new Header(valid_buffer);
       var prevHash = new DataView(h.prevHash().buffer, 11, 32);
+
+      // assertArrayEquality doesn't work since this is
+      // comparing uint32s using the dataview
       for (let i = 0; i < 8; i++) {
         Util.assert(prevHash.getUint32(i*4) === prev_hash_result[i], 'incorrect hash byte');
       }
@@ -140,5 +145,11 @@ module.exports = [
       var h = new Header(valid_buffer);
       Util.assert(h.board() === 0x4e5be7e9);
     }
+  },
+  { description: "Header returns correct reserved data",
+      fn: function() {
+        var h = new Header(valid_buffer);
+        Util.assert(h.reserved() === 0x7c);
+      }
   }
 ]

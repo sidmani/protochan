@@ -41,19 +41,34 @@ module.exports = [
       new Thread(header, d_buf);
     }
   },
+  { description: "Thread block validates data length",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf;
+      if (shouldPass) {
+        d_buf = new ArrayBuffer(192);
+      } else {
+        d_buf = new ArrayBuffer(127);
+      }
+      new Uint8Array(d_buf).fill(0, 0, 16);
+      let header = testCommon.validThreadHeaderFromData(d_buf);
+      new Thread(header, d_buf);
+    }
+  },
   { description: "Thread block validates zero genesis row",
     dual: true,
     fn: function(shouldPass) {
       let d_buf = new ArrayBuffer(64);
       if (shouldPass) {
-        new Uint8Array(d_buf).fill(0, 0, 16);
+        new Uint8Array(d_buf).fill(0, 0, 32);
       } else {
-        new Uint8Array(d_buf).fill(9, 0, 16);
+        new Uint8Array(d_buf).fill(9, 0, 32);
       }
       let header = testCommon.validThreadHeaderFromData(d_buf);
       new Thread(header, d_buf);
     }
   },
+  // TODO: test hashmapping of post-> thread
   { description: "Thread block returns correct post hash",
     fn: function() {
       let d_buf = new ArrayBuffer(64);

@@ -40,6 +40,6 @@ module.exports = class Genesis extends ThreadBlock {
 
   // reserved byte in the header is used to designate max threads
   maxThreads() {
-    return this.reserved();
+    return this.header.reserved();
   }
 }

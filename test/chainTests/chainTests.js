@@ -48,16 +48,5 @@ module.exports = [
         new Chain(testCommon.validGenesis(post), new Array(5));
       }
     }
-  },
-  { description: "Chain validates post hash against genesis block data",
-    dual: true,
-    fn: function(shouldPass) {
-      let post = testCommon.validGenesisPost();
-      let genesis = testCommon.validGenesis(post)
-      if (!shouldPass) {
-        post.header.data[15] = 0x05; // change a byte to break the hash
-      }
-      new Chain(genesis, post);
-    }
   }
 ];

@@ -24,7 +24,7 @@
 
 var Block = require('../../js/block/block.js');
 var Header = require('../../js/block/header.js');
-var Post = require('../../js/block/post.js');
+var Hash = require('../../js/hash/blake2s.js');
 var Util = require('../../js/util.js');
 var testCommon = require('../testCommon.js');
 
@@ -84,6 +84,7 @@ module.exports = [
     fn: function(shouldPass) {
       let buf = new ArrayBuffer(64);
       let header = testCommon.validHeaderFromData(buf);
+      // change a byte to break the hash
       if (!shouldPass) {
         (new Uint8Array(buf))[5] = 0x05;
       }
@@ -99,4 +100,12 @@ module.exports = [
       Util.assert(b instanceof Block);
     }
   },
+  { description: "Block.hash() returns correct hash",
+    fn: function() {
+      var buf = new ArrayBuffer(128);
+      var header = testCommon.validHeaderFromData(buf);
+      var b = new Block(header, buf);
+      Util.assertArrayEquality(b.hash(), Hash.digest(header.data));
+    }
+  }
 ]

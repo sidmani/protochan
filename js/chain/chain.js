@@ -22,7 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Storage = require('./storage.js');
 var Util = require('../util.js');
 var Hash = require('../hash/blake2s.js');
 var Block = require('../block/block.js');
@@ -30,7 +29,8 @@ var Post = require('../block/post.js');
 var Thread = require('../block/thread.js');
 var Genesis = require('../block/genesis.js');
 var GenesisPost = require('../block/genesisPost.js');
-
+var HashMap = require('../hash/hashMap.js');
+var PostChain = require('./postChain.js');
 var Difficulty = require('../hash/difficulty.js');
 
 module.exports = class Chain {
@@ -42,52 +42,93 @@ module.exports = class Chain {
     Util.assert(genesisPost);
     Util.assert(genesisPost instanceof GenesisPost);
 
-    // check that the post hash referenced in the data sector of the genesis block equals the hash of the parameter genesisPost
-    Util.assertArrayEquality(
-      genesis.getPost(0),
-      Hash.digest(genesisPost.header.data)
-    );
-
+    // genesis block starts the chain
     this.genesis = genesis;
 
-    // this.head = undefined; // replace with hash array of genesis block?
+    // all of the individual post chains that comprise a thread
+    this.threads = new Array();
+
+    // the underlying data storage; shared among all post chains
+    // to prevent duplications
+    this.map = new HashMap();
+    this.addThread(genesis, genesisPost);
   }
 
-  // push(block, now) {
-  //     Util.assert(block);
-  //     Util.assert(block instanceof Block, 'Invalid block.');
-  //
-  //     Util.assert(now);
-  //     Util.assert(typeof(now) === 'number');
-  //
-  //     // assert that block is no more than 1 second in the future.
-  //     Util.assert(block.header.timestamp() <= now + 1);
-  //
-  //     // assert that block board id is correct
-  //     Util.assert(block.header.board() === this.board);
-  //
-  //     // assert that data hash in header is as expected
-  //     let calculatedDataHash = Hash.digest(Array.from(block.data));
-  //     let storedDataHash = Array.from(block.header.dataHash());
-  //     Util.assertArrayEquality(calculatedDataHash, storedDataHash);
-  //
-  //     // assert that block points to head, otherwise we're missing blocks
-  //     Util.assertArrayEquality(this.head, Array.from(block.header.prevHash()));
-  //
-  //     // TODO: check that block matches difficulty requirement
-  //     let blockHash = Hash.digest(block);
-  //
-  //     // block is OK
-  //     map.set(blockHash, block);
-  //     this.head = blockHash;
-  // }
+  addThread(block, originalPost) {
+    Util.assert(block);
+    Util.assert(block instanceof Thread);
 
-  // validate() {
-  //   let count = map.count();
-  //   let prevBlock = ; // genesis
-  //   for (let i = 1; i < count; i++) {
-  //     let currentBlock = map.getIdx(i);
-  //     Util.assertArrayEquality(Hash.digest(Array.from(prevBlock.header.buffer)), Array.from(currentBlock.header.prevHash()));
-  //   }
-  // }
+    Util.assert(originalPost);
+    Util.assert(originalPost instanceof Post);
+
+    if (this.threads.length === 0) {
+      // genesis thread
+      Util.assert(block instanceof Genesis);
+      Util.assert(originalPost instanceof GenesisPost);
+
+      // TODO: check difficulty
+    } else {
+      // check that prevHash points correctly
+      Util.assertArrayEquality(
+        this.head().hash(),
+        block.header.prevHash()
+      );
+      // check that all posts are contained in matching threads
+      // and that index of post is greater than index of the
+      // post pointed to for that thread in the previous thread
+      // block
+      let numThreads = block.numThreads();
+      for (let i = 1; i < numThreads; i++) {
+        // the hash of the listed thread's gen block
+        let threadHash = block.getThread(i);
+
+        // the hash of the latest post in that thread
+        let postHash = block.getPost(i);
+
+        // the actual block associated with the post hash
+        let post = this.map.get(postHash);
+
+        // for now, we are going to require that all posts
+        // are inserted beforehand
+        Util.assert(post);
+
+        // assert the post is actually in the listed thread
+        Util.assertArrayEquality(post.thread, threadHash);
+
+        // make sure the post index is higher than that of the
+        // last thread block's post for the corresponding
+        // thread
+
+        // get the latest inserted thread block
+        // TODO: this can be moved outside the loop
+        let prevBlock = this.head();
+
+        // get the hash of the latest post in the ith thread
+        // at the time of the latest inserted block
+        let prevPostHash = prevBlock.getPostForThread(threadHash);
+
+        // actually retrieve that post
+        let prevPost = this.map.get(prevPostHash);
+
+        // assert the previous post has a lesser index than new one
+        Util.assert(prevPost.index < post.index);
+        // TODO: check difficulty
+      }
+    }
+
+    // this already checks if the thread points to the post
+    let chain = new PostChain(originalPost, block, this.map);
+    this.threads.push(chain);
+  }
+
+  addPost() {
+    // get the post pointed to by prevHash
+    // get the associated postChain
+    // .push()
+  }
+
+  head() {
+    Util.assert(this.threads.length > 0);
+    return this.threads[this.threads.length-1];
+  }
 }

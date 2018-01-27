@@ -35,12 +35,16 @@ module.exports = [
       dataView.setUint32(0, 0x0024ffff);
       dataView.setUint8(40, 0xff);
       let header = testCommon.validPostHeaderFromData(d_buf);
+
+      // the correct index is [11, 42] inclusive
+      // using 33 to 42 here so that there's no confusion with
+      // the 0 to 32 zeros in the data's thread 0
       if (shouldPass) {
-        for (let i = 11; i < 43; i++) {
+        for (let i = 33; i < 43; i++) {
           header.data[i] = 0;
         }
       } else {
-        for (let i = 11; i < 43; i++) {
+        for (let i = 33; i < 43; i++) {
           header.data[i] = 1;
         }
       }

@@ -24,5 +24,6 @@
 
 module.exports = [].concat(
   require('./functionTests.js'),
-  require('./difficultyTests.js')
+  require('./difficultyTests.js'),
+  require('./hashMapTests.js')
 );

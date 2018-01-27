@@ -22,51 +22,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+var Hash = require('./blake2s.js');
 var Util = require('../util.js');
 var Block = require('../block/block.js');
 
-module.exports = class Storage {
-  constructor() {
-    this.arr = [];
-  }
+// Basic hashmap implementation
+module.exports = class HashMap {
+  constructor() {}
 
-  push(hash, block) {
-    Util.assert(hash instanceof Uint8Array);
+  set(block) {
+    Util.assert(block);
     Util.assert(block instanceof Block);
-
-    let str = Util.uint8ArrToHex(hash);
-    Util.assert(this[str] === undefined);
-
-    this.arr.push({
-      block: block,
-      hash: hash
-    });
-    this[str] = block;
+    let hash = block.hash();
+    this[Util.uint8ArrToHex(hash)] = block;
+    return hash;
   }
 
-  pop(idx) {
-    Util.assert(typeof(idx) === 'number');
-    Util.assert(idx < this.arr.length);
-    // TODO detach blocks from chain
-  }
-
-  head() {
-    Util.assert(this.arr.length !== 0);
-    return this.arr[this.arr.length-1];
+  setRaw(hash, obj) {
+    this[Util.uint8ArrToHex(hash)] = obj;
   }
 
   get(hash) {
     Util.assert(hash instanceof Uint8Array);
     return this[Util.uint8ArrToHex(hash)];
-  }
-
-  getIndex(idx) {
-    Util.assert(typeof(idx) === 'number');
-    Util.assert(idx < this.arr.length);
-    return this.arr[idx].block;
-  }
-
-  count() {
-    return this.arr.length;
   }
 }

@@ -62,4 +62,10 @@ module.exports = class PostBlock extends Block {
   prune() {
     // TODO: prune data
   }
+
+  // XXX: no unit test
+  thread() {
+    // set when this block is added to a post chain
+    return this.thread;
+  }
 }

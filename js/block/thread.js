@@ -26,6 +26,7 @@ const THREAD_BLOCK_ID = 0x00;
 
 var Util = require('../util.js');
 var Block = require('./block.js');
+var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
 
 module.exports = class ThreadBlock extends Block {
@@ -38,13 +39,21 @@ module.exports = class ThreadBlock extends Block {
 
     // the first thread has a zero hash
     Difficulty.verify(this.getThread(0), 256);
+
+    this.map = new HashMap();
+
+    // put all threads in data into a hashmap for easy lookup
+    let count = this.numThreads();
+    for (let i = 0; i < count; i++) {
+      this.map.setRaw(this.getThread(i), this.getPost(i));
+    }
   }
 
   // data is pairs of 32-byte hashes
   // { thread hash, post hash}
   // first row is { 0, post hash } (genesis)
   getThread(index) {
-    // getThread(0) returns 32 zeroes
+    // NOTE: getThread(0) returns 32 zeroes
     // since the zeroth thread's id is the hash of this block
     // which obviously can't be stored in the block itself
     Util.assert(index < this.data.byteLength / 64);
@@ -54,6 +63,14 @@ module.exports = class ThreadBlock extends Block {
   getPost(index) {
     Util.assert(index < this.data.byteLength / 64);
     return new Uint8Array(this.data.buffer, index*64 + 32, 32);
+  }
+
+  getPostForThread(hash) {
+    return this.map.get(hash);
+  }
+
+  numThreads() {
+    return (this.data.byteLength / 64);
   }
 
   prune() {

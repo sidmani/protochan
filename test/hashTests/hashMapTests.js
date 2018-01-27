@@ -22,41 +22,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Storage = require('../../js/chain/storage.js');
 var Util = require('../../js/util.js');
+var HashMap = require('../../js/hash/hashMap.js');
 var testCommon = require('../testCommon.js');
 
 module.exports = [
-  { description: "Storage stores and retrieves object",
+  { description: "HashMap sets and gets block",
     fn: function() {
-      var block = testCommon.validBlock();
-      var storage = new Storage();
-      storage.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
-      Util.assert(storage.get(new Uint8Array([0x00, 0x33, 0x5f])) === block);
+      let block = testCommon.validPost();
+      let map = new HashMap();
+      let hash = map.set(block);
+      Util.assert(map.get(hash) === block);
     }
   },
-  { description: "Storage automatically sets index",
+  { description: "HashMap.setRaw sets block",
     fn: function() {
-      var block = testCommon.validBlock();
-      var storage = new Storage();
-      storage.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
-      Util.assert(storage.getIndex(0) === block);
-    }
-  },
-  {
-    description: "Storage count is correct",
-    fn: function() {
-     var block = testCommon.validBlock();
-     var storage = new Storage();
-     storage.push(new Uint8Array([0x00, 0x33, 0x5f]), block);
-     storage.push(new Uint8Array([0x05, 0x33, 0x5f]), block);
-     Util.assert(storage.count() === 2);
-    }
-  },
-  { description: "Storage returns undefined for nonexistent object",
-    fn: function() {
-      var storage = new Storage();
-      Util.assert(storage.get(new Uint8Array([0x00, 0x33, 0x5f])) === undefined);
+      let block = testCommon.validPost();
+      let map = new HashMap();
+      let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
+      Util.assert(map.get(new Uint8Array([5, 4, 3])) === block);
     }
   }
+
 ];

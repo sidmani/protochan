@@ -22,7 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Header = require('../../js/block/header.js');
 var Post = require('../../js/block/post.js');
 var Util = require('../../js/util.js');
 var testCommon = require('../testCommon.js');
@@ -54,6 +53,38 @@ module.exports = [
         dataView.setUint32(0, 0x0024ffff);
       } else {
         dataView.setUint32(0, 0x0025ffff);
+      }
+      let header = testCommon.validPostHeaderFromData(d_buf);
+
+      new Post(header, d_buf);
+    }
+  },
+  { description: "Post block validates data padding",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(41);
+      let dataView = new DataView(d_buf);
+      dataView.setUint8(40, 0xff);
+      if (shouldPass) {
+        dataView.setUint32(0, 0x0024ffff);
+      } else {
+        dataView.setUint32(0, 0x0024fccf);
+      }
+      let header = testCommon.validPostHeaderFromData(d_buf);
+
+      new Post(header, d_buf);
+    }
+  },
+  { description: "Post block validates data terminator",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(41);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0024ffff);
+      if (shouldPass) {
+        dataView.setUint8(40, 0xff);
+      } else {
+        dataView.setUint8(40, 0xee);
       }
       let header = testCommon.validPostHeaderFromData(d_buf);
 
