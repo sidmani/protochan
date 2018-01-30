@@ -28,7 +28,6 @@ module.exports.verify = function(hash, leadingZeroes) {
   Util.assert(hash instanceof Uint8Array);
   Util.assert(hash.byteLength === 32);
 
-  Util.assert(leadingZeroes);
   Util.assert(typeof(leadingZeroes) === 'number');
 
   Util.assert(countLeadingZeroes(hash) >= leadingZeroes);
@@ -51,6 +50,29 @@ module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
   }
   return zeroes;
 };
+
+
+// Posts use a simple time exponential decay model for difficulty
+var max_p = 40; // max post difficulty
+var min_p = 10; // min post difficulty
+var p_diff = max_p - min_p; // optimization
+var k_p = -0.10986; // time constant = -0.1*ln(1/3)
+// ln((M/2-m)/(M-m))/-10 where M = max and m = min
+
+module.exports.requiredPostDifficulty = function(delta) {
+  Util.assert(typeof(delta) === 'number');
+  Util.assert(delta >= 0);
+  // required post difficulty decreases exponentially in time
+  // after each post. This vastly increases the difficulty of
+  // spamming.
+  return Math.round(min_p + (p_diff) * Math.exp(k_p * delta));
+}
+
+// Threads use a combination of time decay and # of posts
+// if there have been very few posts since the last thread was
+// created, it will be much more difficult to create a new thread
+// this encourages users to respond to threads instead of creating
+// new ones
 
 // since difficulties are on a log scale,
 // they have to be added logarithmically
@@ -78,7 +100,4 @@ module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
 //   if (b-a > 31) {
 //     return b;
 //   }
-//
-//
-//
 // }

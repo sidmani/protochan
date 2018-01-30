@@ -75,8 +75,14 @@ module.exports = class Chain {
       thread.header.prevHash(),
       this.threadHead);
 
-    let newHead = this.createHead(originalPost, thread);
+    // check that the # of threads is = max threads or thread height if height < max threads
 
+    // stage the new thread on all existing heads
+    let heads = this.headMap.enumerate();
+    // we need to figure out how threads are included and excluded
+    // before this code can be written
+
+    let newHead = this.createHead(originalPost, thread);
   }
 }
 

@@ -103,5 +103,40 @@ module.exports = [
       arr[4] = 0b00000110; // 37 leading zeroes
       Difficulty.verify(arr, 37);
     }
+  },
+  { description: "Post validates delta-t type",
+    dual: true,
+    fn: function(shouldPass) {
+      if (shouldPass) {
+        Difficulty.requiredPostDifficulty(5);
+      } else {
+        Difficulty.requiredPostDifficulty('food')
+      }
+    }
+  },
+  { description: "Post validates delta-t value",
+    dual: true,
+    fn: function(shouldPass) {
+      if (shouldPass) {
+        Difficulty.requiredPostDifficulty(5);
+      } else {
+        Difficulty.requiredPostDifficulty(-2)
+      }
+    }
+  },
+  { description: "Post difficulty f(0) = 40",
+    fn: function() {
+      common.testAssert(Difficulty.requiredPostDifficulty(0) === 40);
+    }
+  },
+  { description: "Post difficulty f(10) = 20",
+    fn: function() {
+      common.testAssert(Difficulty.requiredPostDifficulty(10) === 20);
+    }
+  },
+  { description: "Post difficulty lim t -> ∞ = 10",
+    fn: function() {
+      common.testAssert(Difficulty.requiredPostDifficulty(999999999) === 10);
+    }
   }
 ];

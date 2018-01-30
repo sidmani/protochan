@@ -45,17 +45,14 @@ module.exports = class Head {
 
     originalPost.thread = this.thread;
     this.head = this.map.set(originalPost);
+    this.timestamp = originalPost.header.timestamp();
   }
 
   pushPost(post) {
     // parameter validation
     Util.assert(post instanceof Post);
 
-    // can't build on top of an empty head
-    // XXX: this check *should* be unnecessary
-    Util.assert(this.head);
-
-    // check that post points to head
+    // check that post's prevHash points to head
     Util.assertArrayEquality(
       this.head,
       post.header.prevHash()
@@ -67,6 +64,7 @@ module.exports = class Head {
     post.thread = this.thread;
     this.head = this.map.set(post);
     this.height += 1;
+    this.timestamp = post.header.timestamp();
   }
 
   stageThread(thread, hash) {
@@ -74,12 +72,9 @@ module.exports = class Head {
     Util.assert(thread instanceof Thread);
     Util.assert(hash instanceof Uint8Array);
 
-    // can't build on top of an empty head
-    Util.assert(this.head);
-
     // thread has already been checked and set in the map by caller
     // this just runs other checks and sets head
-    // hash must equal thread.hash(), but don't waste processing
+    // hash is thread.hash(), but don't waste processing
     // power recomputing it every time
 
     // get the latest post hash in this thread according to the
@@ -111,7 +106,7 @@ module.exports = class Head {
 
     this.head = this.stage;
     this.height += 1;
-
+    // don't update the timestamp, since that depends only on posts
     this.stage = undefined;
   }
 

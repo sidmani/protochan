@@ -146,6 +146,16 @@ module.exports = [
       common.testAssert(map.get(originalPost.hash()) === originalPost);
     }
   },
+  { description: "Head sets timestamp from original post",
+    fn: function() {
+      let originalPost = common.validPost();
+      let threadHash = new Uint8Array(32);
+      let map = new HashMap();
+      originalPost.header._data.setUint32(3, 18643);
+      let head = new Head(originalPost, threadHash, map, 0);
+      common.testAssert(head.timestamp === 18643);
+    }
+  },
   { description: "Head.pushPost validates post type",
     dual: true,
     fn: function(shouldPass) {
@@ -213,6 +223,21 @@ module.exports = [
       head.pushPost(nextPost);
 
       common.assertArrayEquality(head.head, nextPost.hash());
+    }
+  },
+  { description: "Head.pushPost sets timestamp",
+    fn: function() {
+      let originalPost = common.validPost();
+      let originalPostHash = originalPost.hash();
+      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+      let nextPost = common.validPost();
+      nextPost.header._data.setUint32(3, 2077354);
+      for (let i = 11; i < 43; i++) {
+        nextPost.header.data[i] = originalPostHash[i-11];
+      }
+      head.pushPost(nextPost);
+
+      common.testAssert(head.timestamp === 2077354);
     }
   },
   { description: "Head.pushPost inserts new post into map",
