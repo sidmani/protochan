@@ -29,6 +29,34 @@ var GenesisPost = require('../js/block/genesisPost.js');
 var Hash = require('../js/hash/blake2s.js');
 var Util = require('../js/util.js');
 
+module.exports.testAssert = testAssert = function(condition, description) {
+  if (!condition) {
+    throw new Error(description)
+  }
+}
+
+module.exports.hash = function(data) {
+  return Hash.digest(data);
+}
+
+module.exports.assertArrayEquality = function(arr1, arr2) {
+  testAssert(arr1 instanceof Uint8Array);
+  testAssert(arr2 instanceof Uint8Array);
+  testAssert(arr1.byteLength === arr2.byteLength);
+  for (let i = 0; i < arr1.byteLength; i++) {
+    testAssert(arr1[i] === arr2[i]);
+  }
+}
+
+module.exports.assertJSArrayEquality = function(arr1, arr2) {
+  testAssert(arr1 instanceof Array);
+  testAssert(arr2 instanceof Array);
+  testAssert(arr1.length === arr2.length);
+  for (let i = 0; i < arr1.length; i++) {
+    testAssert(arr1[i] === arr2[i]);
+  }
+}
+
 module.exports.validPost = function() {
   let d_buf = new ArrayBuffer(41);
   let view = new DataView(d_buf);
