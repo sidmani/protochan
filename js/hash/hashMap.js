@@ -22,7 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Hash = require('./blake2s.js');
 var Util = require('../util.js');
 var Block = require('../block/block.js');
 
@@ -31,7 +30,6 @@ module.exports = class HashMap {
   constructor() {}
 
   set(block) {
-    Util.assert(block);
     Util.assert(block instanceof Block);
     let hash = block.hash();
     this[Util.uint8ArrToHex(hash)] = block;
@@ -39,11 +37,17 @@ module.exports = class HashMap {
   }
 
   setRaw(hash, obj) {
+    // TODO: parameter type assertion
     this[Util.uint8ArrToHex(hash)] = obj;
   }
 
   get(hash) {
     Util.assert(hash instanceof Uint8Array);
     return this[Util.uint8ArrToHex(hash)];
+  }
+
+  enumerate() {
+    // return array of objects in the order they were added
+    return Object.keys(this).map(key => this[key]);
   }
 }

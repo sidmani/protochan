@@ -22,11 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+var common = require('../testCommon.js');
 var Block = require('../../js/block/block.js');
-var Header = require('../../js/block/header.js');
-var Hash = require('../../js/hash/blake2s.js');
-var Util = require('../../js/util.js');
-var testCommon = require('../testCommon.js');
 
 module.exports = [
   { description: "Block validates header",
@@ -35,7 +32,7 @@ module.exports = [
       let buf = new ArrayBuffer(64);
       let header;
       if (shouldPass) {
-        header = testCommon.validHeaderFromData(buf);
+        header = common.validHeaderFromData(buf);
       } else {
         header = undefined;
       }
@@ -48,7 +45,7 @@ module.exports = [
       let buf = new ArrayBuffer(64);
       let header;
       if (shouldPass) {
-        header = testCommon.validHeaderFromData(buf);
+        header = common.validHeaderFromData(buf);
       } else {
         header = new Array();
       }
@@ -59,7 +56,7 @@ module.exports = [
     dual: true,
     fn: function(shouldPass) {
       let buf = new ArrayBuffer(64);
-      let header = testCommon.validHeaderFromData(buf);
+      let header = common.validHeaderFromData(buf);
       if (shouldPass) {
         new Block(header, buf);
       } else {
@@ -71,7 +68,7 @@ module.exports = [
     dual: true,
     fn: function(shouldPass) {
       let buf = new ArrayBuffer(64);
-      let header = testCommon.validHeaderFromData(buf);
+      let header = common.validHeaderFromData(buf);
       if (shouldPass) {
         new Block(header, buf);
       } else {
@@ -83,7 +80,7 @@ module.exports = [
     dual: true,
     fn: function(shouldPass) {
       let buf = new ArrayBuffer(64);
-      let header = testCommon.validHeaderFromData(buf);
+      let header = common.validHeaderFromData(buf);
       // change a byte to break the hash
       if (!shouldPass) {
         (new Uint8Array(buf))[5] = 0x05;
@@ -94,18 +91,18 @@ module.exports = [
   { description: "Block accepts valid header and data",
     fn: function() {
       var buf = new ArrayBuffer(128);
-      var header = testCommon.validHeaderFromData(buf);
+      var header = common.validHeaderFromData(buf);
       var b = new Block(header, buf);
-      Util.assert(b);
-      Util.assert(b instanceof Block);
+      common.testAssert(b);
+      common.testAssert(b instanceof Block);
     }
   },
   { description: "Block.hash() returns correct hash",
     fn: function() {
       var buf = new ArrayBuffer(128);
-      var header = testCommon.validHeaderFromData(buf);
+      var header = common.validHeaderFromData(buf);
       var b = new Block(header, buf);
-      Util.assertArrayEquality(b.hash(), Hash.digest(header.data));
+      common.assertArrayEquality(b.hash(), common.hash(header.data));
     }
   }
 ]

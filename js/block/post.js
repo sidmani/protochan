@@ -22,13 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const POST_BLOCK_ID = 0x01;
-
 var Util = require('../util.js');
 var Block = require('./block.js');
-var Hash = require('../hash/blake2s.js');
 
-module.exports = class PostBlock extends Block {
+const POST_BLOCK_ID = 0x01;
+
+module.exports = class Post extends Block {
   constructor(header, data) {
     super(header, data);
     Util.assert(header.blockType() === POST_BLOCK_ID, 'Header block type is incorrect.');
@@ -40,6 +39,11 @@ module.exports = class PostBlock extends Block {
 
     // data length = 2b len + 2b padding + #b content + 1b final
     Util.assert(this.data.byteLength === this.contentLength() + 5);
+
+    // XXX: untested
+    // this means the max data length is 943 - 5 = 938 bytes
+    // and the max total post block size is 943 + 80 = 1023 bytes
+    Util.assert(this.data.byteLength <= 943);
 
     // last byte is 0xff
     Util.assert(this.data[this.data.byteLength - 1] === 0xff);
@@ -61,11 +65,5 @@ module.exports = class PostBlock extends Block {
 
   prune() {
     // TODO: prune data
-  }
-
-  // XXX: no unit test
-  thread() {
-    // set when this block is added to a post chain
-    return this.thread;
   }
 }

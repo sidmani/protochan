@@ -21,18 +21,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-var Util = require('../../js/util.js');
 var Chain = require('../../js/chain/chain.js');
-var testCommon = require('../testCommon.js');
-var GenesisPost = require('../../js/block/genesisPost.js');
+var common = require('../testCommon.js');
 
 module.exports = [
   { description: "Chain validates genesis block type",
     dual: true,
     fn: function(shouldPass) {
-      let post = testCommon.validGenesisPost();
+      let post = common.validGenesisPost();
       if (shouldPass) {
-        new Chain(testCommon.validGenesis(post), post);
+        new Chain(common.validGenesis(post), post);
       } else {
         new Chain(new Array(5), post);
       }
@@ -41,11 +39,11 @@ module.exports = [
   { description: "Chain validates genesis post type",
     dual: true,
     fn: function(shouldPass) {
-      let post = testCommon.validGenesisPost();
+      let post = common.validGenesisPost();
       if (shouldPass) {
-        new Chain(testCommon.validGenesis(post), post);
+        new Chain(common.validGenesis(post), post);
       } else {
-        new Chain(testCommon.validGenesis(post), new Array(5));
+        new Chain(common.validGenesis(post), new Array(5));
       }
     }
   }

@@ -23,8 +23,7 @@
 // SOFTWARE.
 
 var Post = require('../../js/block/post.js');
-var Util = require('../../js/util.js');
-var testCommon = require('../testCommon.js');
+var common = require('../testCommon.js');
 
 module.exports = [
   { description: "Post block validates block type",
@@ -34,7 +33,7 @@ module.exports = [
       let dataView = new DataView(d_buf);
       dataView.setUint32(0, 0x0024ffff);
       dataView.setUint8(40, 0xff);
-      let header = testCommon.validHeaderFromData(d_buf);
+      let header = common.validHeaderFromData(d_buf);
       if (shouldPass) {
         header.data[2] = 0x01;
       } else {
@@ -54,7 +53,7 @@ module.exports = [
       } else {
         dataView.setUint32(0, 0x0025ffff);
       }
-      let header = testCommon.validPostHeaderFromData(d_buf);
+      let header = common.validPostHeaderFromData(d_buf);
 
       new Post(header, d_buf);
     }
@@ -70,7 +69,7 @@ module.exports = [
       } else {
         dataView.setUint32(0, 0x0024fccf);
       }
-      let header = testCommon.validPostHeaderFromData(d_buf);
+      let header = common.validPostHeaderFromData(d_buf);
 
       new Post(header, d_buf);
     }
@@ -86,7 +85,7 @@ module.exports = [
       } else {
         dataView.setUint8(40, 0xee);
       }
-      let header = testCommon.validPostHeaderFromData(d_buf);
+      let header = common.validPostHeaderFromData(d_buf);
 
       new Post(header, d_buf);
     }
@@ -98,11 +97,11 @@ module.exports = [
       view.setUint32(0, 0x0024ffff);
       view.setUint8(40, 0xff);
 
-      let header = testCommon.validPostHeaderFromData(d_buf);
+      let header = common.validPostHeaderFromData(d_buf);
 
       let p = new Post(header, d_buf);
-      Util.assert(p);
-      Util.assert(p instanceof Post);
+      common.testAssert(p);
+      common.testAssert(p instanceof Post);
     }
   },
   { description: "Post block returns correct content length",
@@ -112,10 +111,10 @@ module.exports = [
       view.setUint32(0, 0x0024ffff);
       view.setUint8(40, 0xff);
 
-      let header = testCommon.validPostHeaderFromData(d_buf);
+      let header = common.validPostHeaderFromData(d_buf);
 
       let p = new Post(header, d_buf);
-      Util.assert(p.contentLength() === 36);
+      common.testAssert(p.contentLength() === 36);
     }
   },
   { description: "Post block returns correct content",
@@ -126,11 +125,11 @@ module.exports = [
       view.setUint32(12, 0xcccccccc);
       view.setUint8(40, 0xff);
 
-      let header = testCommon.validPostHeaderFromData(d_buf);
+      let header = common.validPostHeaderFromData(d_buf);
 
       let content = new Post(header, d_buf).content();
       for (let i = 0; i < 9; i++) {
-        Util.assert(content.getUint32(i*4) === (i===2?0xcccccccc:0));
+        common.testAssert(content.getUint32(i*4) === (i===2?0xcccccccc:0));
       }
     }
   }

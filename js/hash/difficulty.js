@@ -25,14 +25,13 @@
 var Util = require('../util.js');
 
 module.exports.verify = function(hash, leadingZeroes) {
-  Util.assert(hash);
   Util.assert(hash instanceof Uint8Array);
   Util.assert(hash.byteLength === 32);
 
   Util.assert(leadingZeroes);
   Util.assert(typeof(leadingZeroes) === 'number');
 
-  Util.assert(countLeadingZeroes(hash) >= leadingZeroes)
+  Util.assert(countLeadingZeroes(hash) >= leadingZeroes);
 }
 
 module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
@@ -52,3 +51,34 @@ module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
   }
   return zeroes;
 };
+
+// since difficulties are on a log scale,
+// they have to be added logarithmically
+// here we use the identity log2(x + y) = log2(x) + log2(1 + y/x)
+// therefore the sum of two difficulties a and b =
+// a + log2(1 + 2^(b-a))
+// of course, we can't exponentiate 2 to a power over 31
+// so to make life easier, if b-a > 31, we
+// approximate log2(1 + 2^(b-a)) ~= b-a
+// module.exports.sumDifficulties(a, b) {
+//   // if we're summing 8 and 8, difficulty is 9
+//   // since 2^8 + 2^8 = 2^9
+//   if (a === b) {
+//     return a + 1;
+//   }
+//
+//   // otherwise a must be less than b
+//   if (a > b) {
+//     let temp = a;
+//     a = b;
+//     b = temp;
+//   }
+//
+//   // the difference is so great that a doesn't really matter
+//   if (b-a > 31) {
+//     return b;
+//   }
+//
+//
+//
+// }

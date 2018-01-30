@@ -37,12 +37,19 @@ module.exports = class ThreadBlock extends Block {
     // Data comes in sets of 64 bytes (32 thread, 32 post)
     Util.assert(data.byteLength >= 64 && data.byteLength % 64 === 0, 'Data is malformed.');
 
+    // XXX: untested
+    // 16320 = 255 (thread max) * 32 (hash length) * 2 (post and thread)
+    Util.assert(data.byteLength <= 16320);
+
     // the first thread has a zero hash
     Difficulty.verify(this.getThread(0), 256);
 
+    // XXX: untested
+    // XXX: is there a better way of mapping the threads to posts?
     this.map = new HashMap();
 
     // put all threads in data into a hashmap for easy lookup
+    // there is probably a better way to do this (with indices)
     let count = this.numThreads();
     for (let i = 0; i < count; i++) {
       this.map.setRaw(this.getThread(i), this.getPost(i));
@@ -65,10 +72,12 @@ module.exports = class ThreadBlock extends Block {
     return new Uint8Array(this.data.buffer, index*64 + 32, 32);
   }
 
+  // get the post associated with a particular thread
   getPostForThread(hash) {
     return this.map.get(hash);
   }
 
+  // the number of threads listed in this block
   numThreads() {
     return (this.data.byteLength / 64);
   }

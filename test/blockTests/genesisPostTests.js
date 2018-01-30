@@ -21,10 +21,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
+var common = require('../testCommon.js');
 var GenesisPost = require('../../js/block/genesisPost.js');
-var Header = require('../../js/block/header.js');
-var Util = require('../../js/util.js');
-var testCommon = require('../testCommon.js');
 
 module.exports = [
   { description: "GenesisPost validates zero prevHash",
@@ -34,7 +33,7 @@ module.exports = [
       let dataView = new DataView(d_buf);
       dataView.setUint32(0, 0x0024ffff);
       dataView.setUint8(40, 0xff);
-      let header = testCommon.validPostHeaderFromData(d_buf);
+      let header = common.validPostHeaderFromData(d_buf);
 
       // the correct index is [11, 42] inclusive
       // using 33 to 42 here so that there's no confusion with

@@ -23,6 +23,6 @@
 // SOFTWARE.
 
 module.exports = [].concat(
-  require('./chainTests.js'),
-  require('./postChainTests.js')
+//  require('./chainTests.js'),
+  require('./headTests.js')
 );

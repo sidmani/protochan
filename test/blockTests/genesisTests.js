@@ -23,9 +23,8 @@
 // SOFTWARE.
 
 var Genesis = require('../../js/block/genesis.js');
-var Header = require('../../js/block/header.js');
-var Util = require('../../js/util.js');
-var testCommon = require('../testCommon.js');
+var common = require('../testCommon.js');
+
 module.exports = [
   { description: "Genesis block validates data length",
     dual: true,
@@ -55,8 +54,8 @@ module.exports = [
         }
       }
 
-      let header = testCommon.validThreadHeaderFromData(d_buf);
-
+      let header = common.validThreadHeaderFromData(d_buf);
+      header.data[79] = 0xec; //nonzero max threads
       new Genesis(header, d_buf);
     }
   },
@@ -65,7 +64,9 @@ module.exports = [
     dual: true,
     fn: function(shouldPass) {
       let d_buf = new ArrayBuffer(64);
-      let header = testCommon.validThreadHeaderFromData(d_buf);
+      let header = common.validThreadHeaderFromData(d_buf);
+      header.data[79] = 0xec; //nonzero max threads
+
       if (shouldPass) {
         for (let i = 11; i < 43; i++) {
           header.data[i] = 0;
@@ -78,16 +79,32 @@ module.exports = [
       new Genesis(header, d_buf);
     }
   },
+  { description: "Genesis block validates nonzero max threads",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(64);
+      let header = common.validThreadHeaderFromData(d_buf);
+      for (let i = 11; i < 43; i++) {
+        header.data[i] = 0;
+      }
+      if (shouldPass) {
+        header.data[79] = 0xec; //nonzero max threads
+      } else {
+        header.data[79] = 0x00; //nonzero max threads
+      }
+      new Genesis(header, d_buf);
+    }
+  },
   { description: "Genesis block returns correct max threads",
     fn: function() {
       let d_buf = new ArrayBuffer(64);
-      let header = testCommon.validThreadHeaderFromData(d_buf);
+      let header = common.validThreadHeaderFromData(d_buf);
       header.data[79] = 0xff;
       for (let i = 11; i < 43; i++) {
         header.data[i] = 0;
       }
       let gen = new Genesis(header, d_buf);
-      Util.assert(gen.maxThreads() === 0xff);
+      common.testAssert(gen.maxThreads() === 0xff);
     }
   }
 ];

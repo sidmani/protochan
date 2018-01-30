@@ -22,11 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var ThreadBlock = require('./thread.js');
+var Thread = require('./thread.js');
 var Difficulty = require('../hash/difficulty.js');
 var Util = require('../util.js');
 
-module.exports = class Genesis extends ThreadBlock {
+module.exports = class Genesis extends Thread {
   constructor(header, dataBuffer) {
     super(header, dataBuffer);
 
@@ -34,8 +34,11 @@ module.exports = class Genesis extends ThreadBlock {
     Difficulty.verify(this.header.prevHash(), 256);
 
     // Assert that data is 64 bytes, since the genesis block
-    // can only have one post associated with it
+    // can only have one thread/post pair associated with it
     Util.assert(this.data.byteLength === 64);
+
+    // Assert max thread count is not zero
+    Util.assert(this.maxThreads() !== 0);
   }
 
   // reserved byte in the header is used to designate max threads

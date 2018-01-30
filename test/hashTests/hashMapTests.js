@@ -22,26 +22,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Util = require('../../js/util.js');
 var HashMap = require('../../js/hash/hashMap.js');
-var testCommon = require('../testCommon.js');
+var common = require('../testCommon.js');
 
 module.exports = [
   { description: "HashMap sets and gets block",
     fn: function() {
-      let block = testCommon.validPost();
+      let block = common.validPost();
       let map = new HashMap();
       let hash = map.set(block);
-      Util.assert(map.get(hash) === block);
+      common.testAssert(map.get(hash) === block);
     }
   },
   { description: "HashMap.setRaw sets block",
     fn: function() {
-      let block = testCommon.validPost();
+      let block = common.validPost();
       let map = new HashMap();
       let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
-      Util.assert(map.get(new Uint8Array([5, 4, 3])) === block);
+      common.testAssert(map.get(new Uint8Array([5, 4, 3])) === block);
     }
-  }
+  },
+  { description: "HashMap enumerates set objects",
+      fn: function() {
+        let block1 = common.validPost();
+        let block2 = common.validPost();
+        let block3 = common.validPost();
 
+        let map = new HashMap();
+        let hash1 = map.setRaw(new Uint8Array([5, 4, 3]), block1);
+        let hash2 = map.setRaw(new Uint8Array([6, 2, 1]), block2);
+        let hash3 = map.setRaw(new Uint8Array([5, 7, 8]), block3);
+
+        let result = map.enumerate();
+        common.assertJSArrayEquality(result, [block1, block2, block3]);
+      }
+  }
 ];

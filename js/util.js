@@ -22,19 +22,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// NOTE: this function should no longer be used in unit tests
+// so adding prod/debug modes is OK
+
+var mode = 'debug';
+
 module.exports.assert = assert = function(condition, description) {
   if (!condition) {
     throw new Error(description)
   }
 }
 
-module.exports.assertDataViewEquality = function(d1, d2) {
-  assert(d1.byteLength === d2.byteLength);
-  for (let i = 0; i < d1.byteLength; i++) {
-    assert(d1.getUint8(i) === d2.getUint8(i));
-    // XXX: maybe use getUint32 to decrease # of comparisons?
-  }
-}
+// module.exports.assertDataViewEquality = function(d1, d2) {
+//   assert(d1.byteLength === d2.byteLength);
+//   for (let i = 0; i < d1.byteLength; i++) {
+//     assert(d1.getUint8(i) === d2.getUint8(i));
+//     // XXX: maybe use getUint32 to decrease # of comparisons?
+//   }
+// }
 
 module.exports.assertArrayEquality = function(arr1, arr2) {
   assert(arr1.byteLength === arr2.byteLength);
@@ -45,7 +50,7 @@ module.exports.assertArrayEquality = function(arr1, arr2) {
 
 module.exports.time = function() {
   // XXX: is this the most efficient way?
-  return Math.round((new Date()).getTime() / 1000);
+  return Math.round(new Date().getTime() / 1000);
 }
 
 module.exports.uint8ArrToHex = function(arr) {
@@ -54,4 +59,16 @@ module.exports.uint8ArrToHex = function(arr) {
 			str += (arr[i]<16?'0':'') + arr[i].toString(16);
 	}
 	return str;
+}
+
+module.exports.log = function (str, level) {
+  // levels:
+  // 0: info
+  // 1: debug
+  // 2: warning
+  // 3: error
+  // 4: critical
+  if (mode === 'debug') {
+    console.log(str);
+  }
 }

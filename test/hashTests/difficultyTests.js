@@ -23,14 +23,14 @@
 // SOFTWARE.
 
 var Difficulty = require('../../js/hash/difficulty.js');
-var Util = require('../../js/util.js');
+var common = require('../testCommon.js');
 
 module.exports = [
   { description: "countLeadingZeroes counts number of zeroes in a single byte",
     fn: function() {
       var arr = new Uint8Array(32);
       arr[0] = 0b00011011;
-      Util.assert(Difficulty.countLeadingZeroes(arr) === 3);
+      common.testAssert(Difficulty.countLeadingZeroes(arr) === 3);
       return true;
     }
   },
@@ -41,13 +41,13 @@ module.exports = [
       arr[1] = 0;
       arr[2] = 0;
       arr[3] = 0b00001011;
-      Util.assert(Difficulty.countLeadingZeroes(arr) === 28);
+      common.testAssert(Difficulty.countLeadingZeroes(arr) === 28);
       return true;
     }
   },
   { description: "countLeadingZeroes returns 0 for empty array",
     fn: function() {
-      Util.assert(Difficulty.countLeadingZeroes([]) === 0);
+      common.testAssert(Difficulty.countLeadingZeroes([]) === 0);
       return true;
     }
   },

@@ -28,19 +28,21 @@ var Hash = require('../hash/blake2s.js');
 
 module.exports = class Block {
   constructor(header, dataBuffer) {
-    Util.assert(header, 'Header does not exist.');
     Util.assert(header instanceof Header, 'Header is of wrong type.');
-
-    Util.assert(dataBuffer, 'Data does not exist.');
     Util.assert(dataBuffer instanceof ArrayBuffer, 'Data is of wrong type');
 
-    // TODO: check for max size
+    // XXX: untested
+    // Absolute max size of a block's databuffer is
+    // 2^16-1 (uint16) - 80 (header) - 100 (any packet headers)  = 65355.
+    Util.assert(dataBuffer.byteLength < 65355);
 
     this.header = header;
     this.data = new Uint8Array(dataBuffer);
 
     // Assert that the hash of the data is equal to the
     // hash stored in the header
+    // TODO: move to the post and thread blocks
+    // and replace with a merkle tree for the thread block?
     Util.assertArrayEquality(
       Hash.digest(this.data), header.dataHash()
     );

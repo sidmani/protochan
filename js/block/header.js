@@ -26,7 +26,6 @@ var Util = require('../util.js');
 
 module.exports = class Header {
   constructor(buffer) {
-    Util.assert(buffer, 'Data does not exist.');
     Util.assert(buffer instanceof ArrayBuffer, 'Data is of wrong type.');
 
     // Assert that the buffer is exactly 80 bytes long
