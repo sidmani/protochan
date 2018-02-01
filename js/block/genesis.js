@@ -30,7 +30,7 @@ module.exports = class Genesis extends Thread {
   constructor(header, dataBuffer) {
     super(header, dataBuffer);
 
-    // Assert that prevHash has maximum difficulty
+    // Assert that prevHash is all zeroes (max difficulty)
     Difficulty.verify(this.header.prevHash(), 256);
 
     // Assert that data is 64 bytes, since the genesis block

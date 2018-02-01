@@ -26,6 +26,7 @@ var Util = require('../util.js');
 var Post = require('../block/post.js');
 var Thread = require('../block/thread.js');
 var HashMap = require('../hash/hashMap.js');
+var Difficulty = require('../hash/difficulty.js');
 
 module.exports = class Head {
   constructor(originalPost, threadHash, map, startingHeight) {
@@ -52,17 +53,24 @@ module.exports = class Head {
     // parameter validation
     Util.assert(post instanceof Post);
 
+    let hash = post.hash();
+    // TODO: difficulty check
+    let delta_t = post.header.timestamp() - this.map.get(this.head).header.timestamp();
+    let reqDiff = Difficulty.requiredPostDifficulty(delta_t);
+    // Difficulty.verify(hash, reqDiff);
+    // this breaks the unit tests :(
+
     // check that post's prevHash points to head
     Util.assertArrayEquality(
       this.head,
       post.header.prevHash()
     );
 
-    // TODO: difficulty check
-
     // post is OK!
     post.thread = this.thread;
-    this.head = this.map.set(post);
+    // don't waste time computing the hash again
+    this.map.setRaw(hash, post);
+    this.head = hash;
     this.height += 1;
     this.timestamp = post.header.timestamp();
   }

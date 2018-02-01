@@ -22,39 +22,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var HashMap = require('../../js/hash/hashMap.js');
 var common = require('../testCommon.js');
+var Miner = require('../../js/miner/miner.js');
+var Hash = require('../../js/hash/blake2s.js');
 
 module.exports = [
-  { description: "HashMap sets and gets block",
+  { description: "Miner produces a leading zero byte for 8 difficulty",
     fn: function() {
-      let block = common.validPost();
-      let map = new HashMap();
-      let hash = map.set(block);
-      common.assert(map.get(hash) === block);
-    }
-  },
-  { description: "HashMap.setRaw sets block",
-    fn: function() {
-      let block = common.validPost();
-      let map = new HashMap();
-      let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
-      common.assert(map.get(new Uint8Array([5, 4, 3])) === block);
-    }
-  },
-  { description: "HashMap enumerates set objects",
-      fn: function() {
-        let block1 = common.validPost();
-        let block2 = common.validPost();
-        let block3 = common.validPost();
+      let data = new ArrayBuffer(64);
+      let header = common.validHeaderFromData(data);
 
-        let map = new HashMap();
-        let hash1 = map.setRaw(new Uint8Array([5, 4, 3]), block1);
-        let hash2 = map.setRaw(new Uint8Array([6, 2, 1]), block2);
-        let hash3 = map.setRaw(new Uint8Array([5, 7, 8]), block3);
-
-        let result = map.enumerate();
-        common.assertJSArrayEquality(result, [block1, block2, block3]);
-      }
+      let miner = new Miner(header);
+      miner.mine(8);
+      let hash = Hash.digest(header.data);
+      common.assert(hash[0] === 0);
+    }
   }
 ];

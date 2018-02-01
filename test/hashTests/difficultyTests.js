@@ -30,7 +30,7 @@ module.exports = [
     fn: function() {
       var arr = new Uint8Array(32);
       arr[0] = 0b00011011;
-      common.testAssert(Difficulty.countLeadingZeroes(arr) === 3);
+      common.assert(Difficulty.countLeadingZeroes(arr) === 3);
       return true;
     }
   },
@@ -41,13 +41,13 @@ module.exports = [
       arr[1] = 0;
       arr[2] = 0;
       arr[3] = 0b00001011;
-      common.testAssert(Difficulty.countLeadingZeroes(arr) === 28);
+      common.assert(Difficulty.countLeadingZeroes(arr) === 28);
       return true;
     }
   },
   { description: "countLeadingZeroes returns 0 for empty array",
     fn: function() {
-      common.testAssert(Difficulty.countLeadingZeroes([]) === 0);
+      common.assert(Difficulty.countLeadingZeroes([]) === 0);
       return true;
     }
   },
@@ -126,17 +126,17 @@ module.exports = [
   },
   { description: "Post difficulty f(0) = 40",
     fn: function() {
-      common.testAssert(Difficulty.requiredPostDifficulty(0) === 40);
+      common.assert(Difficulty.requiredPostDifficulty(0) === 40);
     }
   },
   { description: "Post difficulty f(10) = 20",
     fn: function() {
-      common.testAssert(Difficulty.requiredPostDifficulty(10) === 20);
+      common.assert(Difficulty.requiredPostDifficulty(10) === 20);
     }
   },
-  { description: "Post difficulty lim t -> ∞ = 10",
+  { description: "Post difficulty = 10 when delta-t -> ∞",
     fn: function() {
-      common.testAssert(Difficulty.requiredPostDifficulty(999999999) === 10);
+      common.assert(Difficulty.requiredPostDifficulty(999999999) === 10);
     }
   }
 ];

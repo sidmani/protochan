@@ -23,6 +23,7 @@
 // SOFTWARE.
 
 var allTests = {
+  minerTests: require('./minerTests/group.js'),
   hashTests: require('./hashTests/group.js'),
   headerTests: require('./headerTests/headerTests.js'),
   blockTests: require('./blockTests/group.js'),
@@ -32,6 +33,8 @@ var allTests = {
 function runTests() {
   var verbose = (process.argv.indexOf('-v') > -1);
   var noCatch = (process.argv.indexOf('-n') > -1);
+  var debug = (process.argv.indexOf('-d') > -1);
+
   var numSuccess = 0;
   var numFailure = 0;
   console.log('RUNNING TESTS...');
@@ -40,6 +43,7 @@ function runTests() {
     var success = true;
     process.stdout.write('🤖 RUNNING GROUP: ' + groupName + ' (' + testGroup.length + (verbose?')\n':') '));
     for (testCase in testGroup) {
+      if (debug && !testGroup[testCase].debug) { continue; }
       let testPass = true;
       let error = undefined;
       if (testGroup[testCase].dual) {

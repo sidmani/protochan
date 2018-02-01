@@ -77,7 +77,7 @@ module.exports = [
       let t = new Thread(header, d_buf);
       let firstThread = t.getPost(0);
       for (let i = 0; i < 32; i++) {
-          common.testAssert(firstThread[i] === (i<16?9:0));
+          common.assert(firstThread[i] === (i<16?9:0));
       }
     }
   },
@@ -90,7 +90,7 @@ module.exports = [
       let t = new Thread(header, d_buf);
       let firstThread = t.getThread(1);
       for (let i = 0; i < 32; i++) {
-          common.testAssert(firstThread[i] === (i<4?9:0));
+          common.assert(firstThread[i] === (i<4?9:0));
       }
     }
   }

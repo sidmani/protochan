@@ -100,8 +100,8 @@ module.exports = [
       let header = common.validPostHeaderFromData(d_buf);
 
       let p = new Post(header, d_buf);
-      common.testAssert(p);
-      common.testAssert(p instanceof Post);
+      common.assert(p);
+      common.assert(p instanceof Post);
     }
   },
   { description: "Post block returns correct content length",
@@ -114,7 +114,7 @@ module.exports = [
       let header = common.validPostHeaderFromData(d_buf);
 
       let p = new Post(header, d_buf);
-      common.testAssert(p.contentLength() === 36);
+      common.assert(p.contentLength() === 36);
     }
   },
   { description: "Post block returns correct content",
@@ -129,7 +129,7 @@ module.exports = [
 
       let content = new Post(header, d_buf).content();
       for (let i = 0; i < 9; i++) {
-        common.testAssert(content.getUint32(i*4) === (i===2?0xcccccccc:0));
+        common.assert(content.getUint32(i*4) === (i===2?0xcccccccc:0));
       }
     }
   }

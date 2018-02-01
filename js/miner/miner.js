@@ -22,39 +22,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var HashMap = require('../../js/hash/hashMap.js');
-var common = require('../testCommon.js');
+var Util = require('../util.js');
+var Difficulty = require('../hash/difficulty.js');
+var Header = require('../block/header.js');
+var Hash = require('../hash/blake2s.js');
 
-module.exports = [
-  { description: "HashMap sets and gets block",
-    fn: function() {
-      let block = common.validPost();
-      let map = new HashMap();
-      let hash = map.set(block);
-      common.assert(map.get(hash) === block);
-    }
-  },
-  { description: "HashMap.setRaw sets block",
-    fn: function() {
-      let block = common.validPost();
-      let map = new HashMap();
-      let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
-      common.assert(map.get(new Uint8Array([5, 4, 3])) === block);
-    }
-  },
-  { description: "HashMap enumerates set objects",
-      fn: function() {
-        let block1 = common.validPost();
-        let block2 = common.validPost();
-        let block3 = common.validPost();
-
-        let map = new HashMap();
-        let hash1 = map.setRaw(new Uint8Array([5, 4, 3]), block1);
-        let hash2 = map.setRaw(new Uint8Array([6, 2, 1]), block2);
-        let hash3 = map.setRaw(new Uint8Array([5, 7, 8]), block3);
-
-        let result = map.enumerate();
-        common.assertJSArrayEquality(result, [block1, block2, block3]);
-      }
+module.exports = class Miner {
+  constructor(header) {
+    Util.assert(header instanceof Header);
+    this.header = header;
   }
-];
+
+  mine(reqDiff, fromNonce, toNonce) {
+    fromNonce = fromNonce ? fromNonce : 0;
+    toNonce = toNonce ? toNonce : 0xffffffff;
+    this.header.setNonce(fromNonce);
+    for (let i = fromNonce; i <= toNonce; i++) {
+      if (countLeadingZeroes(Hash.digest(this.header.data)) >= reqDiff) { return; }
+      this.header.incrNonce();
+    }
+    // TODO: error, no nonce value yielded the required difficulty.
+    // should exit with an error.
+    // the caller will adjust the timestamp or something and retry.
+  }
+}

@@ -104,7 +104,7 @@ module.exports = [
         header.data[i] = 0;
       }
       let gen = new Genesis(header, d_buf);
-      common.testAssert(gen.maxThreads() === 0xff);
+      common.assert(gen.maxThreads() === 0xff);
     }
   }
 ];

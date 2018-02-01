@@ -110,7 +110,7 @@ module.exports = [
   { description: "Head sets starting height",
     fn: function() {
       let head = new Head(common.validPost(), new Uint8Array(32), new HashMap(), 177);
-      common.testAssert(head.height === 177);
+      common.assert(head.height === 177);
     }
   },
   { description: "Head sets this.thread",
@@ -143,7 +143,7 @@ module.exports = [
       let map = new HashMap();
 
       let head = new Head(originalPost, threadHash, map, 0);
-      common.testAssert(map.get(originalPost.hash()) === originalPost);
+      common.assert(map.get(originalPost.hash()) === originalPost);
     }
   },
   { description: "Head sets timestamp from original post",
@@ -153,7 +153,7 @@ module.exports = [
       let map = new HashMap();
       originalPost.header._data.setUint32(3, 18643);
       let head = new Head(originalPost, threadHash, map, 0);
-      common.testAssert(head.timestamp === 18643);
+      common.assert(head.timestamp === 18643);
     }
   },
   { description: "Head.pushPost validates post type",
@@ -237,7 +237,7 @@ module.exports = [
       }
       head.pushPost(nextPost);
 
-      common.testAssert(head.timestamp === 2077354);
+      common.assert(head.timestamp === 2077354);
     }
   },
   { description: "Head.pushPost inserts new post into map",
@@ -252,7 +252,7 @@ module.exports = [
       }
       head.pushPost(nextPost);
 
-      common.testAssert(map.get(nextPost.hash()) === nextPost);
+      common.assert(map.get(nextPost.hash()) === nextPost);
     }
   },
   { description: "Head.pushPost increments height",
@@ -266,7 +266,7 @@ module.exports = [
       }
       head.pushPost(nextPost);
 
-      common.testAssert(head.height === 178);
+      common.assert(head.height === 178);
     }
   }
 ]

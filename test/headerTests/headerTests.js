@@ -23,50 +23,57 @@
 // SOFTWARE.
 
 var Header = require('../../js/block/header.js');
-var Util = require('../../js/util.js');
+var common = require('../testCommon.js');
 
-const valid_buffer = new ArrayBuffer(80);
-const view = new DataView(valid_buffer);
-
-// protocol version
-view.setUint16(0, 12345);
-// block type
-view.setUint8(2, 234);
-// timestamp
-view.setUint32(3, 274444555);
-// nonce
-view.setUint32(7, 777711889);
 // prevHash
-var prev_hash_result = [ // random integers
-  0xea38ad19,
-  0x6d64a34a,
-  0xb082cd1e,
-  0x12d7794e,
-  0x8274924f,
-  0xa18d96eb,
-  0x50f83b55,
-  0x85a75ea1
-];
-for (let i = 0; i < 8; i++) {
-  view.setUint32(11+4*i, prev_hash_result[i]);
-}
+var prev_hash_result = new Uint8Array([ // random integers
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+]);
+
 // dataHash
-var data_hash_result = [
-  0x12209fd7,
-  0xb2f995dd,
-  0x48a87405,
-  0x61932d67,
-  0x0ab39744,
-  0x9c2aeea6,
-  0xa3c515c3,
-  0x6e27d3f4
-]
-for (let i = 0; i < 8; i++) {
-  view.setUint32(43+4*i, data_hash_result[i]);
+var data_hash_result = new Uint8Array([
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+  0xea, 0x38, 0xad, 0x19,
+]);
+
+function validBuffer() {
+  let valid_buffer = new ArrayBuffer(80);
+  let view = new DataView(valid_buffer);
+
+  // protocol version
+  view.setUint16(0, 12345);
+  // block type
+  view.setUint8(2, 234);
+  // timestamp
+  view.setUint32(3, 274444555);
+  // nonce
+  view.setUint32(7, 777711889);
+  for (let i = 0; i < 32; i++) {
+    view.setUint8(11+i, prev_hash_result[i]);
+  }
+
+  for (let i = 0; i < 32; i++) {
+    view.setUint8(43+i, data_hash_result[i]);
+  }
+
+  view.setUint32(75, 0x4e5be7e9);
+  view.setUint8(79, 0x7c);
+  return valid_buffer;
 }
 
-view.setUint32(75, 0x4e5be7e9);
-view.setUint8(79, 0x7c);
 
 module.exports = [
   // these are all one-liners, so no need to use dual testing
@@ -91,65 +98,75 @@ module.exports = [
   { description: "Header accepts properly typed data",
     fn: function() {
       var h = new Header(new ArrayBuffer(80));
-      Util.assert(h);
-      Util.assert(h instanceof Header);
+      common.assert(h instanceof Header);
+    }
+  },
+  { description: "Header sets nonce",
+    fn: function() {
+      var h = new Header(validBuffer());
+      h.setNonce(0x5f4f3f2f);
+      common.assert(h.nonce() === 0x5f4f3f2f);
+    }
+  },
+  { description: "Header increments nonce",
+    fn: function() {
+      var h = new Header(validBuffer());
+      h.setNonce(0x5f4f3fff);
+      h.incrNonce();
+      common.assert(h.nonce() === 0x5f4f4000);
     }
   },
   { description: "Header returns correct protocol version",
     fn: function() {
-      var h = new Header(valid_buffer);
-      Util.assert(h.protocolVersion() === 12345);
+      var h = new Header(validBuffer());
+      common.assert(h.protocolVersion() === 12345);
     }
   },
   { description: "Header returns correct block type",
     fn: function() {
-      var h = new Header(valid_buffer);
-      Util.assert(h.blockType() === 234);
+      var h = new Header(validBuffer());
+      common.assert(h.blockType() === 234);
     }
   },
   { description: "Header returns correct timestamp",
     fn: function() {
-      var h = new Header(valid_buffer);
-      Util.assert(h.timestamp() === 274444555);
+      var h = new Header(validBuffer());
+      common.assert(h.timestamp() === 274444555);
     }
   },
   { description: "Header returns correct nonce",
     fn: function() {
-      var h = new Header(valid_buffer);
-      Util.assert(h.nonce() === 777711889);
+      var h = new Header(validBuffer());
+      common.assert(h.nonce() === 777711889);
     }
   },
   { description: "Header returns correct previous hash",
     fn: function() {
-      var h = new Header(valid_buffer);
-      var prevHash = new DataView(h.prevHash().buffer, 11, 32);
-
+      var h = new Header(validBuffer());
+      common.assertArrayEquality(h.prevHash(), prev_hash_result);
       // assertArrayEquality doesn't work since this is
       // comparing uint32s using the dataview
-      for (let i = 0; i < 8; i++) {
-        Util.assert(prevHash.getUint32(i*4) === prev_hash_result[i], 'incorrect hash byte');
-      }
+      // for (let i = 0; i < 8; i++) {
+      //   common.assert(prevHash.getUint32(i*4) === prev_hash_result[i], 'incorrect hash byte');
+      // }
     }
   },
   { description: "Header returns correct data hash",
     fn: function() {
-      var h = new Header(valid_buffer);
-      var dataHash = new DataView(h.dataHash().buffer, 43, 32);
-      for (let i = 0; i < 8; i++) {
-        Util.assert(dataHash.getUint32(i*4) === data_hash_result[i], 'incorrect hash byte');
-      }
+      var h = new Header(validBuffer());
+      common.assertArrayEquality(h.dataHash(), data_hash_result);
     }
   },
   { description: "Header returns correct board ID",
     fn: function() {
-      var h = new Header(valid_buffer);
-      Util.assert(h.board() === 0x4e5be7e9);
+      var h = new Header(validBuffer());
+      common.assert(h.board() === 0x4e5be7e9);
     }
   },
   { description: "Header returns correct reserved data",
       fn: function() {
-        var h = new Header(valid_buffer);
-        Util.assert(h.reserved() === 0x7c);
+        var h = new Header(validBuffer());
+        common.assert(h.reserved() === 0x7c);
       }
   }
 ]

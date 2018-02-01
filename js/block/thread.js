@@ -67,6 +67,7 @@ module.exports = class ThreadBlock extends Block {
     return new Uint8Array(this.data.buffer, index*64, 32);
   }
 
+  // TODO: optimize to use hashmap and not create extra arrays
   getPost(index) {
     Util.assert(index < this.data.byteLength / 64);
     return new Uint8Array(this.data.buffer, index*64 + 32, 32);
@@ -79,7 +80,7 @@ module.exports = class ThreadBlock extends Block {
 
   // the number of threads listed in this block
   numThreads() {
-    return (this.data.byteLength / 64);
+    return this.data.byteLength / 64;
   }
 
   prune() {

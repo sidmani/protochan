@@ -26,13 +26,38 @@ var Util = require('../util.js');
 
 module.exports = class Header {
   constructor(buffer) {
-    Util.assert(buffer instanceof ArrayBuffer, 'Data is of wrong type.');
+    // parameter validation
+    Util.assert(buffer instanceof ArrayBuffer);
 
     // Assert that the buffer is exactly 80 bytes long
-    Util.assert(buffer.byteLength === 80, 'Data is of wrong length.');
+    Util.assert(buffer.byteLength === 80);
 
     this._data = new DataView(buffer);
     this.data = new Uint8Array(buffer);
+  }
+
+  // For mining
+  setNonce(value) {
+    this._data.setUint32(7, value);
+  }
+
+  // fastest way to increment a uint32 that's split by bytes (?)
+  incrNonce() {
+    if (this.data[10] < 0xff) {
+      this.data[10] += 1;
+    } else if (this.data[9] < 0xff) {
+      this.data[9] += 1;
+      this.data[10] = 0x00;
+    } else if (this.data[8] < 0xff) {
+      this.data[8] += 1;
+      this.data[9] = 0x00;
+      this.data[10] = 0x00;
+    } else {
+      this.data[7] += 1;
+      this.data[8] = 0x00;
+      this.data[9] = 0x00;
+      this.data[10] = 0x00;
+    }
   }
 
   /// Protocol version (uint16)

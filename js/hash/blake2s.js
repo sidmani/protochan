@@ -93,9 +93,6 @@ function blake2sCompress (ctx, last) {
   }
 
   // ten rounds of mixing
-  // uncomment the DebugPrint calls to log the computation
-  // and match the RFC sample documentation
-  // util.debugPrint('          m[16]', m, 32)
   for (i = 0; i < 10; i++) {
     B2S_G(0, 4, 8, 12, m[SIGMA[i * 16 + 0]], m[SIGMA[i * 16 + 1]]);
     B2S_G(1, 5, 9, 13, m[SIGMA[i * 16 + 2]], m[SIGMA[i * 16 + 3]]);
@@ -120,7 +117,7 @@ function blake2sInit () {
     c: 0, // pointer within block
     t: 0, // input count
   };
-  ctx.h[0] ^= 0x01010020;
+  ctx.h[0] = 0x6B08E647;
   return ctx;
 }
 
@@ -156,7 +153,7 @@ function blake2sFinal (ctx) {
 
 // Computes the BLAKE2S hash of Uint8Array array, and returns a Uint8Array
 //
-// Returns a n-byte Uint8Array
+// Returns a 32-byte Uint8Array
 //
 // Parameters:
 // - input - the input bytes, as a Uint8Array

@@ -93,8 +93,7 @@ module.exports = [
       var buf = new ArrayBuffer(128);
       var header = common.validHeaderFromData(buf);
       var b = new Block(header, buf);
-      common.testAssert(b);
-      common.testAssert(b instanceof Block);
+      common.assert(b instanceof Block);
     }
   },
   { description: "Block.hash() returns correct hash",

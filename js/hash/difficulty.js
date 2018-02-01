@@ -53,27 +53,40 @@ module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
 
 
 // Posts use a simple time exponential decay model for difficulty
+// these rates are much too low
+// a good GPU gets 1-3GH/s and 2^40 = 1099 GH, 2^20 = 0.001 GH
 var max_p = 40; // max post difficulty
 var min_p = 10; // min post difficulty
 var p_diff = max_p - min_p; // optimization
 var k_p = -0.10986; // time constant = -0.1*ln(1/3)
-// ln((M/2-m)/(M-m))/-10 where M = max and m = min
+// using initial condition f(10) = 20
+// => ln((M/2-m)/(M-m))/-10 where M = max and m = min
 
-module.exports.requiredPostDifficulty = function(delta) {
-  Util.assert(typeof(delta) === 'number');
-  Util.assert(delta >= 0);
-  // required post difficulty decreases exponentially in time
-  // after each post. This vastly increases the difficulty of
-  // spamming.
-  return Math.round(min_p + (p_diff) * Math.exp(k_p * delta));
+// required post difficulty decays exponentially in time
+// after each post. This vastly increases the difficulty of
+// spamming.
+// If someone wants to post every 5 seconds, they have to do about
+// 128 times as much work as someone who posts every 10 seconds.
+
+module.exports.requiredPostDifficulty = function(delta_t) {
+  Util.assert(typeof(delta_t) === 'number');
+  Util.assert(delta_t >= 0);
+  return Math.round(min_p + (p_diff) * Math.exp(k_p * delta_t));
 }
 
 // Threads use a combination of time decay and # of posts
-// if there have been very few posts since the last thread was
+// If there have been very few posts since the last thread was
 // created, it will be much more difficult to create a new thread
 // this encourages users to respond to threads instead of creating
 // new ones
 
+module.exports.requiredThreadDifficulty = function(delta_t, numPosts) {
+  Util.assert(typeof(delta_t) === 'number');
+  Util.assert(delta_t >= 0);
+  Util.assert(typeof(numPosts) === 'number');
+  Util.assert(numPosts >= 0);
+  // probably of the form f(t)g(n) + h(t)
+}
 // since difficulties are on a log scale,
 // they have to be added logarithmically
 // here we use the identity log2(x + y) = log2(x) + log2(1 + y/x)
