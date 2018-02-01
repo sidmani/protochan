@@ -100,7 +100,6 @@ module.exports = [
       let header = common.validPostHeaderFromData(d_buf);
 
       let p = new Post(header, d_buf);
-      common.assert(p);
       common.assert(p instanceof Post);
     }
   },

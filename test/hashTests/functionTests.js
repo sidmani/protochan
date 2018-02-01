@@ -22,13 +22,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+var common = require('../testCommon.js');
 var Util = require('../../js/util.js');
 var blake2s = require('../../js/hash/blake2s.js');
 
 module.exports = [
   { description: "Blake2s produces correct results",
     fn: function() {
-      Util.assert(Util.uint8ArrToHex(blake2s.digest(new Uint8Array([97, 98, 99]))) ===
+      common.assert(Util.uint8ArrToHex(blake2s.digest(new Uint8Array([97, 98, 99]))) ===
   '508c5e8c327c14e2e1a72ba34eeb452f37458b209ed63a294d999b4c86675982');
     }
   }

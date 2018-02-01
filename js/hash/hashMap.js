@@ -37,7 +37,7 @@ module.exports = class HashMap {
   }
 
   setRaw(hash, obj) {
-    // TODO: parameter type assertion
+    Util.assert(hash instanceof Uint8Array);
     this[Util.uint8ArrToHex(hash)] = obj;
   }
 

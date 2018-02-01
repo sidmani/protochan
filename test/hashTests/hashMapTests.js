@@ -34,6 +34,21 @@ module.exports = [
       common.assert(map.get(hash) === block);
     }
   },
+  { description: "HashMap.setRaw validates hash type",
+    dual: true,
+    fn: function(shouldPass) {
+      let block = common.validPost();
+      let map = new HashMap();
+      let hash;
+      if (shouldPass) {
+        hash = new Uint8Array([5, 4, 1]);
+      } else {
+        hash = [5, 4, 1];
+      }
+
+      map.setRaw(hash, block);
+    }
+  },
   { description: "HashMap.setRaw sets block",
     fn: function() {
       let block = common.validPost();

@@ -33,14 +33,6 @@ module.exports.assert = assert = function(condition, description) {
   }
 }
 
-// module.exports.assertDataViewEquality = function(d1, d2) {
-//   assert(d1.byteLength === d2.byteLength);
-//   for (let i = 0; i < d1.byteLength; i++) {
-//     assert(d1.getUint8(i) === d2.getUint8(i));
-//     // XXX: maybe use getUint32 to decrease # of comparisons?
-//   }
-// }
-
 module.exports.assertArrayEquality = function(arr1, arr2) {
   assert(arr1.byteLength === arr2.byteLength);
   for (let i = 0; i < arr1.byteLength; i++) {

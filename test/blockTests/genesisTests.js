@@ -35,7 +35,8 @@ module.exports = [
       if (shouldPass) {
         d_buf = new ArrayBuffer(64);
       } else {
-        d_buf = new ArrayBuffer(63);
+        // make sure that super constructor check is not failing
+        d_buf = new ArrayBuffer(128);
       }
 
       let dataView = new DataView(d_buf);
@@ -90,7 +91,7 @@ module.exports = [
       if (shouldPass) {
         header.data[79] = 0xec; //nonzero max threads
       } else {
-        header.data[79] = 0x00; //nonzero max threads
+        header.data[79] = 0x00; //zero max threads
       }
       new Genesis(header, d_buf);
     }

@@ -25,9 +25,9 @@ var Post = require('../js/block/post.js');
 var Header = require('../js/block/header.js');
 var Block = require('../js/block/block.js');
 var Genesis = require('../js/block/genesis.js');
+var Thread = require('../js/block/thread.js');
 var GenesisPost = require('../js/block/genesisPost.js');
 var Hash = require('../js/hash/blake2s.js');
-var Util = require('../js/util.js');
 
 module.exports.assert = assert = function(condition, description) {
   if (!condition) {
@@ -57,6 +57,24 @@ module.exports.assertJSArrayEquality = function(arr1, arr2) {
   }
 }
 
+module.exports.validThread = function(post) {
+  assert(post instanceof Post)
+  let d_buf = new ArrayBuffer(64);
+  let arr = new Uint8Array(d_buf);
+  for (let i = 0; i < 32; i++) {
+    arr[i] = 0x00;
+  }
+  let postHash = Hash.digest(post.header.data);
+
+  for (let i = 32; i < 64; i++) {
+    arr[i] = postHash[i-32];
+  }
+
+  let header = validThreadHeaderFromData(d_buf);
+
+  return new Thread(header, d_buf);
+}
+
 module.exports.validPost = function() {
   let d_buf = new ArrayBuffer(41);
   let view = new DataView(d_buf);
@@ -83,7 +101,7 @@ module.exports.validGenesisPost = function() {
 };
 
 module.exports.validGenesis = function(post) {
-  Util.assert(post instanceof GenesisPost)
+  assert(post instanceof GenesisPost)
   let d_buf = new ArrayBuffer(64);
   let arr = new Uint8Array(d_buf);
   for (let i = 0; i < 32; i++) {

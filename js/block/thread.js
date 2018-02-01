@@ -44,8 +44,6 @@ module.exports = class ThreadBlock extends Block {
     // the first thread has a zero hash
     Difficulty.verify(this.getThread(0), 256);
 
-    // XXX: untested
-    // XXX: is there a better way of mapping the threads to posts?
     this.map = new HashMap();
 
     // put all threads in data into a hashmap for easy lookup

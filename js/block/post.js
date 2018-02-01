@@ -30,7 +30,7 @@ const POST_BLOCK_ID = 0x01;
 module.exports = class Post extends Block {
   constructor(header, data) {
     super(header, data);
-    Util.assert(header.blockType() === POST_BLOCK_ID, 'Header block type is incorrect.');
+    Util.assert(header.blockType() === POST_BLOCK_ID);
 
     // 0xffff between len and data so that data starts at
     // a byte index divisible by 4.

@@ -75,6 +75,7 @@ module.exports = class Head {
     this.timestamp = post.header.timestamp();
   }
 
+  // XXX: untested
   stageThread(thread, hash) {
     // parameter validation
     Util.assert(thread instanceof Thread);
@@ -110,7 +111,7 @@ module.exports = class Head {
   }
 
   commitThread() {
-    Util.assert(this.stage);
+    Util.assert(this.stage instanceof Thread);
 
     this.head = this.stage;
     this.height += 1;
@@ -118,11 +119,13 @@ module.exports = class Head {
     this.stage = undefined;
   }
 
+  // XXX: untested
   pushThread(thread, hash) {
     this.stageThread(thread, hash);
     this.commitThread();
   }
 
+  // XXX: untested
   sumWork() {
     return this.work; // don't calculate it every time
   }

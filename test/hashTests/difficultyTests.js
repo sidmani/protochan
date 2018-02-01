@@ -47,7 +47,7 @@ module.exports = [
   },
   { description: "countLeadingZeroes returns 0 for empty array",
     fn: function() {
-      common.assert(Difficulty.countLeadingZeroes([]) === 0);
+      common.assert(Difficulty.countLeadingZeroes(new Uint8Array([])) === 0);
       return true;
     }
   },

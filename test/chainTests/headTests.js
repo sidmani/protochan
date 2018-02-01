@@ -268,5 +268,63 @@ module.exports = [
 
       common.assert(head.height === 178);
     }
+  },
+  { description: "Head.discardStage works",
+    fn: function() {
+      let originalPost = common.validPost();
+      let originalPostHash = originalPost.hash();
+      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+      head.stage = common.validThread(originalPost); // not undefined
+      head.discardStage();
+      common.assert(head.stage === undefined);
+    }
+  },
+  { description: "Head.commitThread validates stage",
+    dual: true,
+    fn: function(shouldPass) {
+      let originalPost = common.validPost();
+      let originalPostHash = originalPost.hash();
+      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+
+      if (shouldPass) {
+        head.stage = common.validThread(originalPost);
+      } else {
+        head.stage = 5;
+      }
+
+      head.commitThread();
+    }
+  },
+  { description: "Head.commitThread increments height",
+    fn: function() {
+      let originalPost = common.validPost();
+      let originalPostHash = originalPost.hash();
+      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+      head.stage = common.validThread(originalPost);
+      head.commitThread();
+      common.assert(head.height === 178);
+    }
+  },
+  { description: "Head.commitThread sets head",
+    fn: function() {
+      let originalPost = common.validPost();
+      let originalPostHash = originalPost.hash();
+      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+      let thread = common.validThread(originalPost);
+      head.stage = thread;
+      head.commitThread();
+      common.assert(head.head === thread);
+    }
+  },
+  { description: "Head.commitThread clears stage",
+    fn: function() {
+      let originalPost = common.validPost();
+      let originalPostHash = originalPost.hash();
+      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+      let thread = common.validThread(originalPost);
+      head.stage = thread;
+      head.commitThread();
+      common.assert(head.stage === undefined);
+    }
   }
 ]
