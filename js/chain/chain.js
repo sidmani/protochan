@@ -39,6 +39,9 @@ module.exports = class Chain {
     // create the genesis thread
     let newHead = this.createHead(originalPost, genesisBlock);
 
+    // TODO: set and verify board #
+    // TODO: protocol version
+
     // the underlying data storage
     this.commonMap = new HashMap();
 

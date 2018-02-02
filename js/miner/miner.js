@@ -34,7 +34,7 @@ module.exports = class Miner {
   }
 
   mine(reqDiff, fromNonce, toNonce) {
-    fromNonce = fromNonce ? fromNonce : 0;
+    fromNonce = fromNonce ? fromNonce : 0x00000000;
     toNonce = toNonce ? toNonce : 0xffffffff;
     this.header.setNonce(fromNonce);
     for (let i = fromNonce; i <= toNonce; i++) {

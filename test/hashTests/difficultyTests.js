@@ -104,39 +104,44 @@ module.exports = [
       Difficulty.verify(arr, 37);
     }
   },
-  { description: "Post validates delta-t type",
-    dual: true,
-    fn: function(shouldPass) {
-      if (shouldPass) {
-        Difficulty.requiredPostDifficulty(5);
-      } else {
-        Difficulty.requiredPostDifficulty('food')
-      }
-    }
-  },
-  { description: "Post validates delta-t value",
-    dual: true,
-    fn: function(shouldPass) {
-      if (shouldPass) {
-        Difficulty.requiredPostDifficulty(5);
-      } else {
-        Difficulty.requiredPostDifficulty(-2)
-      }
-    }
-  },
-  { description: "Post difficulty f(0) = 40",
+  { description: "Post difficulty f(0) = max difficulty",
     fn: function() {
-      common.assert(Difficulty.requiredPostDifficulty(0) === 40);
+      common.assert(Difficulty.requiredPostDifficulty(0, 10, 40) === 40);
     }
   },
-  { description: "Post difficulty f(10) = 20",
+  { description: "Post difficulty f(10) = max difficulty / 2",
     fn: function() {
-      common.assert(Difficulty.requiredPostDifficulty(10) === 20);
+      common.assert(Difficulty.requiredPostDifficulty(10, 10, 40) === 20);
     }
   },
-  { description: "Post difficulty = 10 when delta-t -> ∞",
+  { description: "Post difficulty = 10 when delta-t increases",
     fn: function() {
-      common.assert(Difficulty.requiredPostDifficulty(999999999) === 10);
+      common.assert(Difficulty.requiredPostDifficulty(999999999,  10, 40) === 10);
+    }
+  },
+  { description: "Thread difficulty f(0 sec, 0 posts) = max difficulty",
+    fn: function() {
+      common.assert(Difficulty.requiredThreadDifficulty(0, 0, 255, 24, 64) === 64);
+    }
+  },
+  { description: "Thread difficulty f(300 sec, 0 posts) = 0.5*difficulty interval + minimum difficulty + 1",
+    fn: function() {
+      common.assert(Difficulty.requiredThreadDifficulty(300, 0, 255, 24, 64) === 45);
+    }
+  },
+  { description: "Thread difficulty f(0 sec, maxThread posts) = 0.5*difficulty interval + minimum difficulty + 1",
+    fn: function() {
+      common.assert(Difficulty.requiredThreadDifficulty(0, 255, 255, 24, 64) === 45);
+    }
+  },
+  { description: "Thread difficulty f(300 sec, maxThread posts) = minimum difficulty + 2",
+    fn: function() {
+      common.assert(Difficulty.requiredThreadDifficulty(300, 255, 255, 24, 64) === 26);
+    }
+  },
+  { description: "Thread difficulty equals minimum difficulty as inputs increase",
+    fn: function() {
+      common.assert(Difficulty.requiredThreadDifficulty(99999999, 99999999, 255, 24, 64) === 24);
     }
   }
 ];

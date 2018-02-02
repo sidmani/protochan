@@ -58,18 +58,18 @@ module.exports = [
     }
   },
   { description: "HashMap enumerates set objects",
-      fn: function() {
-        let block1 = common.validPost();
-        let block2 = common.validPost();
-        let block3 = common.validPost();
+    fn: function() {
+      let block1 = common.validPost();
+      let block2 = common.validPost();
+      let block3 = common.validPost();
 
-        let map = new HashMap();
-        let hash1 = map.setRaw(new Uint8Array([5, 4, 3]), block1);
-        let hash2 = map.setRaw(new Uint8Array([6, 2, 1]), block2);
-        let hash3 = map.setRaw(new Uint8Array([5, 7, 8]), block3);
+      let map = new HashMap();
+      let hash1 = map.setRaw(new Uint8Array([5, 4, 3]), block1);
+      let hash2 = map.setRaw(new Uint8Array([6, 2, 1]), block2);
+      let hash3 = map.setRaw(new Uint8Array([5, 7, 8]), block3);
 
-        let result = map.enumerate();
-        common.assertJSArrayEquality(result, [block1, block2, block3]);
-      }
+      let result = map.enumerate();
+      common.assertJSArrayEquality(result, [block1, block2, block3]);
+    }
   }
 ];
