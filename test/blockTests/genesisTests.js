@@ -79,33 +79,5 @@ module.exports = [
       }
       new Genesis(header, d_buf);
     }
-  },
-  { description: "Genesis block validates nonzero max threads",
-    dual: true,
-    fn: function(shouldPass) {
-      let d_buf = new ArrayBuffer(64);
-      let header = common.validThreadHeaderFromData(d_buf);
-      for (let i = 11; i < 43; i++) {
-        header.data[i] = 0;
-      }
-      if (shouldPass) {
-        header.data[79] = 0xec; //nonzero max threads
-      } else {
-        header.data[79] = 0x00; //zero max threads
-      }
-      new Genesis(header, d_buf);
-    }
-  },
-  { description: "Genesis block returns correct max threads",
-    fn: function() {
-      let d_buf = new ArrayBuffer(64);
-      let header = common.validThreadHeaderFromData(d_buf);
-      header.data[79] = 0xff;
-      for (let i = 11; i < 43; i++) {
-        header.data[i] = 0;
-      }
-      let gen = new Genesis(header, d_buf);
-      common.assert(gen.maxThreads() === 0xff);
-    }
   }
 ];

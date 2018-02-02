@@ -24,12 +24,48 @@
 
 var Post = require('./post.js');
 var Difficulty = require('../hash/difficulty.js');
+var Util = require('../util.js');
 
 module.exports = class GenesisPost extends Post {
   constructor(header, data) {
     super(header, data);
     // Assert that prevHash has maximum difficulty
     Difficulty.verify(header.prevHash(), 256);
+
+    Util.assert(this.contentLength() >= 5); // 5 bytes of options
+
+    // max >= min difficulty
+    Util.assert(this.maxPostDifficulty() >= this.minPostDifficulty());
+    Util.assert(this.maxThreadDifficulty() >= this.minThreadDifficulty());
+
+    // nonzero max threads
+    Util.assert(this.maxThreads() > 0);
+  }
+
+  // the data contains the configuration for the board
+  // MIN_POST_DIFFICULTY: uint8,
+  // MAX_POST_DIFFICULTY: uint8,
+  // MIN_THREAD_DIFFICULTY: uint8,
+  // MAX_THREAD_DIFFICULTY: uint8,
+  // MAX_THREAD_COUNT
+  minPostDifficulty() {
+    return this.data[4];
+  }
+
+  maxPostDifficulty() {
+    return this.data[5];
+  }
+
+  minThreadDifficulty() {
+    return this.data[6];
+  }
+
+  maxThreadDifficulty() {
+    return this.data[7];
+  }
+
+  maxThreads() {
+    return this.data[8];
   }
 
   // to extend the protocol with options, store additional

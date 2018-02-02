@@ -23,27 +23,37 @@
 // SOFTWARE.
 
 var allTests = {
-  minerTests: require('./minerTests/group.js'),
-  hashTests: require('./hashTests/group.js'),
-  headerTests: require('./headerTests/headerTests.js'),
-  blockTests: require('./blockTests/group.js'),
-  chainTests: require('./chainTests/group.js'),
+  miner: require('./minerTests/group.js'),
+  hash: require('./hashTests/group.js'),
+  header: require('./headerTests/headerTests.js'),
+  block: require('./blockTests/group.js'),
+  chain: require('./chainTests/group.js'),
+  board: require('./boardTests/group.js')
 }
 
 function runTests() {
   var verbose = (process.argv.indexOf('-v') > -1);
   var noCatch = (process.argv.indexOf('-n') > -1);
-  var debug = (process.argv.indexOf('-d') > -1);
+
+  let debugIdx = process.argv.indexOf('-d');
+  var debug = (debugIdx > -1 ? process.argv[debugIdx+1] : undefined);
+
+  if (debugIdx > -1 && !debug) {
+    process.stdout.write('Error: -d option must specify name.\n');
+    return;
+  }
 
   var numSuccess = 0;
   var numFailure = 0;
   console.log('RUNNING TESTS...');
   for (var groupName in allTests) {
+    if (debug && groupName !== debug) {
+      continue;
+    }
     var testGroup = allTests[groupName];
     var success = true;
     process.stdout.write('🤖 RUNNING GROUP: ' + groupName + ' (' + testGroup.length + (verbose?')\n':') '));
     for (testCase in testGroup) {
-      if (debug && !testGroup[testCase].debug) { continue; }
       let testPass = true;
       let error = undefined;
       if (testGroup[testCase].dual) {

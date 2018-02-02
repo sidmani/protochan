@@ -22,19 +22,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Thread = require('./thread.js');
-var Difficulty = require('../hash/difficulty.js');
+var GenesisPost = require('../block/genesisPost.js');
 var Util = require('../util.js');
 
-module.exports = class Genesis extends Thread {
-  constructor(header, dataBuffer) {
-    super(header, dataBuffer);
-
-    // Assert that prevHash is all zeroes (max difficulty)
-    Difficulty.verify(this.header.prevHash(), 256);
-
-    // Assert that data is 64 bytes, since the genesis block
-    // can only have one thread/post pair associated with it
-    Util.assert(this.data.byteLength === 64);
+module.exports = class Configuration {
+  constructor(originalPost) {
+    Util.assert(originalPost instanceof GenesisPost);
+    this.MIN_POST_DIFFICULTY = originalPost.minPostDifficulty();
+    this.MAX_POST_DIFFICULTY = originalPost.maxPostDifficulty();
+    this.MIN_THREAD_DIFFICULTY = originalPost.minThreadDifficulty();
+    this.MAX_THREAD_DIFFICULTY = originalPost.maxThreadDifficulty();
+    this.MAX_THREAD_COUNT = originalPost.maxThreads();
+    this.BOARD_ID = originalPost.header.board();
   }
 }

@@ -156,6 +156,15 @@ module.exports = [
       common.assert(head.timestamp === 18643);
     }
   },
+  { description: "Head sets unconfirmed post count",
+    fn: function() {
+      let originalPost = common.validPost();
+      let threadHash = new Uint8Array(32);
+      let map = new HashMap();
+      let head = new Head(originalPost, threadHash, map, 1077);
+      common.assert(head.unconfirmedPosts === 1);
+    }
+  },
   { description: "Head.pushPost validates post type",
     dual: true,
     fn: function(shouldPass) {
@@ -223,6 +232,20 @@ module.exports = [
       head.pushPost(nextPost);
 
       common.assertArrayEquality(head.head, nextPost.hash());
+    }
+  },
+  { description: "Head.pushPost increments unconfirmed post count",
+    fn: function() {
+      let originalPost = common.validPost();
+      let originalPostHash = originalPost.hash();
+      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+      let nextPost = common.validPost();
+      for (let i = 11; i < 43; i++) {
+        nextPost.header.data[i] = originalPostHash[i-11];
+      }
+      head.pushPost(nextPost);
+
+      common.assert(head.unconfirmedPosts === 2);
     }
   },
   { description: "Head.pushPost sets timestamp",
@@ -305,6 +328,17 @@ module.exports = [
       common.assert(head.height === 178);
     }
   },
+  { description: "Head.commitThread resets unconfirmed post count",
+    fn: function() {
+      let originalPost = common.validPost();
+      let originalPostHash = originalPost.hash();
+      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+      head.stage = common.validThread(originalPost);
+      common.assert(head.unconfirmedPosts === 1);
+      head.commitThread();
+      common.assert(head.unconfirmedPosts === 0);
+    }
+  },
   { description: "Head.commitThread sets head",
     fn: function() {
       let originalPost = common.validPost();
@@ -325,6 +359,15 @@ module.exports = [
       head.stage = thread;
       head.commitThread();
       common.assert(head.stage === undefined);
+    }
+  },
+  { description: "Head.getBlockAtHead retrieves head from map",
+    fn: function() {
+      let originalPost = common.validPost();
+      let originalPostHash = originalPost.hash();
+      let map = new HashMap();
+      let head = new Head(originalPost, new Uint8Array(32), map, 177);
+      common.assert(head.getBlockAtHead() === originalPost);
     }
   }
 ]

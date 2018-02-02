@@ -33,20 +33,39 @@ module.exports = class Head {
     // base is the starting point of the chain
     // if this is part of a fork, base is the first block on branch after the fork
 
-    // * run checks *
+    // parameter assertions
     Util.assert(originalPost instanceof Post);
     Util.assert(threadHash instanceof Uint8Array);
     Util.assert(map instanceof HashMap);
     Util.assert(typeof(startingHeight) === 'number');
     Util.assert(startingHeight >= 0);
 
+    // the starting height of originalPost
     this.height = startingHeight;
+
+    // the associated thread
     this.thread = threadHash;
+
+    // the underlying hashmap
     this.map = map;
 
+    // set the associated thread for the original post
     originalPost.thread = this.thread;
+
+    // insert the post into the hashmap
+    // and point this.head to the post's hash
     this.head = this.map.set(originalPost);
+
+    // set timestamp to post's timestamp
     this.timestamp = originalPost.header.timestamp();
+
+    // this is the number of posts that have been inserted since the last thread block
+    // summing this value for all heads yields the numPosts used in thread difficulty calculations
+    this.unconfirmedPosts = 1;
+  }
+
+  getBlockAtHead() {
+    return this.map.get(this.head);
   }
 
   pushPost(post) {
@@ -55,7 +74,8 @@ module.exports = class Head {
 
     let hash = post.hash();
     // TODO: difficulty check
-    let delta_t = post.header.timestamp() - this.map.get(this.head).header.timestamp();
+    let delta_t = post.header.timestamp() - this.getBlockAtHead().header.timestamp();
+    // XXX: max diff and min diff need to be set globally
     let reqDiff = Difficulty.requiredPostDifficulty(delta_t);
     // Difficulty.verify(hash, reqDiff);
     // this breaks the unit tests :(
@@ -68,11 +88,12 @@ module.exports = class Head {
 
     // post is OK!
     post.thread = this.thread;
-    // don't waste time computing the hash again
+    // don't need to compute the hash again
     this.map.setRaw(hash, post);
     this.head = hash;
     this.height += 1;
     this.timestamp = post.header.timestamp();
+    this.unconfirmedPosts += 1;
   }
 
   // XXX: untested
@@ -111,12 +132,15 @@ module.exports = class Head {
   }
 
   commitThread() {
+    // since stage is never set from outside, check may be unnecessary
     Util.assert(this.stage instanceof Thread);
 
     this.head = this.stage;
     this.height += 1;
     // don't update the timestamp, since that depends only on posts
-    this.stage = undefined;
+    this.discardStage();
+
+    this.unconfirmedPosts = 0;
   }
 
   // XXX: untested

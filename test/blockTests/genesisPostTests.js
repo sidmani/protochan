@@ -26,12 +26,13 @@ var common = require('../testCommon.js');
 var GenesisPost = require('../../js/block/genesisPost.js');
 
 module.exports = [
-  { description: "GenesisPost validates zero prevHash",
+  { description: "Genesis post validates zero prevHash",
     dual: true,
     fn: function(shouldPass) {
       let d_buf = new ArrayBuffer(41);
       let dataView = new DataView(d_buf);
       dataView.setUint32(0, 0x0024ffff);
+      dataView.setUint8(8, 0xff); // maxThreads != 0
       dataView.setUint8(40, 0xff);
       let header = common.validPostHeaderFromData(d_buf);
 
@@ -48,6 +49,150 @@ module.exports = [
         }
       }
       new GenesisPost(header, d_buf);
+    }
+  },
+  { description: "Genesis post validates minimum contentLength",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf;
+      if (shouldPass) {
+        d_buf = new ArrayBuffer(10);
+        let dataView = new DataView(d_buf);
+        dataView.setUint32(0, 0x0005ffff);
+        dataView.setUint8(9, 0xff);
+        dataView.setUint8(8, 0xff); // maxThreads != 0
+      } else {
+        d_buf = new ArrayBuffer(8);
+        let dataView = new DataView(d_buf);
+        dataView.setUint32(0, 0x0003ffff);
+        dataView.setUint8(7, 0xff);
+        dataView.setUint8(8, 0xff); // maxThreads != 0
+      }
+      let header = common.validPostHeaderFromData(d_buf);
+      new GenesisPost(header, d_buf);
+    }
+  },
+  { description: "Genesis post validates max post difficulty greater than min post difficulty",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(10);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0005ffff);
+      dataView.setUint8(4, 0xcc);
+      dataView.setUint8(8, 0xff); // maxThreads != 0
+      dataView.setUint8(9, 0xff);
+
+      if (shouldPass) {
+        dataView.setUint8(5, 0xcd);
+      } else {
+        dataView.setUint8(5, 0xcb);
+      }
+
+      let header = common.validPostHeaderFromData(d_buf);
+      new GenesisPost(header, d_buf);
+    }
+  },
+  { description: "Genesis post validates max thread difficulty greater than max post difficulty",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(10);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0005ffff);
+      dataView.setUint8(6, 0xcc);
+      dataView.setUint8(8, 0xff); // maxThreads != 0
+      dataView.setUint8(9, 0xff);
+
+      if (shouldPass) {
+        dataView.setUint8(7, 0xcd);
+      } else {
+        dataView.setUint8(7, 0xcb);
+      }
+
+      let header = common.validPostHeaderFromData(d_buf);
+      new GenesisPost(header, d_buf);
+    }
+  },
+  { description: "Genesis post validates max thread count > 0",
+    dual: true,
+    fn: function(shouldPass) {
+      let d_buf = new ArrayBuffer(10);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0005ffff);
+      dataView.setUint8(9, 0xff);
+
+      if (shouldPass) {
+        dataView.setUint8(8, 0x01);
+      } else {
+        dataView.setUint8(8, 0x00);
+      }
+
+      let header = common.validPostHeaderFromData(d_buf);
+      new GenesisPost(header, d_buf);
+    }
+  },
+  { description: "Genesis post returns correct minimum post difficulty",
+    fn: function() {
+      let d_buf = new ArrayBuffer(10);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0005ffff);
+      dataView.setUint32(4, 0xcccdcecf);
+      dataView.setUint8(8, 0xff); // maxThreads != 0
+      dataView.setUint8(9, 0xff);
+      let header = common.validPostHeaderFromData(d_buf);
+      let p = new GenesisPost(header, d_buf);
+      common.assert(p.minPostDifficulty() === 0xcc);
+    }
+  },
+  { description: "Genesis post returns correct maximum post difficulty",
+    fn: function() {
+      let d_buf = new ArrayBuffer(10);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0005ffff);
+      dataView.setUint32(4, 0xcccdcecf);
+      dataView.setUint8(8, 0xff); // maxThreads != 0
+      dataView.setUint8(9, 0xff);
+      let header = common.validPostHeaderFromData(d_buf);
+      let p = new GenesisPost(header, d_buf);
+      common.assert(p.maxPostDifficulty() === 0xcd);
+    }
+  },
+  { description: "Genesis post returns correct minimum thread difficulty",
+    fn: function() {
+      let d_buf = new ArrayBuffer(10);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0005ffff);
+      dataView.setUint32(4, 0xcccdcecf);
+      dataView.setUint8(8, 0xff); // maxThreads != 0
+      dataView.setUint8(9, 0xff);
+      let header = common.validPostHeaderFromData(d_buf);
+      let p = new GenesisPost(header, d_buf);
+      common.assert(p.minThreadDifficulty() === 0xce);
+    }
+  },
+  { description: "Genesis post returns correct maximum thread difficulty",
+    fn: function() {
+      let d_buf = new ArrayBuffer(10);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0005ffff);
+      dataView.setUint32(4, 0xcccdcecf);
+      dataView.setUint8(8, 0xff); // maxThreads != 0
+      dataView.setUint8(9, 0xff);
+      let header = common.validPostHeaderFromData(d_buf);
+      let p = new GenesisPost(header, d_buf);
+      common.assert(p.maxThreadDifficulty() === 0xcf);
+    }
+  },
+  { description: "Genesis post returns correct maximum thread count",
+    fn: function() {
+      let d_buf = new ArrayBuffer(10);
+      let dataView = new DataView(d_buf);
+      dataView.setUint32(0, 0x0005ffff);
+      dataView.setUint32(4, 0xcccdcecf);
+      dataView.setUint8(8, 0x9a); // maxThreads != 0
+      dataView.setUint8(9, 0xff);
+      let header = common.validPostHeaderFromData(d_buf);
+      let p = new GenesisPost(header, d_buf);
+      common.assert(p.maxThreads() === 0x9a);
     }
   }
 ]

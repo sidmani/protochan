@@ -30,17 +30,21 @@ var GenesisPost = require('../block/genesisPost.js');
 var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
 var Head = require('./head.js');
+var Configuration = require('../board/config.js');
 
 module.exports = class Chain {
   constructor(originalPost, genesisBlock) {
     // validate parameters
     Util.assert(genesisBlock instanceof Genesis);
     Util.assert(originalPost instanceof GenesisPost);
-    // create the genesis thread
-    let newHead = this.createHead(originalPost, genesisBlock);
 
-    // TODO: set and verify board #
     // TODO: protocol version
+
+    // XXX: untested
+    Util.assert(originalPost.header.board() === genesisBlock.header.board());
+
+    // XXX: untested
+    this.config = new Configuration(originalPost);
 
     // the underlying data storage
     this.commonMap = new HashMap();
@@ -50,6 +54,9 @@ module.exports = class Chain {
 
     // points to top of chain of thread blocks
     this.threadHead = newHead.thread;
+
+    // create the genesis thread
+    let newHead = this.createHead(originalPost, genesisBlock);
 
     // put that head into the hashmap
     this.headMap.setRaw(newHead.thread, newHead);

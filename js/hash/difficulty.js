@@ -51,8 +51,7 @@ module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
   return zeroes;
 };
 
-
-// Posts use a simple time exponential decay model for difficulty
+// Posts use a simple exponential decay model over time for difficulty
 // a good GPU gets 1-3GH/s and 2^40 = 1099 GH, 2^20 = 0.001 GH
 
 // required post difficulty decays exponentially in time
@@ -61,10 +60,10 @@ module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
 // If someone wants to post every 5 seconds, they have to do about
 // 128 times as much work as someone who posts every 10 seconds.
 
-module.exports.requiredPostDifficulty = function(delta_t, minDiff, maxDiff) {
+module.exports.requiredPostDifficulty = function(deltaT, minDiff, maxDiff) {
   let interval = maxDiff - minDiff;
   let k = Math.log((maxDiff/2-minDiff)/interval) / -10;
-  return Math.round(minDiff + (interval) * Math.exp(-k * delta_t));
+  return Math.round(minDiff + (interval) * Math.exp(-k * deltaT));
 }
 
 // Threads use a combination of time decay and # of posts
@@ -73,19 +72,19 @@ module.exports.requiredPostDifficulty = function(delta_t, minDiff, maxDiff) {
 // this encourages users to respond to threads instead of creating
 // new ones
 
-// f(t, n) = k1*e^-ct + k2*e^-dn + k3
+// f(t, n) = k1*e^-ct + k2*e^-dn + min_t
 // f(0, 0) = max_t
 // f(300, 0) = 3/4 * max_t
 // f(0, maxThreads) = 3/4 * max_t
 // f(300, maxThreads) = max_t/2
 // f(∞, ∞) = min_t
 
-module.exports.requiredThreadDifficulty = function(delta_t, numPosts, maxThreads, minDiff, maxDiff) {
+module.exports.requiredThreadDifficulty = function(deltaT, numPosts, maxThreads, minDiff, maxDiff) {
   let interval = maxDiff - minDiff;
   let c = Math.log(3/(2*interval)) / -300;
   let d = Math.log(3/(2*interval)) / -maxThreads;
 
-  return Math.round(minDiff + interval/2*(Math.exp(-c*delta_t) + Math.exp(-d*numPosts)));
+  return Math.round(minDiff + interval/2*(Math.exp(-c*deltaT) + Math.exp(-d*numPosts)));
 }
 
 // since difficulties are on a log scale,
