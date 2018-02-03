@@ -95,8 +95,7 @@ module.exports = class Header {
     return this._data.getUint32(75);
   }
 
-  // genesis block uses this for max thread count
-  // for other blocks, can be used for additional flags
+  // additional flags
   reserved() {
     return this._data.getUint8(79);
   }

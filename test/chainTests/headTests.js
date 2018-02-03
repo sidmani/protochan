@@ -220,7 +220,7 @@ module.exports = [
       common.assertArrayEquality(nextPost.thread, threadHash);
     }
   },
-  { description: "Head.pushPost sets head",
+  { description: "Head.pushPost sets pointer",
     fn: function() {
       let originalPost = common.validPost();
       let originalPostHash = originalPost.hash();
@@ -231,7 +231,7 @@ module.exports = [
       }
       head.pushPost(nextPost);
 
-      common.assertArrayEquality(head.head, nextPost.hash());
+      common.assertArrayEquality(head.pointer, nextPost.hash());
     }
   },
   { description: "Head.pushPost increments unconfirmed post count",
@@ -339,7 +339,7 @@ module.exports = [
       common.assert(head.unconfirmedPosts === 0);
     }
   },
-  { description: "Head.commitThread sets head",
+  { description: "Head.commitThread sets pointer",
     fn: function() {
       let originalPost = common.validPost();
       let originalPostHash = originalPost.hash();
@@ -347,7 +347,7 @@ module.exports = [
       let thread = common.validThread(originalPost);
       head.stage = thread;
       head.commitThread();
-      common.assert(head.head === thread);
+      common.assert(head.pointer === thread);
     }
   },
   { description: "Head.commitThread clears stage",

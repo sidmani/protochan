@@ -28,11 +28,17 @@ var Thread = require('../block/thread.js');
 var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
 
+///////////////////////
+// A head represents the top of a chain of blocks
+// Every head is guaranteed to be the top of a continuous chain to the genesis block
+///////////////////////
+
 module.exports = class Head {
   constructor(originalPost, threadHash, map, startingHeight) {
     // base is the starting point of the chain
     // if this is part of a fork, base is the first block on branch after the fork
 
+    //////////////////////////
     // parameter assertions
     Util.assert(originalPost instanceof Post);
     Util.assert(threadHash instanceof Uint8Array);
@@ -40,6 +46,8 @@ module.exports = class Head {
     Util.assert(typeof(startingHeight) === 'number');
     Util.assert(startingHeight >= 0);
 
+    //////////////////////////
+    // Set instance variables
     // the starting height of originalPost
     this.height = startingHeight;
 
@@ -49,12 +57,13 @@ module.exports = class Head {
     // the underlying hashmap
     this.map = map;
 
+    ///////////////////////////
+    // Insert the original post
     // set the associated thread for the original post
     originalPost.thread = this.thread;
 
-    // insert the post into the hashmap
-    // and point this.head to the post's hash
-    this.head = this.map.set(originalPost);
+    // insert the post into the hashmap; this.pointer = post's hash
+    this.pointer = this.map.set(originalPost);
 
     // set timestamp to post's timestamp
     this.timestamp = originalPost.header.timestamp();
@@ -65,7 +74,7 @@ module.exports = class Head {
   }
 
   getBlockAtHead() {
-    return this.map.get(this.head);
+    return this.map.get(this.pointer);
   }
 
   pushPost(post) {
@@ -74,7 +83,8 @@ module.exports = class Head {
 
     let hash = post.hash();
     // TODO: difficulty check
-    let delta_t = post.header.timestamp() - this.getBlockAtHead().header.timestamp();
+    // XXX: timestamp should be calculated based on last post block, not last any block
+    let delta_t = post.header.timestamp() - this.timestamp;
     // XXX: max diff and min diff need to be set globally
     let reqDiff = Difficulty.requiredPostDifficulty(delta_t);
     // Difficulty.verify(hash, reqDiff);
@@ -82,7 +92,7 @@ module.exports = class Head {
 
     // check that post's prevHash points to head
     Util.assertArrayEquality(
-      this.head,
+      this.pointer,
       post.header.prevHash()
     );
 
@@ -90,7 +100,7 @@ module.exports = class Head {
     post.thread = this.thread;
     // don't need to compute the hash again
     this.map.setRaw(hash, post);
-    this.head = hash;
+    this.pointer = hash;
     this.height += 1;
     this.timestamp = post.header.timestamp();
     this.unconfirmedPosts += 1;
@@ -112,7 +122,7 @@ module.exports = class Head {
     let latestPost = thread.getPostForThread(this.thread);
     if (latestPost) {
       // assert latestPost hash is equal to head hash
-      Util.assertArrayEquality(latestPost, this.head);
+      Util.assertArrayEquality(latestPost, this.pointer);
     } else {
       // check if genesis case
 
@@ -120,7 +130,7 @@ module.exports = class Head {
       Util.assertArrayEquality(hash, this.thread);
 
       // post in thread block's genesis row equals this.head
-      Util.assertArrayEquality(thread.getPost(0), this.head);
+      Util.assertArrayEquality(thread.getPost(0), this.pointer);
     }
 
     // thread is OK!
@@ -135,7 +145,7 @@ module.exports = class Head {
     // since stage is never set from outside, check may be unnecessary
     Util.assert(this.stage instanceof Thread);
 
-    this.head = this.stage;
+    this.pointer = this.stage;
     this.height += 1;
     // don't update the timestamp, since that depends only on posts
     this.discardStage();
