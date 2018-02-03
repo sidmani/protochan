@@ -43,12 +43,44 @@ module.exports = class Block {
     // hash stored in the header
     // TODO: move to the post and thread blocks
     // and replace with a merkle tree for the thread block?
-    Util.assertArrayEquality(
-      Hash.digest(this.data), header.dataHash()
+    Util.assertArrayEquality( //
+      Hash.digest(this.data), header.dataHash() //
+    ); //
+
+    // # of control bytes (1byte), control bytes, 0x29, content bytes, 0x04
+    Util.assert(this.data[this.controlLength()] === 0x29);//
+
+    // at least 3 control bytes (control length, content length)
+    Util.assert(this.controlLength() >= 3); //
+
+    // data length = 2b len + #b control + delimiter + #b content + EOT
+    Util.assert(this.data.byteLength === //
+        this.contentLength() // content bytes
+      + this.controlLength() // control bytes
+      + 1 // separator
+      + 1 // terminator
     );
+
+    // last byte is 0x04 end of transmission
+    Util.assert(this.data[this.data.byteLength - 1] === 0x04); //
   }
 
   hash() {
     return Hash.digest(this.header.data);
+  }
+
+  // index of 0x29 end byte
+  controlLength() {
+    return this.data[0];
+  }
+
+  contentLength() {
+    // big endian
+    return (this.data[1] << 8) + this.data[2];
+  }
+
+  content() {
+    let length = this.contentLength();
+    return new Uint8Array(this.data.buffer, this.controlLength() + 1, length);
   }
 };

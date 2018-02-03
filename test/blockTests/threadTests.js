@@ -29,58 +29,75 @@ module.exports = [
   { description: "Thread block validates block type",
     dual: true,
     fn: function(shouldPass) {
-      let d_buf = new ArrayBuffer(64);
-      let header = common.validHeaderFromData(d_buf);
+      let buf = new ArrayBuffer(133);
+      let view = new DataView(buf);
+      view.setUint32(0, 0x03008029);
+      view.setUint8(132, 0x04);
+
+      let header = common.validHeaderFromData(buf);
       if (shouldPass) {
         header.data[2] = 0x00;
       } else {
         header.data[2] = 0x01;
       }
-      new Thread(header, d_buf);
+      new Thread(header, buf);
     }
   },
   { description: "Thread block validates data length",
     dual: true,
     fn: function(shouldPass) {
-      let d_buf;
+      let buf;
       if (shouldPass) {
-        d_buf = new ArrayBuffer(192);
+        buf = new ArrayBuffer(133);
+        let view = new DataView(buf);
+        view.setUint32(0, 0x03008029);
+        view.setUint8(132, 0x04);
       } else {
-        d_buf = new ArrayBuffer(127);
+        buf = new ArrayBuffer(134);
+        let view = new DataView(buf);
+        view.setUint32(0, 0x03008129);
+        view.setUint8(133, 0x04);
       }
-      new Uint8Array(d_buf).fill(0, 0, 16);
-      let header = common.validThreadHeaderFromData(d_buf);
-      new Thread(header, d_buf);
+      let header = common.validThreadHeaderFromData(buf);
+      new Thread(header, buf);
     }
   },
   { description: "Thread block validates zero genesis row",
     dual: true,
     fn: function(shouldPass) {
-      let d_buf = new ArrayBuffer(64);
+      let buf = new ArrayBuffer(133);
+      let view = new DataView(buf);
+      view.setUint32(0, 0x03008029);
+      view.setUint8(132, 0x04);
+
       if (shouldPass) {
-        new Uint8Array(d_buf).fill(0, 0, 32);
+        new Uint8Array(buf).fill(0, 5, 37);
       } else {
-        new Uint8Array(d_buf).fill(9, 0, 32);
+        new Uint8Array(buf).fill(1, 5, 37);
       }
-      let header = common.validThreadHeaderFromData(d_buf);
-      new Thread(header, d_buf);
+      let header = common.validThreadHeaderFromData(buf);
+      new Thread(header, buf);
     }
   },
   { description: "Thread retrieves genesis post from zero array",
     fn: function() {
-      let d_buf = new ArrayBuffer(64);
-      let arr = new Uint8Array(d_buf);
-      arr.fill(17, 32, 64);
+      let buf = new ArrayBuffer(133);
+      let view = new DataView(buf);
+      view.setUint32(0, 0x03008029);
+      view.setUint8(132, 0x04);
 
-      let header = common.validThreadHeaderFromData(d_buf);
-      let thread = new Thread(header, d_buf);
+      let arr = new Uint8Array(buf);
+      arr.fill(17, 37, 69);
+
+      let header = common.validThreadHeaderFromData(buf);
+      let thread = new Thread(header, buf);
 
       let expected_thread_hash = new Uint8Array(32);
       expected_thread_hash.fill(0, 0, 32);
 
       let expected_post_hash = new Uint8Array(32);
       expected_post_hash.fill(17, 0, 32);
-
+  //    console.log(thread.getPostForThread(expected_thread_hash));
       common.assertArrayEquality(expected_post_hash, thread.getPostForThread(expected_thread_hash));
     }
   },

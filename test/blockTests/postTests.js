@@ -31,8 +31,8 @@ module.exports = [
     fn: function(shouldPass) {
       let d_buf = new ArrayBuffer(41);
       let dataView = new DataView(d_buf);
-      dataView.setUint32(0, 0x0024ffff);
-      dataView.setUint8(40, 0xff);
+      dataView.setUint32(0, 0x03002429);
+      dataView.setUint8(40, 0x04);
       let header = common.validHeaderFromData(d_buf);
       if (shouldPass) {
         header.data[2] = 0x01;
@@ -42,94 +42,20 @@ module.exports = [
       new Post(header, d_buf);
     }
   },
-  { description: "Post block validates data length",
+  { description: "Post block requires at least two control bytes",
     dual: true,
     fn: function(shouldPass) {
       let d_buf = new ArrayBuffer(41);
       let dataView = new DataView(d_buf);
-      dataView.setUint8(40, 0xff);
+      dataView.setUint8(40, 0x04);
       if (shouldPass) {
-        dataView.setUint32(0, 0x0024ffff);
+        dataView.setUint32(0, 0x03002429);
       } else {
-        dataView.setUint32(0, 0x0025ffff);
+        dataView.setUint32(0, 0x02252900);
       }
       let header = common.validPostHeaderFromData(d_buf);
 
       new Post(header, d_buf);
     }
   },
-  { description: "Post block validates data padding",
-    dual: true,
-    fn: function(shouldPass) {
-      let d_buf = new ArrayBuffer(41);
-      let dataView = new DataView(d_buf);
-      dataView.setUint8(40, 0xff);
-      if (shouldPass) {
-        dataView.setUint32(0, 0x0024ffff);
-      } else {
-        dataView.setUint32(0, 0x0024fccf);
-      }
-      let header = common.validPostHeaderFromData(d_buf);
-
-      new Post(header, d_buf);
-    }
-  },
-  { description: "Post block validates data terminator",
-    dual: true,
-    fn: function(shouldPass) {
-      let d_buf = new ArrayBuffer(41);
-      let dataView = new DataView(d_buf);
-      dataView.setUint32(0, 0x0024ffff);
-      if (shouldPass) {
-        dataView.setUint8(40, 0xff);
-      } else {
-        dataView.setUint8(40, 0xee);
-      }
-      let header = common.validPostHeaderFromData(d_buf);
-
-      new Post(header, d_buf);
-    }
-  },
-  { description: "Post block accepts correct block type and data length",
-    fn: function() {
-      let d_buf = new ArrayBuffer(41);
-      let view = new DataView(d_buf);
-      view.setUint32(0, 0x0024ffff);
-      view.setUint8(40, 0xff);
-
-      let header = common.validPostHeaderFromData(d_buf);
-
-      let p = new Post(header, d_buf);
-      common.assert(p instanceof Post);
-    }
-  },
-  { description: "Post block returns correct content length",
-    fn: function() {
-      let d_buf = new ArrayBuffer(41);
-      let view = new DataView(d_buf);
-      view.setUint32(0, 0x0024ffff);
-      view.setUint8(40, 0xff);
-
-      let header = common.validPostHeaderFromData(d_buf);
-
-      let p = new Post(header, d_buf);
-      common.assert(p.contentLength() === 36);
-    }
-  },
-  { description: "Post block returns correct content",
-    fn: function() {
-      let d_buf = new ArrayBuffer(41);
-      let view = new DataView(d_buf);
-      view.setUint32(0, 0x0024ffff);
-      view.setUint32(12, 0xcccccccc);
-      view.setUint8(40, 0xff);
-
-      let header = common.validPostHeaderFromData(d_buf);
-
-      let content = new Post(header, d_buf).content();
-      for (let i = 0; i < 9; i++) {
-        common.assert(content.getUint32(i*4) === (i===2?0xcccccccc:0));
-      }
-    }
-  }
 ];

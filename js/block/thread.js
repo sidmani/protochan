@@ -32,24 +32,25 @@ var Difficulty = require('../hash/difficulty.js');
 module.exports = class ThreadBlock extends Block {
   constructor(header, data) {
     super(header, data);
-    Util.assert(header.blockType() === THREAD_BLOCK_ID, 'Header block type is incorrect.');
+    Util.assert(header.blockType() === THREAD_BLOCK_ID);//
 
-    // Data comes in sets of 64 bytes (32 thread, 32 post)
-    Util.assert(data.byteLength >= 64 && data.byteLength % 64 === 0, 'Data is malformed.');
+    // thread data comes in sets of 64 bytes (32 thread, 32 post)
+    let threadDataLength = data.byteLength
+    - this.controlLength()
+    - 2; // separator and terminator
 
-    // XXX: untested
-    // 16320 = 255 (thread max) * 32 (hash length) * 2 (post and thread)
-    Util.assert(data.byteLength <= 16320);
+    Util.assert(threadDataLength >= 64 && threadDataLength % 64 === 0);//
+
+    this.numThreads = threadDataLength / 64;
 
     // the first thread has a zero hash
-    Difficulty.verify(this.getThread(0), 256);
+    Difficulty.verify(this.getThread(0), 256);//
 
     this.map = new HashMap();
 
     // put all threads in data into a hashmap for easy lookup
     // there is probably a better way to do this (with indices)
-    let count = this.numThreads();
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < this.numThreads; i++) {
       this.map.setRaw(this.getThread(i), this.getPost(i));
     }
   }
@@ -62,13 +63,13 @@ module.exports = class ThreadBlock extends Block {
     // since the zeroth thread's id is the hash of this block
     // which obviously can't be stored in the block itself
     Util.assert(index < this.data.byteLength / 64);
-    return new Uint8Array(this.data.buffer, index*64, 32);
+    return new Uint8Array(this.data.buffer, this.controlLength() + 1 + index*64, 32);
   }
 
   // TODO: optimize to use hashmap and not create extra arrays
   getPost(index) {
     Util.assert(index < this.data.byteLength / 64);
-    return new Uint8Array(this.data.buffer, index*64 + 32, 32);
+    return new Uint8Array(this.data.buffer, this.controlLength() + 1 + this.index*64 + 32, 32);
   }
 
   // get the post associated with a particular thread
@@ -76,10 +77,10 @@ module.exports = class ThreadBlock extends Block {
     return this.map.get(hash);
   }
 
-  // the number of threads listed in this block
-  numThreads() {
-    return this.data.byteLength / 64;
-  }
+  // // the number of threads listed in this block
+  // numThreads() {
+  //   return this.data.byteLength / 64;
+  // }
 
   prune() {
     // TODO: prune data

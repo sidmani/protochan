@@ -31,36 +31,6 @@ module.exports = class Post extends Block {
   constructor(header, data) {
     super(header, data);
     Util.assert(header.blockType() === POST_BLOCK_ID);
-
-    // 0xffff between len and data so that data starts at
-    // a byte index divisible by 4.
-    Util.assert(this.data[2] === 0xff);
-    Util.assert(this.data[3] === 0xff);
-
-    // data length = 2b len + 2b padding + #b content + 1b final
-    Util.assert(this.data.byteLength === this.contentLength() + 5);
-
-    // XXX: untested
-    // this means the max data length is 943 - 5 = 938 bytes
-    // and the max total post block size is 943 + 80 = 1023 bytes
-    Util.assert(this.data.byteLength <= 943);
-
-    // last byte is 0xff
-    Util.assert(this.data[this.data.byteLength - 1] === 0xff);
-
-    // TODO: error correction if 0xff end byte is present but length is wrong
-    // would require rechecking hash
-  }
-
-  // data is 2 bytes length, 0xff, 0xff, data, 0xff
-  // big endian
-  contentLength() {
-    return (this.data[0] << 8) + this.data[1];
-  }
-
-  content() {
-    let length = this.contentLength();
-    return new DataView(this.data.buffer, 4, length);
   }
 
   prune() {

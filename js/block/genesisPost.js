@@ -32,7 +32,10 @@ module.exports = class GenesisPost extends Post {
     // Assert that prevHash has maximum difficulty
     Difficulty.verify(header.prevHash(), 256);
 
-    Util.assert(this.contentLength() >= 5); // 5 bytes of options
+    // 1 byte control length
+    // 2 bytes content length
+    // 5 bytes genesis options
+    Util.assert(this.controlLength() >= 8);
 
     // max >= min difficulty
     Util.assert(this.maxPostDifficulty() >= this.minPostDifficulty());
@@ -49,23 +52,23 @@ module.exports = class GenesisPost extends Post {
   // MAX_THREAD_DIFFICULTY: uint8,
   // MAX_THREAD_COUNT
   minPostDifficulty() {
-    return this.data[4];
+    return this.data[3];
   }
 
   maxPostDifficulty() {
-    return this.data[5];
+    return this.data[4];
   }
 
   minThreadDifficulty() {
-    return this.data[6];
+    return this.data[5];
   }
 
   maxThreadDifficulty() {
-    return this.data[7];
+    return this.data[6];
   }
 
   maxThreads() {
-    return this.data[8];
+    return this.data[7];
   }
 
   // to extend the protocol with options, store additional

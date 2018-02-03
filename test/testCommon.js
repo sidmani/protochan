@@ -78,8 +78,8 @@ module.exports.validThread = function(post) {
 module.exports.validPost = function() {
   let d_buf = new ArrayBuffer(41);
   let view = new DataView(d_buf);
-  view.setUint32(0, 0x0024ffff);
-  view.setUint8(40, 0xff);
+  view.setUint32(0, 0x03002429);
+  view.setUint8(40, 0x04);
 
   let header = validPostHeaderFromData(d_buf);
 
@@ -89,9 +89,9 @@ module.exports.validPost = function() {
 module.exports.validGenesisPost = function() {
   let d_buf = new ArrayBuffer(41);
   let view = new DataView(d_buf);
-  view.setUint32(0, 0x0024ffff); //length + padding
+  view.setUint32(0, 0x03002429); // control + separator
   view.setUint8(8, 0xc5); // thread # != 0
-  view.setUint8(40, 0xff); //end padding
+  view.setUint8(40, 0x04); //terminator
 
   let header = validPostHeaderFromData(d_buf);
   for (let i = 11; i < 43; i++) {
