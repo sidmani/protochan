@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+"use strict";
+
 var Util = require('../util.js');
 var Block = require('../block/block.js');
 
@@ -32,7 +34,7 @@ module.exports = class HashMap {
   set(block, overwrite) {
     Util.assert(block instanceof Block);
     let hash = block.hash();
-    let str = Util.uint8ArrToHex(hash);
+    let str = HashMap.uint8ArrToHex(hash);
     Util.assert(!this[str]);
     this[str] = block;
     return hash;
@@ -40,18 +42,26 @@ module.exports = class HashMap {
 
   setRaw(hash, obj, overwrite) {
     Util.assert(hash instanceof Uint8Array);
-    let str = Util.uint8ArrToHex(hash);
+    let str = HashMap.uint8ArrToHex(hash);
     Util.assert(!this[str] || overwrite);
     this[str] = obj;
   }
 
   get(hash) {
     Util.assert(hash instanceof Uint8Array);
-    return this[Util.uint8ArrToHex(hash)];
+    return this[HashMap.uint8ArrToHex(hash)];
   }
 
   enumerate() {
     // return array of objects in the order they were added
     return Object.keys(this).map(key => this[key]);
+  }
+
+  static uint8ArrToHex(arr) {
+  	let str = '';
+  	for (let i = 0; i < arr.byteLength; i++) {
+  			str += (arr[i]<16?'0':'') + arr[i].toString(16);
+  	}
+  	return str;
   }
 }

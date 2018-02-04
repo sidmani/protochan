@@ -63,7 +63,7 @@ module.exports = [
       Difficulty.verify(new Uint8Array(31), 4);
     }
   },
-  { description: "verifyDifficulty accepts zero array", // XXX: this is pretty weird. code shouldn't allow this?
+  { description: "verifyDifficulty accepts zero array",
     fn: function() {
       Difficulty.verify(new Uint8Array(32), 4);
     }

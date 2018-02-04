@@ -23,14 +23,19 @@
 // SOFTWARE.
 
 var common = require('../testCommon.js');
-var Util = require('../../js/util.js');
 var blake2s = require('../../js/hash/blake2s.js');
 
 module.exports = [
   { description: "Blake2s produces correct results",
     fn: function() {
-      common.assert(Util.uint8ArrToHex(blake2s.digest(new Uint8Array([97, 98, 99]))) ===
-  '508c5e8c327c14e2e1a72ba34eeb452f37458b209ed63a294d999b4c86675982');
+      common.assertArrayEquality(
+        blake2s.digest(new Uint8Array([97, 98, 99])),
+        new Uint8Array([
+        0x50, 0x8c, 0x5e, 0x8c, 0x32, 0x7c, 0x14, 0xe2,
+        0xe1, 0xa7, 0x2b, 0xa3, 0x4e, 0xeb, 0x45, 0x2f,
+        0x37, 0x45, 0x8b, 0x20, 0x9e, 0xd6, 0x3a, 0x29, 
+        0x4d, 0x99, 0x9b, 0x4c, 0x86, 0x67, 0x59, 0x82
+      ]));
     }
   }
 ];

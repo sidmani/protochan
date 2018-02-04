@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+"use strict";
+
 var Util = require('../util.js');
 
 module.exports.verify = function(hash, leadingZeroes) {
@@ -33,7 +35,7 @@ module.exports.verify = function(hash, leadingZeroes) {
   Util.assert(countLeadingZeroes(hash) >= leadingZeroes);
 }
 
-module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
+var countLeadingZeroes = function(arr) {
   let zeroes = 0;
   for (let i = 0; i < arr.byteLength; i++) {
     if (arr[i] === 0) {
@@ -50,6 +52,7 @@ module.exports.countLeadingZeroes = countLeadingZeroes = function(arr) {
   }
   return zeroes;
 };
+module.exports.countLeadingZeroes = countLeadingZeroes;
 
 // Posts use a simple exponential decay model over time for difficulty
 // a good GPU gets 1-3GH/s and 2^40 = 1099 GH, 2^20 = 0.001 GH

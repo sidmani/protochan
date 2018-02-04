@@ -24,27 +24,10 @@
 
 "use strict";
 
-var Util = require('../util.js');
-var Difficulty = require('../hash/difficulty.js');
-var Header = require('../block/header.js');
-var Hash = require('../hash/blake2s.js');
+module.exports.Data = {
+  length: function() { throw new Error('Length of data is incorrect.'); },
+};
 
-module.exports = class Miner {
-  constructor(header) {
-    Util.assert(header instanceof Header);
-    this.header = header;
-  }
-
-  mine(reqDiff, fromNonce, toNonce) {
-    fromNonce = fromNonce ? fromNonce : 0x00000000;
-    toNonce = toNonce ? toNonce : 0xffffffff;
-    this.header.setNonce(fromNonce);
-    for (let i = fromNonce; i <= toNonce; i++) {
-      if (Difficulty.countLeadingZeroes(Hash.digest(this.header.data)) >= reqDiff) { return; }
-      this.header.incrNonce();
-    }
-    // TODO: error, no nonce value yielded the required difficulty.
-    // should exit with an error.
-    // the caller will adjust the timestamp or something and retry.
-  }
+module.exports.Parameter = {
+  type: function() { throw new Error('Parameter type is incorrect.'); }
 }

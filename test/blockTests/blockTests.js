@@ -126,7 +126,7 @@ module.exports = [
       new Block(header, buf);
     }
   },
-  { description: "Block validates data terminator",
+  { description: "Block validates data terminator byte",
     dual: true,
     fn: function(shouldPass) {
       let buf = new ArrayBuffer(10);
@@ -178,14 +178,14 @@ module.exports = [
   },
   { description: "Block returns correct content length",
     fn: function() {
-      var buf = new ArrayBuffer(128);
+      var buf = new ArrayBuffer(517);
       let view = new DataView(buf);
-      view.setUint32(0, 0x04007AEF);
+      view.setUint32(0, 0x0401FFEF);
       view.setUint32(4, 0x29000000)
-      view.setUint8(127, 0x04);
+      view.setUint8(516, 0x04);
       var header = common.validHeaderFromData(buf);
       var b = new Block(header, buf);
-      common.assert(b.contentLength() === 0x7A);
+      common.assert(b.contentLength() === 0x01FF);
     }
   },
   { description: "Block returns correct content",
@@ -206,4 +206,4 @@ module.exports = [
       }
     }
   }
-]
+];

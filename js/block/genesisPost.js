@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+"use strict";
+
 var Post = require('./post.js');
 var Difficulty = require('../hash/difficulty.js');
 var Util = require('../util.js');

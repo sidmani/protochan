@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+"use strict";
+
 var Util = require('../util.js');
 var Header = require('./header.js');
 var Hash = require('../hash/blake2s.js');
@@ -39,22 +41,23 @@ module.exports = class Block {
     this.header = header;
     this.data = new Uint8Array(data);
 
-    // Assert that the hash of the data is equal to the
-    // hash stored in the header
     // TODO: move to the post and thread blocks
     // and replace with a merkle tree for the thread block?
-    Util.assertArrayEquality( //
-      Hash.digest(this.data), header.dataHash() //
-    ); //
+
+    // Assert that the hash of the data is equal to the
+    // hash stored in the header
+    Util.assertArrayEquality(
+      Hash.digest(this.data), header.dataHash()
+    );
 
     // # of control bytes (1byte), control bytes, 0x29, content bytes, 0x04
-    Util.assert(this.data[this.controlLength()] === 0x29);//
+    Util.assert(this.data[this.controlLength()] === 0x29);
 
     // at least 3 control bytes (control length, content length)
-    Util.assert(this.controlLength() >= 3); //
+    Util.assert(this.controlLength() >= 3);
 
     // data length = 2b len + #b control + delimiter + #b content + EOT
-    Util.assert(this.data.byteLength === //
+    Util.assert(this.data.byteLength ===
         this.contentLength() // content bytes
       + this.controlLength() // control bytes
       + 1 // separator

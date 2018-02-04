@@ -22,16 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// NOTE: this function should no longer be used in unit tests
-// so adding prod/debug modes is OK
+"use strict";
 
 var mode = 'debug';
 
-module.exports.assert = assert = function(condition, description) {
+var assert = function(condition, description) {
   if (!condition) {
     throw new Error(description)
   }
 }
+module.exports.assert = assert;
 
 module.exports.assertArrayEquality = function(arr1, arr2) {
   assert(arr1.byteLength === arr2.byteLength);
@@ -41,16 +41,7 @@ module.exports.assertArrayEquality = function(arr1, arr2) {
 }
 
 module.exports.time = function() {
-  // XXX: is this the most efficient way?
   return Math.round(new Date().getTime() / 1000);
-}
-
-module.exports.uint8ArrToHex = function(arr) {
-	let str = '';
-	for (let i = 0; i < arr.byteLength; i++) {
-			str += (arr[i]<16?'0':'') + arr[i].toString(16);
-	}
-	return str;
 }
 
 module.exports.log = function (str, level) {
