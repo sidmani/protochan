@@ -34,6 +34,18 @@ module.exports = [
       common.assert(map.get(hash) === block);
     }
   },
+  { description: "HashMap.set refuses to set same object twice",
+    dual: true,
+    fn: function(shouldPass) {
+      let block = common.validPost();
+      let map = new HashMap();
+      let hash = map.set(block);
+      if (!shouldPass) {
+        map.set(block);
+      }
+      common.assert(map.get(hash) === block);
+    }
+  },
   { description: "HashMap.setRaw validates hash type",
     dual: true,
     fn: function(shouldPass) {
@@ -54,6 +66,16 @@ module.exports = [
       let block = common.validPost();
       let map = new HashMap();
       let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
+      common.assert(map.get(new Uint8Array([5, 4, 3])) === block);
+    }
+  },
+  { description: "HashMap.setRaw obeys overwrite flag",
+    dual: true,
+    fn: function(shouldPass) {
+      let block = common.validPost();
+      let map = new HashMap();
+      let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
+      map.setRaw(new Uint8Array([5, 4, 3]), block, shouldPass);
       common.assert(map.get(new Uint8Array([5, 4, 3])) === block);
     }
   },

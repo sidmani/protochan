@@ -29,16 +29,21 @@ var Block = require('../block/block.js');
 module.exports = class HashMap {
   constructor() {}
 
-  set(block) {
+  set(block, overwrite) {
     Util.assert(block instanceof Block);
     let hash = block.hash();
-    this[Util.uint8ArrToHex(hash)] = block;
+    let str = Util.uint8ArrToHex(hash);
+    Util.assert(!this[str]);
+    this[str] = block;
     return hash;
   }
 
-  setRaw(hash, obj) {
+  // XXX: untested (overwrite)
+  setRaw(hash, obj, overwrite) {
     Util.assert(hash instanceof Uint8Array);
-    this[Util.uint8ArrToHex(hash)] = obj;
+    let str = Util.uint8ArrToHex(hash);
+    Util.assert(!this[str] || overwrite);
+    this[str] = obj;
   }
 
   get(hash) {
