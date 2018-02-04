@@ -50,9 +50,15 @@ module.exports = class ThreadBlock extends Block {
 
     // put all threads in data into a hashmap for easy lookup
     // there is probably a better way to do this (with indices)
+    // XXX: check duplication
     for (let i = 0; i < this.numThreads; i++) {
+      // no overwrites allowed, since that implies a hash collision
+    //  console.log(this.getThread(i) + ' ' + this.getPost(i))
       this.map.setRaw(this.getThread(i), this.getPost(i));
     }
+
+    // TODO: count # of items in the map and make sure it's
+    // equal to numThreads
   }
 
   // data is pairs of 32-byte hashes
@@ -62,14 +68,15 @@ module.exports = class ThreadBlock extends Block {
     // NOTE: getThread(0) returns 32 zeroes
     // since the zeroth thread's id is the hash of this block
     // which obviously can't be stored in the block itself
-    Util.assert(index < this.data.byteLength / 64);
+    Util.assert(index < this.numThreads);
     return new Uint8Array(this.data.buffer, this.controlLength() + 1 + index*64, 32);
   }
 
   // TODO: optimize to use hashmap and not create extra arrays
   getPost(index) {
-    Util.assert(index < this.data.byteLength / 64);
-    return new Uint8Array(this.data.buffer, this.controlLength() + 1 + this.index*64 + 32, 32);
+    Util.assert(index < this.numThreads);
+    return this.data.subarray(this.controlLength() + 1 + index*64 + 32, this.controlLength() + 1 + index*64 + 64)
+    // return new Uint8Array(this.data.buffer, this.controlLength() + 1 + index*64 + 32, 32);
   }
 
   // get the post associated with a particular thread

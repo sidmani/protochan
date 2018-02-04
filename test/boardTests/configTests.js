@@ -40,8 +40,8 @@ module.exports = [
   { description: "Configuration sets minimum post difficulty",
     fn() {
       let post = common.validGenesisPost();
-      post.data[4] = 0xf5;
-      post.data[5] = 0xf6;
+      post.data[3] = 0xf5;
+      post.data[4] = 0xf6;
       let config = new Configuration(post);
       common.assert(config.MIN_POST_DIFFICULTY === 0xf5);
     }
@@ -49,8 +49,8 @@ module.exports = [
   { description: "Configuration sets maximum post difficulty",
     fn() {
       let post = common.validGenesisPost();
-      post.data[4] = 0xf5;
-      post.data[5] = 0xf6;
+      post.data[3] = 0xf5;
+      post.data[4] = 0xf6;
       let config = new Configuration(post);
       common.assert(config.MAX_POST_DIFFICULTY === 0xf6);
     }
@@ -58,8 +58,8 @@ module.exports = [
   { description: "Configuration sets min thread difficulty",
     fn() {
       let post = common.validGenesisPost();
-      post.data[6] = 0xf5;
-      post.data[7] = 0xf6;
+      post.data[5] = 0xf5;
+      post.data[6] = 0xf6;
       let config = new Configuration(post);
       common.assert(config.MIN_THREAD_DIFFICULTY === 0xf5);
     }
@@ -67,8 +67,8 @@ module.exports = [
   { description: "Configuration sets max thread difficulty",
     fn() {
       let post = common.validGenesisPost();
-      post.data[6] = 0xf5;
-      post.data[7] = 0xf6;
+      post.data[5] = 0xf5;
+      post.data[6] = 0xf6;
       let config = new Configuration(post);
       common.assert(config.MAX_THREAD_DIFFICULTY === 0xf6);
     }
@@ -76,7 +76,7 @@ module.exports = [
   { description: "Configuration sets max thread count",
     fn() {
       let post = common.validGenesisPost();
-      post.data[8] = 0xf5;
+      post.data[7] = 0xf5;
       let config = new Configuration(post);
       common.assert(config.MAX_THREAD_COUNT === 0xf5);
     }

@@ -33,8 +33,9 @@ module.exports = class Genesis extends Thread {
     // Assert that prevHash is all zeroes (max difficulty)
     Difficulty.verify(this.header.prevHash(), 256);
 
-    // Assert that data is 64 bytes, since the genesis block
+    // Assert that data is 69 bytes, since the genesis block
     // can only have one thread/post pair associated with it
-    Util.assert(this.data.byteLength === 64);
+    // 32 + 32 + 5 = 69
+    Util.assert(this.data.byteLength === 69);
   }
 }

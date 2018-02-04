@@ -30,33 +30,22 @@ module.exports = [
     dual: true,
     fn: function(shouldPass) {
       let d_buf;
-
       // set the correct length (64) if should pass
       if (shouldPass) {
-        d_buf = new ArrayBuffer(64);
+        d_buf = new ArrayBuffer(69);
+        let view = new DataView(d_buf);
+        view.setUint32(0, 0x03004029);
+        view.setUint8(68, 0x04);
       } else {
         // make sure that super constructor check is not failing
-        d_buf = new ArrayBuffer(128);
-      }
-
-      let dataView = new DataView(d_buf);
-      for (let i = 0; i < 32; i++) {
-        dataView.setUint8(i, 0x00);
-      }
-
-      // end index is different for data, avoid overflow err
-      if (shouldPass) {
-        for (let i = 32; i < 64; i++) {
-          dataView.setUint8(i, 0x01);
-        }
-      } else {
-        for (let i = 32; i < 63; i++) {
-          dataView.setUint8(i, 0x01);
-        }
+        d_buf = new ArrayBuffer(133);
+        let view = new DataView(d_buf);
+        view.setUint32(0, 0x03008029);
+        view.setUint32(75, 0xcefdab64);
+        view.setUint8(132, 0x04);
       }
 
       let header = common.validThreadHeaderFromData(d_buf);
-      header.data[79] = 0xec; //nonzero max threads
       new Genesis(header, d_buf);
     }
   },
@@ -64,9 +53,12 @@ module.exports = [
   { description: "Genesis block validates zero prevHash",
     dual: true,
     fn: function(shouldPass) {
-      let d_buf = new ArrayBuffer(64);
+      let d_buf = new ArrayBuffer(69);
+      let view = new DataView(d_buf);
+      view.setUint32(0, 0x03004029);
+      view.setUint8(68, 0x04);
+
       let header = common.validThreadHeaderFromData(d_buf);
-      header.data[79] = 0xec; //nonzero max threads
 
       if (shouldPass) {
         for (let i = 11; i < 43; i++) {

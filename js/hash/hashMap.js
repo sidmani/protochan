@@ -38,7 +38,6 @@ module.exports = class HashMap {
     return hash;
   }
 
-  // XXX: untested (overwrite)
   setRaw(hash, obj, overwrite) {
     Util.assert(hash instanceof Uint8Array);
     let str = Util.uint8ArrToHex(hash);

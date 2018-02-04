@@ -59,15 +59,20 @@ module.exports.assertJSArrayEquality = function(arr1, arr2) {
 
 module.exports.validThread = function(post) {
   assert(post instanceof Post)
-  let d_buf = new ArrayBuffer(64);
+  let d_buf = new ArrayBuffer(69);
   let arr = new Uint8Array(d_buf);
-  for (let i = 0; i < 32; i++) {
+
+  let view = new DataView(d_buf);
+  view.setUint32(0, 0x03004029);
+  view.setUint8(68, 0x04);
+
+  for (let i = 5; i < 37; i++) {
     arr[i] = 0x00;
   }
   let postHash = Hash.digest(post.header.data);
 
-  for (let i = 32; i < 64; i++) {
-    arr[i] = postHash[i-32];
+  for (let i = 37; i < 68; i++) {
+    arr[i] = postHash[i-37];
   }
 
   let header = validThreadHeaderFromData(d_buf);
@@ -87,30 +92,34 @@ module.exports.validPost = function() {
 };
 
 module.exports.validGenesisPost = function() {
-  let d_buf = new ArrayBuffer(41);
-  let view = new DataView(d_buf);
-  view.setUint32(0, 0x03002429); // control + separator
-  view.setUint8(8, 0xc5); // thread # != 0
-  view.setUint8(40, 0x04); //terminator
-
+  let d_buf = new ArrayBuffer(10);
+  let dataView = new DataView(d_buf);
+  dataView.setUint32(0, 0x080000cc);
+  dataView.setUint32(4, 0xefacadae);
+  dataView.setUint8(8, 0x29);
+  dataView.setUint8(9, 0x04);
   let header = validPostHeaderFromData(d_buf);
+
   for (let i = 11; i < 43; i++) {
     header.data[i] = 0;
   }
-
   return new GenesisPost(header, d_buf);
 };
 
 module.exports.validGenesis = function(post) {
   assert(post instanceof GenesisPost)
-  let d_buf = new ArrayBuffer(64);
+  let d_buf = new ArrayBuffer(69);
+  let view = new DataView(d_buf);
+  view.setUint32(0, 0x03004029); // control + separator
+  view.setUint8(68, 0x04); //terminator
   let arr = new Uint8Array(d_buf);
-  for (let i = 0; i < 32; i++) {
+  for (let i = 5; i < 37; i++) {
     arr[i] = 0x00;
   }
+
   let postHash = Hash.digest(post.header.data);
 
-  for (let i = 32; i < 64; i++) {
+  for (let i = 37; i < 69; i++) {
     arr[i] = postHash[i-32];
   }
 
