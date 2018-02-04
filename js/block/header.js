@@ -26,7 +26,14 @@
 
 var Util = require('../util.js');
 
-module.exports = class Header {
+/**
+ * The block header.
+ */
+class Header {
+  /**
+   * Create a header from an 80-byte ArrayBuffer.
+   * @param {ArrayBuffer} buffer - The source buffer.
+   */
   constructor(buffer) {
     // parameter validation
     Util.assert(buffer instanceof ArrayBuffer);
@@ -101,4 +108,6 @@ module.exports = class Header {
   reserved() {
     return this._data.getUint8(79);
   }
-};
+}
+
+module.exports = Header;

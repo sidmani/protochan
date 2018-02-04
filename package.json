@@ -1,0 +1,28 @@
+{
+  "name": "protochan",
+  "version": "0.0.1",
+  "description": "Protocol for an uncensored, anonymous blockchain-based message board",
+  "main": "protochan.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test/test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sidmani/protochan.git"
+  },
+  "keywords": [
+    "blockchain",
+    "decentralized",
+    "peer-to-peer"
+  ],
+  "author": "Sid Mani",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sidmani/protochan/issues"
+  },
+  "homepage": "https://github.com/sidmani/protochan#readme",
+  "devDependencies": {}
+}
