@@ -24,14 +24,14 @@
 
 "use strict";
 
-var Util = require('../util.js');
 var Difficulty = require('../hash/difficulty.js');
 var Header = require('../block/header.js');
 var Hash = require('../hash/blake2s.js');
+var ErrorType = require('../error.js');
 
 module.exports = class Miner {
   constructor(header) {
-    Util.assert(header instanceof Header);
+    if(!(header instanceof Header)) throw ErrorType.Parameter.type();
     this.header = header;
   }
 

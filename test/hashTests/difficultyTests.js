@@ -24,7 +24,6 @@
 
 var Difficulty = require('../../js/hash/difficulty.js');
 var ErrorType = require('../../js/error.js');
-var common = require('../testCommon.js');
 var t = require('tap');
 
 t.test('countLeadingZeroes counts number of zeroes in a single byte', function(t) {
@@ -68,7 +67,7 @@ t.test('verifyDifficulty rejects too few leading zeroes (single byte)', function
   let arr = new Uint8Array(32);
   arr[0] = 0b00011011; // 3 leading zeroes
 
-  t.throws(function() { Difficulty.verify(arr, 4); }, ErrorType.Difficulty.notEnough());
+  t.throws(function() { Difficulty.verify(arr, 4); }, ErrorType.Difficulty.insufficient());
   t.end()
 });
 
@@ -77,7 +76,7 @@ t.test('verifyDifficulty rejects too few leading zeroes (multiple bytes)', funct
   arr[0] = 0;
   arr[1] = 0;
   arr[2] = 0b00011001; // 19 leading zeroes
-  t.throws(function() { Difficulty.verify(arr, 20); }, ErrorType.Difficulty.notEnough());
+  t.throws(function() { Difficulty.verify(arr, 20); }, ErrorType.Difficulty.insufficient());
   t.end();
 });
 

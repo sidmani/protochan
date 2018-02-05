@@ -24,52 +24,46 @@
 
 var Genesis = require('../../js/block/genesis.js');
 var common = require('../testCommon.js');
+var t = require('tap');
+var ErrorType = require('../../js/error.js');
 
-module.exports = [
-  { description: "Genesis block validates data length",
-    dual: true,
-    fn: function(shouldPass) {
-      let d_buf;
-      // set the correct length (64) if should pass
-      if (shouldPass) {
-        d_buf = new ArrayBuffer(69);
-        let view = new DataView(d_buf);
-        view.setUint32(0, 0x03004029);
-        view.setUint8(68, 0x04);
-      } else {
-        // make sure that super constructor check is not failing
-        d_buf = new ArrayBuffer(133);
-        let view = new DataView(d_buf);
-        view.setUint32(0, 0x03008029);
-        view.setUint32(75, 0xcefdab64);
-        view.setUint8(132, 0x04);
-      }
+t.test('Genesis block validates data length', function(t) {
+  let d_buf;
+  // make sure that super constructor check is not failing
+  d_buf = new ArrayBuffer(133);
+  let view = new DataView(d_buf);
+  view.setUint32(0, 0x03008029);
+  view.setUint32(75, 0xcefdab64);
+  view.setUint8(132, 0x04);
 
-      let header = common.validThreadHeaderFromData(d_buf);
-      new Genesis(header, d_buf);
-    }
-  },
-  // prevHash = 0 identifies this as a genesis block
-  { description: "Genesis block validates zero prevHash",
-    dual: true,
-    fn: function(shouldPass) {
-      let d_buf = new ArrayBuffer(69);
-      let view = new DataView(d_buf);
-      view.setUint32(0, 0x03004029);
-      view.setUint8(68, 0x04);
+  let header = common.validThreadHeaderFromData(d_buf);
+  t.throws(function() { new Genesis(header, d_buf); }, ErrorType.Data.length());
+  t.end();
+});
 
-      let header = common.validThreadHeaderFromData(d_buf);
+t.test('Genesis block validates zero prevHash', function(t) {
+  let d_buf = new ArrayBuffer(69);
+  let view = new DataView(d_buf);
+  view.setUint32(0, 0x03004029);
+  view.setUint8(68, 0x04);
 
-      if (shouldPass) {
-        for (let i = 11; i < 43; i++) {
-          header.data[i] = 0;
-        }
-      } else {
-        for (let i = 11; i < 43; i++) {
-          header.data[i] = 1;
-        }
-      }
-      new Genesis(header, d_buf);
-    }
+  let header = common.validThreadHeaderFromData(d_buf);
+
+  for (let i = 11; i < 43; i++) {
+    header.data[i] = 1;
   }
-];
+  t.throws(function() { new Genesis(header, d_buf); }, ErrorType.Difficulty.insufficient());
+  t.end();
+});
+
+t.test('Genesis block accepts valid data', function(t) {
+  let d_buf = new ArrayBuffer(69);
+  let view = new DataView(d_buf);
+  view.setUint32(0, 0x03004029);
+  view.setUint8(68, 0x04);
+
+  let header = common.validThreadHeaderFromData(d_buf);
+
+  t.doesNotThrow(function() { new Genesis(header, d_buf); });
+  t.end();
+});

@@ -26,7 +26,7 @@
 
 var Post = require('./post.js');
 var Difficulty = require('../hash/difficulty.js');
-var Util = require('../util.js');
+var ErrorType = require('../error.js');
 
 module.exports = class GenesisPost extends Post {
   constructor(header, data) {
@@ -37,14 +37,14 @@ module.exports = class GenesisPost extends Post {
     // 1 byte control length
     // 2 bytes content length
     // 5 bytes genesis options
-    Util.assert(this.controlLength() >= 8);
+    if (this.controlLength() < 8) throw ErrorType.Data.controlLength();
 
     // max >= min difficulty
-    Util.assert(this.maxPostDifficulty() >= this.minPostDifficulty());
-    Util.assert(this.maxThreadDifficulty() >= this.minThreadDifficulty());
+    if (this.maxPostDifficulty() < this.minPostDifficulty()) throw ErrorType.Block.illegalControlValues();
+    if (this.maxThreadDifficulty() < this.minThreadDifficulty()) throw ErrorType.Block.illegalControlValues();
 
     // nonzero max threads
-    Util.assert(this.maxThreads() > 0);
+    if (this.maxThreads() <= 0) throw ErrorType.Block.illegalControlValues();
   }
 
   // the data contains the configuration for the board

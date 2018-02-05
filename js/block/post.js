@@ -24,15 +24,15 @@
 
 "use strict";
 
-var Util = require('../util.js');
 var Block = require('./block.js');
+var ErrorType = require('../error.js');
 
 const POST_BLOCK_ID = 0x01;
 
 module.exports = class Post extends Block {
   constructor(header, data) {
     super(header, data);
-    Util.assert(header.blockType() === POST_BLOCK_ID);
+    if (header.blockType() !== POST_BLOCK_ID) throw ErrorType.Block.type();
   }
 
   prune() {

@@ -32,7 +32,7 @@ module.exports.verify = function(hash, leadingZeroes) {
 
   if(typeof(leadingZeroes) !== 'number') throw ErrorType.Parameter.type();
 
-  if(countLeadingZeroes(hash) < leadingZeroes) throw ErrorType.Difficulty.notEnough();
+  if(countLeadingZeroes(hash) < leadingZeroes) throw ErrorType.Difficulty.insufficient();
 }
 
 var countLeadingZeroes = function(arr) {

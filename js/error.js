@@ -28,13 +28,23 @@ module.exports.Data = {
   length: function() { return new Error('Length of data is incorrect.'); },
   hash: function() { return new Error('Data hash does not match expected value.'); },
   controlLength: function() { return new Error('Invalid control byte length.'); },
-  delimiter: function() { return new Error('Malformed delimiter byte.'); },
+  delimiter: function() { return new Error('Malformed delimiter byte.'); }
+};
+
+module.exports.Block = {
+  type: function() { return new Error('Block type is incorrect.'); },
+  illegalControlValues: function() { return new Error('Control bytes contain illegal values.'); }
 };
 
 module.exports.Parameter = {
-  type: function() { return new Error('Parameter type is incorrect.'); }
+  type: function() { return new Error('Parameter type is incorrect.'); },
+  invalid: function() { return new Error('Parameter value is invalid.'); }
 };
 
 module.exports.Difficulty = {
-  notEnough: function() { return new Error('Data does not meet difficulty threshold.'); }
+  insufficient: function() { return new Error('Data does not meet difficulty threshold.'); }
+};
+
+module.exports.HashMap = {
+  duplicate: function() { return new Error('Value is already set for that key.'); }
 };

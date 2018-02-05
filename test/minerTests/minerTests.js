@@ -25,17 +25,29 @@
 var common = require('../testCommon.js');
 var Miner = require('../../js/miner/miner.js');
 var Hash = require('../../js/hash/blake2s.js');
+var t = require('tap');
 
-module.exports = [
-  { description: "Miner produces a leading zero byte for 8 difficulty",
-    fn: function() {
-      let data = new ArrayBuffer(64);
-      let header = common.validHeaderFromData(data);
+t.test('Miner produces a leading zero byte for 8 difficulty', function(t) {
+  let data = new ArrayBuffer(64);
+  let header = common.validHeaderFromData(data);
 
-      let miner = new Miner(header);
-      miner.mine(8);
-      let hash = Hash.digest(header.data);
-      common.assert(hash[0] === 0);
-    }
-  }
-];
+  let miner = new Miner(header);
+  miner.mine(8);
+  let hash = Hash.digest(header.data);
+  t.equal(hash[0], 0);
+  t.end();
+});
+//
+// module.exports = [
+//   { description: "Miner produces a leading zero byte for 8 difficulty",
+//     fn: function() {
+//       let data = new ArrayBuffer(64);
+//       let header = common.validHeaderFromData(data);
+//
+//       let miner = new Miner(header);
+//       miner.mine(8);
+//       let hash = Hash.digest(header.data);
+//       common.assert(hash[0] === 0);
+//     }
+//   }
+// ];

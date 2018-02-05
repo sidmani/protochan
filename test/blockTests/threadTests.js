@@ -24,172 +24,82 @@
 
 var Thread = require('../../js/block/thread.js');
 var common = require('../testCommon.js');
+var t = require('tap');
+var ErrorType = require('../../js/error.js');
 
-module.exports = [
-  { description: "Thread block validates block type",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf = new ArrayBuffer(69);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x03004029);
-      view.setUint8(68, 0x04);
+t.test('Thread block validates block type', function(t) {
+  let buf = new ArrayBuffer(69);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x03004029);
+  view.setUint8(68, 0x04);
 
-      let header = common.validHeaderFromData(buf);
-      if (shouldPass) {
-        header.data[2] = 0x00;
-      } else {
-        header.data[2] = 0x01;
-      }
-      new Thread(header, buf);
-    }
-  },
-  { description: "Thread block validates data length",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf;
-      if (shouldPass) {
-        buf = new ArrayBuffer(133);
-        let view = new DataView(buf);
-        view.setUint32(0, 0x03008029);
-        view.setUint8(132, 0x04);
-        view.setUint8(75, 0x04); // set a byte so the hashes differ
-      } else {
-        buf = new ArrayBuffer(134);
-        let view = new DataView(buf);
-        view.setUint32(0, 0x03008129);
-        view.setUint8(133, 0x04);
-        view.setUint8(75, 0x04); //
-      }
-      let header = common.validThreadHeaderFromData(buf);
-      new Thread(header, buf);
-    }
-  },
-  { description: "Thread rejects duplicate thread hashes",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf = new ArrayBuffer(133);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x03008029);
-      view.setUint8(132, 0x04);
+  let header = common.validHeaderFromData(buf);
+  header.data[2] = 0x01;
+  t.throws(function() { new Thread(header, buf); }, ErrorType.Block.type(), 'Thread block rejects wrong block type');
+  header.data[2] = 0x00;
+  t.doesNotThrow(function() { new Thread(header, buf); }, 'Thread block accepts correct block type');
+  t.end();
+});
 
-      if (shouldPass) {
-        view.setUint8(75, 0x04); // set a byte so the hashes differ
-      }
-      let header = common.validThreadHeaderFromData(buf);
-      new Thread(header, buf);
-    }
-  },
-  { description: "Thread block validates zero genesis row",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf = new ArrayBuffer(133);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x03008029);
-      view.setUint8(132, 0x04);
-      view.setUint8(75, 0x04);
+t.test('Thread block validates data length', function(t) {
+  let buf = new ArrayBuffer(134);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x03008129);
+  view.setUint8(133, 0x04);
+  view.setUint8(75, 0x04);
+  let header = common.validThreadHeaderFromData(buf);
+  t.throws(function() { new Thread(header, buf) }, ErrorType.Data.length());
+  t.end();
+});
 
-      if (shouldPass) {
-        new Uint8Array(buf).fill(0, 5, 37);
-      } else {
-        new Uint8Array(buf).fill(1, 5, 37);
-      }
-      let header = common.validThreadHeaderFromData(buf);
-      new Thread(header, buf);
-    }
-  },
-  { description: "Thread block sets correct number of threads",
-    fn: function() {
-      let buf = new ArrayBuffer(133);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x03008029);
-      view.setUint8(132, 0x04);
-      view.setUint8(75, 0x04);
+t.test('Thread rejects duplicate thread hashes', function(t) {
+  let buf = new ArrayBuffer(133);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x03008029);
+  view.setUint8(132, 0x04);
+  let header = common.validThreadHeaderFromData(buf);
+  t.throws(function() { new Thread(header, buf) }, ErrorType.HashMap.duplicate());
+  t.end();
+});
 
-      let header = common.validThreadHeaderFromData(buf);
-      let thread = new Thread(header, buf);
-      common.assert(thread.numThreads === 2);
-    }
-  },
-  { description: "Thread block returns correct post hash",
-    fn: function() {
-      let d_buf = new ArrayBuffer(133);
+t.test('Thread block validates zero genesis row', function(t) {
+  let buf = new ArrayBuffer(133);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x03008029);
+  view.setUint8(132, 0x04);
+  view.setUint8(75, 0x04);
+  new Uint8Array(buf).fill(1, 5, 37);
+  let header = common.validThreadHeaderFromData(buf);
+  t.throws(function() { new Thread(header, buf); }, ErrorType.Difficulty.insufficient);
+  t.end();
+});
 
-      let view = new DataView(d_buf);
-      view.setUint32(0, 0x03008029);
-      view.setUint32(75, 0xcefdab64);
-      view.setUint8(132, 0x04);
+t.test('Thread block getters', function(t) {
+  let buf = new ArrayBuffer(133);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x03008029);
+  view.setUint8(132, 0x04);
+  view.setUint8(75, 0x04);
+  let arr = new Uint8Array(buf);
+  arr.fill(17, 36, 68);
+  arr.fill(7, 68, 100);
+  arr.fill(9, 100, 132);
 
-      let arr = new Uint8Array(d_buf);
-      arr.fill(9, 100, 132);
-      let header = common.validThreadHeaderFromData(d_buf);
-      let t = new Thread(header, d_buf);
-      let p = t.getPost(1);
-      for (let i = 0; i < 32; i++) {
-          common.assert(p[i] === 9);
-      }
-    }
-  },
-  { description: "Thread block returns correct thread hash",
-    fn: function() {
-      let d_buf = new ArrayBuffer(133);
-      let view = new DataView(d_buf);
-      view.setUint32(0, 0x03008029);
-      view.setUint32(75, 0xcefdab64);
-      view.setUint8(132, 0x04);
-      let arr = new Uint8Array(d_buf);
-      arr.fill(9, 68, 100);
-      let header = common.validThreadHeaderFromData(d_buf);
-      let t = new Thread(header, d_buf);
-      let firstThread = t.getThread(1);
-      for (let i = 0; i < 32; i++) {
-          common.assert(firstThread[i] === 9);
-      }
-    }
-  },
-  { description: "Thread retrieves genesis post from zero array",
-    fn: function() {
-      let buf = new ArrayBuffer(133);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x03008029);
-      view.setUint8(132, 0x04);
+  let header = common.validThreadHeaderFromData(buf);
+  let thread = new Thread(header, buf);
+  t.equal(thread.numThreads, 2, 'Thread block sets correct number of threads');
+  let expected = new Uint8Array(32);
+  expected.fill(9, 0, 32);
+  t.strictSame(thread.getPost(1), expected, 'Thread block returns correct post hash');
 
-      let arr = new Uint8Array(buf);
-      arr.fill(17, 36, 68);
-      arr.fill(18, 68, 100);
-      arr.fill(19, 100, 132);
+  let expectedThread = new Uint8Array(32);
+  expectedThread.fill(7, 0, 32);
+  t.strictSame(thread.getPostForThread(expectedThread), expected, 'Thread retrieves post from thread hash');
 
-      let header = common.validThreadHeaderFromData(buf);
-      let thread = new Thread(header, buf);
+  expected.fill(7, 0, 32);
+  t.strictSame(thread.getThread(1), expected, 'Thread block returns correct thread hash');
 
-      let expected_thread_hash = new Uint8Array(32);
-      expected_thread_hash.fill(0, 0, 32);
-
-      let expected_post_hash = new Uint8Array(32);
-      expected_post_hash.fill(17, 0, 32);
-      common.assertArrayEquality(expected_post_hash, thread.getPostForThread(expected_thread_hash));
-    }
-  },
-  { description: "Thread retrieves post from thread hash",
-    fn: function() {
-      let d_buf = new ArrayBuffer(133);
-      let view = new DataView(d_buf);
-      view.setUint32(0, 0x03008029);
-      view.setUint32(75, 0xcefdab64);
-      view.setUint8(132, 0x04);
-
-      let arr = new Uint8Array(d_buf);
-      arr.fill(13, 68, 100);
-      arr.fill(17, 100, 132);
-
-      let header = common.validThreadHeaderFromData(d_buf);
-      let thread = new Thread(header, d_buf);
-
-      let expected_thread_hash = new Uint8Array(32);
-      expected_thread_hash.fill(13, 0, 32);
-
-      let expected_post_hash = new Uint8Array(32);
-      expected_post_hash.fill(17, 0, 32);
-      common.assertArrayEquality(expected_post_hash, thread.getPostForThread(expected_thread_hash));
-    }
-  }
-];
+  expected.fill(17, 0, 32);
+  t.strictSame(thread.getPostForThread(new Uint8Array(32)), expected, 'Thread block retrieves genesis post from zero array');
+  t.end();
+});

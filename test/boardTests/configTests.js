@@ -23,70 +23,24 @@
 // SOFTWARE.
 var common = require('../testCommon.js');
 var Configuration = require('../../js/board/config.js');
+var ErrorType = require('../../js/error.js');
+var t = require('tap');
 
-module.exports = [
-  { description: "Configuration validates genesis post type",
-    dual: true,
-    fn: function(shouldPass) {
-      let post;
-      if (shouldPass) {
-        post = common.validGenesisPost();
-      } else {
-        post = new Array(12);
-      }
-      new Configuration(post);
-    }
-  },
-  { description: "Configuration sets minimum post difficulty",
-    fn() {
-      let post = common.validGenesisPost();
-      post.data[3] = 0xf5;
-      post.data[4] = 0xf6;
-      let config = new Configuration(post);
-      common.assert(config.MIN_POST_DIFFICULTY === 0xf5);
-    }
-  },
-  { description: "Configuration sets maximum post difficulty",
-    fn() {
-      let post = common.validGenesisPost();
-      post.data[3] = 0xf5;
-      post.data[4] = 0xf6;
-      let config = new Configuration(post);
-      common.assert(config.MAX_POST_DIFFICULTY === 0xf6);
-    }
-  },
-  { description: "Configuration sets min thread difficulty",
-    fn() {
-      let post = common.validGenesisPost();
-      post.data[5] = 0xf5;
-      post.data[6] = 0xf6;
-      let config = new Configuration(post);
-      common.assert(config.MIN_THREAD_DIFFICULTY === 0xf5);
-    }
-  },
-  { description: "Configuration sets max thread difficulty",
-    fn() {
-      let post = common.validGenesisPost();
-      post.data[5] = 0xf5;
-      post.data[6] = 0xf6;
-      let config = new Configuration(post);
-      common.assert(config.MAX_THREAD_DIFFICULTY === 0xf6);
-    }
-  },
-  { description: "Configuration sets max thread count",
-    fn() {
-      let post = common.validGenesisPost();
-      post.data[7] = 0xf5;
-      let config = new Configuration(post);
-      common.assert(config.MAX_THREAD_COUNT === 0xf5);
-    }
-  },
-  { description: "Configuration sets board ID",
-    fn() {
-      let post = common.validGenesisPost();
-      post.header._data.setUint32(75, 0x18f3e974)
-      let config = new Configuration(post);
-      common.assert(config.BOARD_ID === 0x18f3e974);
-    }
-  }
-];
+t.test('Configuration constructor', function(t) {
+  t.throws(function() { new Configuration(new Array(12)); }, ErrorType.Parameter.type());
+  let post = common.validGenesisPost();
+  post.data[3] = 0xf5;
+  post.data[4] = 0xf6;
+  post.data[5] = 0xf7;
+  post.data[6] = 0xf8;
+  post.data[7] = 0xf9;
+  post.header._data.setUint32(75, 0x18f3e974)
+  let config = new Configuration(post);
+  t.equal(config.MIN_POST_DIFFICULTY, 0xf5, 'Configuration sets minimum post difficulty');
+  t.equal(config.MAX_POST_DIFFICULTY, 0xf6, 'Configuration sets maximum post difficulty');
+  t.equal(config.MIN_THREAD_DIFFICULTY, 0xf7, 'Configuration sets min thread difficulty');
+  t.equal(config.MAX_THREAD_DIFFICULTY, 0xf8, 'Configuration sets max thread difficulty');
+  t.equal(config.MAX_THREAD_COUNT, 0xf9, 'Configuration sets max thread count');
+  t.equal(config.BOARD_ID, 0x18f3e974, 'Configuration sets board ID');
+  t.end();
+});

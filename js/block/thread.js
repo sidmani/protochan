@@ -26,23 +26,23 @@
 
 const THREAD_BLOCK_ID = 0x00;
 
-var Util = require('../util.js');
 var Block = require('./block.js');
 var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
+var ErrorType = require('../error.js');
 
 module.exports = class ThreadBlock extends Block {
   constructor(header, data) {
     super(header, data);
-    Util.assert(header.blockType() === THREAD_BLOCK_ID);
+    if (header.blockType() !== THREAD_BLOCK_ID) throw ErrorType.Block.type();
 
     // thread data comes in sets of 64 bytes (32 thread, 32 post)
     let threadDataLength = data.byteLength
     - this.controlLength()
     - 2; // separator and terminator
 
-    Util.assert(threadDataLength >= 64);
-    Util.assert(threadDataLength % 64 === 0);
+    if (threadDataLength < 64) throw ErrorType.Data.length();
+    if (threadDataLength % 64 !== 0) throw ErrorType.Data.length();
 
     this.numThreads = threadDataLength / 64;
 
@@ -67,7 +67,7 @@ module.exports = class ThreadBlock extends Block {
   // { thread hash, post hash}
   // first row is { 0, post hash } (genesis)
   getThread(index) {
-    Util.assert(index < this.numThreads);
+    if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
     return this.data.subarray(
       this.controlLength() + 1 + index*64,
       this.controlLength() + 1 + index*64 + 32
@@ -76,7 +76,7 @@ module.exports = class ThreadBlock extends Block {
 
   // TODO: optimize to use hashmap and not create extra arrays
   getPost(index) {
-    Util.assert(index < this.numThreads);
+    if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
     return this.data.subarray(
       this.controlLength() + 1 + index*64 + 32,
       this.controlLength() + 1 + index*64 + 64

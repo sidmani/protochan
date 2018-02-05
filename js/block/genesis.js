@@ -26,8 +26,7 @@
 
 var Thread = require('./thread.js');
 var Difficulty = require('../hash/difficulty.js');
-var Util = require('../util.js');
-// var ErrorType = require('../error.js');
+var ErrorType = require('../error.js');
 
 module.exports = class Genesis extends Thread {
   constructor(header, dataBuffer) {
@@ -39,7 +38,6 @@ module.exports = class Genesis extends Thread {
     // Assert that data is 69 (lol) bytes, since the genesis block
     // can only have one thread/post pair associated with it
     // 32 + 32 + 5 = 69
-    Util.assert(this.data.byteLength === 69);
-    //if (this.data.byteLength !== 69) { ErrorType.Data.length(); };
+    if (this.data.byteLength !== 69) throw ErrorType.Data.length();
   }
 }

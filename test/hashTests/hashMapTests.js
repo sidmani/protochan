@@ -24,74 +24,46 @@
 
 var HashMap = require('../../js/hash/hashMap.js');
 var common = require('../testCommon.js');
+var t = require('tap');
+var ErrorType = require('../../js/error.js');
 
-module.exports = [
-  { description: "HashMap sets and gets block",
-    fn: function() {
-      let block = common.validPost();
-      let map = new HashMap();
-      let hash = map.set(block);
-      common.assert(map.get(hash) === block);
-    }
-  },
-  { description: "HashMap.set refuses to set same object twice",
-    dual: true,
-    fn: function(shouldPass) {
-      let block = common.validPost();
-      let map = new HashMap();
-      let hash = map.set(block);
-      if (!shouldPass) {
-        map.set(block);
-      }
-      common.assert(map.get(hash) === block);
-    }
-  },
-  { description: "HashMap.setRaw validates hash type",
-    dual: true,
-    fn: function(shouldPass) {
-      let block = common.validPost();
-      let map = new HashMap();
-      let hash;
-      if (shouldPass) {
-        hash = new Uint8Array([5, 4, 1]);
-      } else {
-        hash = [5, 4, 1];
-      }
+t.test('HashMap.set', function(t) {
+  let block = common.validPost();
+  let map = new HashMap();
+  let hash = map.set(block);
+  t.equal(map.get(hash), block, 'HashMap sets and gets block');
+  t.throws(function() { map.set(block); }, ErrorType.HashMap.duplicate(), 'HashMap refuses to set same object twice');
+  t.end();
+});
 
-      map.setRaw(hash, block);
-    }
-  },
-  { description: "HashMap.setRaw sets block",
-    fn: function() {
-      let block = common.validPost();
-      let map = new HashMap();
-      let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
-      common.assert(map.get(new Uint8Array([5, 4, 3])) === block);
-    }
-  },
-  { description: "HashMap.setRaw obeys overwrite flag",
-    dual: true,
-    fn: function(shouldPass) {
-      let block = common.validPost();
-      let map = new HashMap();
-      let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
-      map.setRaw(new Uint8Array([5, 4, 3]), block, shouldPass);
-      common.assert(map.get(new Uint8Array([5, 4, 3])) === block);
-    }
-  },
-  { description: "HashMap enumerates set objects",
-    fn: function() {
-      let block1 = common.validPost();
-      let block2 = common.validPost();
-      let block3 = common.validPost();
+t.test('HashMap.setRaw', function(t) {
+  let block = common.validPost();
+  let map = new HashMap();
+  t.throws(function() { map.setRaw([5, 4, 1], block); }, ErrorType.Parameter.type(), 'HashMap.setRaw validates hash type');
+  let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
+  t.equal(map.get(new Uint8Array([5, 4, 3])), block, 'HashMap.setRaw sets block');
+  t.throws(function() { map.setRaw(new Uint8Array([5, 4, 3]), 'abc', false); }, ErrorType.HashMap.duplicate(), 'HashMap.setRaw obeys false overwrite flag');
+  t.doesNotThrow(function() { map.setRaw(new Uint8Array([5, 4, 3]), 'cde', true); }, 'HashMap.setRaw obeys true overwrite flag')
+  t.equal(map.get(new Uint8Array([5, 4, 3])), 'cde', 'HashMap.setRaw overwrites existing value when overwrite flag is true');
+  t.end();
+});
 
-      let map = new HashMap();
-      let hash1 = map.setRaw(new Uint8Array([5, 4, 3]), block1);
-      let hash2 = map.setRaw(new Uint8Array([6, 2, 1]), block2);
-      let hash3 = map.setRaw(new Uint8Array([5, 7, 8]), block3);
+t.test('HashMap enumerates set objects', function(t) {
+  let block1 = common.validPost();
+  let block2 = common.validPost();
+  let block3 = common.validPost();
 
-      let result = map.enumerate();
-      common.assertJSArrayEquality(result, [block1, block2, block3]);
-    }
-  }
-];
+  // the blocks need to be different for the test to be useful
+  block1.header.data[5] = 0x07;
+  block2.header.data[5] = 0x08;
+  block3.header.data[5] = 0x09;
+
+  let map = new HashMap();
+  let hash1 = map.setRaw(new Uint8Array([5, 4, 3]), block1);
+  let hash2 = map.setRaw(new Uint8Array([6, 2, 1]), block2);
+  let hash3 = map.setRaw(new Uint8Array([5, 7, 8]), block3);
+
+  let result = map.enumerate();
+  t.strictSame(result, [block1, block2, block3], 'HashMap.enumerate returns correct array');
+  t.end();
+});

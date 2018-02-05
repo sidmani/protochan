@@ -25,11 +25,11 @@
 "use strict";
 
 var GenesisPost = require('../block/genesisPost.js');
-var Util = require('../util.js');
+var ErrorType = require('../error.js');
 
 module.exports = class Configuration {
   constructor(originalPost) {
-    Util.assert(originalPost instanceof GenesisPost);
+    if(!(originalPost instanceof GenesisPost)) throw ErrorType.Parameter.type();
     this.MIN_POST_DIFFICULTY = originalPost.minPostDifficulty();
     this.MAX_POST_DIFFICULTY = originalPost.maxPostDifficulty();
     this.MIN_THREAD_DIFFICULTY = originalPost.minThreadDifficulty();

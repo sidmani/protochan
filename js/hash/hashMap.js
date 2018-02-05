@@ -24,31 +24,31 @@
 
 "use strict";
 
-var Util = require('../util.js');
 var Block = require('../block/block.js');
+var ErrorType = require('../error.js');
 
 // Basic hashmap implementation
 module.exports = class HashMap {
   constructor() {}
 
-  set(block, overwrite) {
-    Util.assert(block instanceof Block);
+  set(block) {
+    if (!(block instanceof Block)) throw ErrorType.Parameter.type();
     let hash = block.hash();
     let str = HashMap.uint8ArrToHex(hash);
-    Util.assert(!this[str]);
+    if (this[str] !== undefined) throw ErrorType.HashMap.duplicate();
     this[str] = block;
     return hash;
   }
 
   setRaw(hash, obj, overwrite) {
-    Util.assert(hash instanceof Uint8Array);
+    if (!(hash instanceof Uint8Array)) throw ErrorType.Parameter.type();
     let str = HashMap.uint8ArrToHex(hash);
-    Util.assert(!this[str] || overwrite);
+    if (this[str] !== undefined && !overwrite) throw ErrorType.HashMap.duplicate();
     this[str] = obj;
   }
 
   get(hash) {
-    Util.assert(hash instanceof Uint8Array);
+    if (!(hash instanceof Uint8Array)) throw ErrorType.Parameter.type();
     return this[HashMap.uint8ArrToHex(hash)];
   }
 
@@ -57,6 +57,7 @@ module.exports = class HashMap {
     return Object.keys(this).map(key => this[key]);
   }
 
+  // XXX: untested
   static uint8ArrToHex(arr) {
   	let str = '';
   	for (let i = 0; i < arr.byteLength; i++) {

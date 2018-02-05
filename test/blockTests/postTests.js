@@ -24,38 +24,18 @@
 
 var Post = require('../../js/block/post.js');
 var common = require('../testCommon.js');
+var t = require('tap');
+var ErrorType = require('../../js/error.js');
 
-module.exports = [
-  { description: "Post block validates block type",
-    dual: true,
-    fn: function(shouldPass) {
-      let d_buf = new ArrayBuffer(41);
-      let dataView = new DataView(d_buf);
-      dataView.setUint32(0, 0x03002429);
-      dataView.setUint8(40, 0x04);
-      let header = common.validHeaderFromData(d_buf);
-      if (shouldPass) {
-        header.data[2] = 0x01;
-      } else {
-        header.data[2] = 0x00;
-      }
-      new Post(header, d_buf);
-    }
-  },
-  { description: "Post block requires at least two control bytes",
-    dual: true,
-    fn: function(shouldPass) {
-      let d_buf = new ArrayBuffer(41);
-      let dataView = new DataView(d_buf);
-      dataView.setUint8(40, 0x04);
-      if (shouldPass) {
-        dataView.setUint32(0, 0x03002429);
-      } else {
-        dataView.setUint32(0, 0x02252900);
-      }
-      let header = common.validPostHeaderFromData(d_buf);
-
-      new Post(header, d_buf);
-    }
-  },
-];
+t.test('Post block validates block type', function(t) {
+  let d_buf = new ArrayBuffer(41);
+  let dataView = new DataView(d_buf);
+  dataView.setUint32(0, 0x03002429);
+  dataView.setUint8(40, 0x04);
+  let header = common.validHeaderFromData(d_buf);
+  header.data[2] = 0x00;
+  t.throws(function() { new Post(header, d_buf); }, ErrorType.Block.type(), 'Post block rejects wrong block type');
+  header.data[2] = 0x01;
+  t.doesNotThrow(function() { new Post(header, d_buf); }, 'Post block accepts correct block type');
+  t.end();
+});
