@@ -1,4 +1,5 @@
-language: generic
+language: node_js
+before_script:
+  - npm install
 script:
-  - node test/test.js
-# TODO: ^ should be npm test
+  - npm test

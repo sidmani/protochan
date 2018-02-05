@@ -2,7 +2,7 @@
   "name": "protochan",
   "version": "0.0.1",
   "description": "Protocol for an uncensored, anonymous blockchain-based message board",
-  "main": "protochan.js",
+  "main": "js/protochan.js",
   "directories": {
     "test": "test"
   },
