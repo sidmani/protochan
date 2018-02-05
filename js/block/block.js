@@ -27,16 +27,17 @@
 var Util = require('../util.js');
 var Header = require('./header.js');
 var Hash = require('../hash/blake2s.js');
+var ErrorType = require('../error.js');
 
 module.exports = class Block {
   constructor(header, data) {
-    Util.assert(header instanceof Header);
-    Util.assert(data instanceof ArrayBuffer);
+    if (!(header instanceof Header)) throw ErrorType.Parameter.type();
+    if (!(data instanceof ArrayBuffer)) throw ErrorType.Parameter.type();
 
     // XXX: untested
     // Absolute max size of a block's databuffer is
     // 2^16-1 (uint16) - 80 (header) - 100 (any packet headers)  = 65355.
-    Util.assert(data.byteLength < 65355);
+    if (data.byteLength >= 65355) throw ErrorType.Data.length();
 
     this.header = header;
     this.data = new Uint8Array(data);
@@ -46,26 +47,24 @@ module.exports = class Block {
 
     // Assert that the hash of the data is equal to the
     // hash stored in the header
-    Util.assertArrayEquality(
-      Hash.digest(this.data), header.dataHash()
-    );
+    if (!Util.arrayEquality(Hash.digest(this.data), header.dataHash())) throw ErrorType.Data.hash();
 
     // # of control bytes (1byte), control bytes, 0x29, content bytes, 0x04
-    Util.assert(this.data[this.controlLength()] === 0x29);
+    if (this.data[this.controlLength()] !== 0x29) throw ErrorType.Data.delimiter();
 
     // at least 3 control bytes (control length, content length)
-    Util.assert(this.controlLength() >= 3);
+    if (this.controlLength() < 3) throw ErrorType.Data.controlLength();
 
     // data length = 2b len + #b control + delimiter + #b content + EOT
-    Util.assert(this.data.byteLength ===
+    if (this.data.byteLength !==
         this.contentLength() // content bytes
       + this.controlLength() // control bytes
       + 1 // separator
       + 1 // terminator
-    );
+    ) throw ErrorType.Data.length();
 
     // last byte is 0x04 end of transmission
-    Util.assert(this.data[this.data.byteLength - 1] === 0x04); //
+    if (this.data[this.data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
   }
 
   hash() {

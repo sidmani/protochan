@@ -25,6 +25,7 @@
 "use strict";
 
 var Util = require('../util.js');
+var ErrorType = require('../error.js');
 
 /**
  * The block header.
@@ -36,10 +37,10 @@ class Header {
    */
   constructor(buffer) {
     // parameter validation
-    Util.assert(buffer instanceof ArrayBuffer);
+    if (!(buffer instanceof ArrayBuffer)) throw ErrorType.Parameter.type();
 
     // Assert that the buffer is exactly 80 bytes long
-    Util.assert(buffer.byteLength === 80);
+    if (buffer.byteLength !== 80) throw ErrorType.Data.length();
 
     this._data = new DataView(buffer);
     this.data = new Uint8Array(buffer);

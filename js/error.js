@@ -25,9 +25,16 @@
 "use strict";
 
 module.exports.Data = {
-  length: function() { throw new Error('Length of data is incorrect.'); },
+  length: function() { return new Error('Length of data is incorrect.'); },
+  hash: function() { return new Error('Data hash does not match expected value.'); },
+  controlLength: function() { return new Error('Invalid control byte length.'); },
+  delimiter: function() { return new Error('Malformed delimiter byte.'); },
 };
 
 module.exports.Parameter = {
-  type: function() { throw new Error('Parameter type is incorrect.'); }
-}
+  type: function() { return new Error('Parameter type is incorrect.'); }
+};
+
+module.exports.Difficulty = {
+  notEnough: function() { return new Error('Data does not meet difficulty threshold.'); }
+};

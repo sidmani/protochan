@@ -24,186 +24,117 @@
 
 var common = require('../testCommon.js');
 var Block = require('../../js/block/block.js');
+var ErrorType = require('../../js/error.js');
+var t = require('tap');
 
-module.exports = [
-  { description: "Block validates header type",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf = new ArrayBuffer(10);
-      let view = new DataView(buf);
+t.test('Block validates header type', function(t) {
+  let buf = new ArrayBuffer(10);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x03000529);
+  view.setUint8(9, 0x04);
+  t.throws(function() { new Block(new Array(80), buf); }, ErrorType.Parameter.type());
+  t.end();
+});
 
-      view.setUint32(0, 0x03000529);
-      view.setUint8(9, 0x04);
-      let header;
-      if (shouldPass) {
-        header = common.validHeaderFromData(buf);
-      } else {
-        header = new Array();
-      }
-      new Block(header, buf);
-    }
-  },
-  { description: "Block validates data type",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf = new ArrayBuffer(64);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x04003A29);
-      view.setUint8(4, 0x29);
-      view.setUint8(63, 0x04);
-      let header = common.validHeaderFromData(buf);
-      if (shouldPass) {
-        new Block(header, buf);
-      } else {
-        new Block(header, new Array());
-      }
-    }
-  },
-  { description: "Block validates data hash",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf = new ArrayBuffer(10);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x03000529);
-      view.setUint8(9, 0x04);
-      let header = common.validHeaderFromData(buf);
-      // change a byte to break the hash
-      if (!shouldPass) {
-        (new Uint8Array(buf))[5] = 0x05;
-      }
-      new Block(header, buf);
-    }
-  },
-  { description: "Block validates data separator byte",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf = new ArrayBuffer(10);
-      let view = new DataView(buf);
-      view.setUint8(9, 0x04);
-      if (shouldPass) {
-        view.setUint32(0, 0x03000529);
-      } else {
-        view.setUint32(0, 0x03000528);
-      }
+t.test('Block validates data type', function(t) {
+  let buf = new ArrayBuffer(64);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x04003A29);
+  view.setUint8(4, 0x29);
+  view.setUint8(63, 0x04);
+  let header = common.validHeaderFromData(buf);
 
-      let header = common.validHeaderFromData(buf);
-      new Block(header, buf);
-    }
-  },
-  { description: "Block validates number of control bytes",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf = new ArrayBuffer(10);
-      let view = new DataView(buf);
-      view.setUint8(9, 0x04);
-      if (shouldPass) {
-        view.setUint32(0, 0x03000529);
-      } else {
-        view.setUint32(0, 0x02062900);
-      }
+  t.throws(function() { new Block(header, new Array()); }, ErrorType.Parameter.type());
+  t.end();
+});
 
-      let header = common.validHeaderFromData(buf);
-      new Block(header, buf);
-    }
-  },
-  { description: "Block validates data length",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf;
-      if (shouldPass) {
-        buf = new ArrayBuffer(10);
-        let view = new DataView(buf);
-        view.setUint8(9, 0x04);
-        view.setUint32(0, 0x03000529);
-      } else {
-        buf = new ArrayBuffer(11);
-        let view = new DataView(buf);
-        view.setUint8(10, 0x04);
-        view.setUint32(0, 0x03000529);
-      }
+t.test('Block validates data hash', function(t) {
+  let buf = new ArrayBuffer(10);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x03000529);
+  view.setUint8(9, 0x04);
+  let header = common.validHeaderFromData(buf);
+  (new Uint8Array(buf))[5] = 0x05;
 
-      let header = common.validHeaderFromData(buf);
-      new Block(header, buf);
-    }
-  },
-  { description: "Block validates data terminator byte",
-    dual: true,
-    fn: function(shouldPass) {
-      let buf = new ArrayBuffer(10);
-      let view = new DataView(buf);
-      if (shouldPass) {
-        view.setUint8(9, 0x04);
-      } else {
-        view.setUint8(9, 0x07);
-      }
-      view.setUint32(0, 0x03000529);
+  t.throws(function() { new Block(header, buf); }, ErrorType.Data.hash());
+  t.end();
+});
 
-      let header = common.validHeaderFromData(buf);
-      new Block(header, buf);
-    }
-  },
-  { description: "Block accepts valid header and data",
-    fn: function() {
-      var buf = new ArrayBuffer(128);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x03007B29);
-      view.setUint8(127, 0x04);
-      var header = common.validHeaderFromData(buf);
-      var b = new Block(header, buf);
-      common.assert(b instanceof Block);
-    }
-  },
-  { description: "Block.hash() returns correct hash",
-    fn: function() {
-      var buf = new ArrayBuffer(128);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x03007B29);
-      view.setUint8(127, 0x04);
-      var header = common.validHeaderFromData(buf);
-      var b = new Block(header, buf);
-      common.assertArrayEquality(b.hash(), common.hash(header.data));
-    }
-  },
-  { description: "Block returns correct control length",
-    fn: function() {
-      var buf = new ArrayBuffer(128);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x04007AEF);
-      view.setUint32(4, 0x29000000)
-      view.setUint8(127, 0x04);
-      var header = common.validHeaderFromData(buf);
-      var b = new Block(header, buf);
-      common.assert(b.controlLength() === 0x04);
-    }
-  },
-  { description: "Block returns correct content length",
-    fn: function() {
-      var buf = new ArrayBuffer(517);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x0401FFEF);
-      view.setUint32(4, 0x29000000)
-      view.setUint8(516, 0x04);
-      var header = common.validHeaderFromData(buf);
-      var b = new Block(header, buf);
-      common.assert(b.contentLength() === 0x01FF);
-    }
-  },
-  { description: "Block returns correct content",
-    fn: function() {
-      let buf = new ArrayBuffer(128);
-      let view = new DataView(buf);
-      view.setUint32(0, 0x04007AEF);
-      view.setUint32(4, 0x29000000)
-      view.setUint8(127, 0x04);
+t.test('Block validates data separator byte', function(t) {
+  let buf = new ArrayBuffer(10);
+  let view = new DataView(buf);
+  view.setUint8(9, 0x04);
+  view.setUint32(0, 0x03000528);
+  let header = common.validHeaderFromData(buf);
+  t.throws(function() { new Block(header, buf); }, ErrorType.Data.delimiter());
+  t.end()
+});
 
-      (new Uint8Array(buf)).fill(0x94, 5, 127);
-      let header = common.validHeaderFromData(buf);
-      let b = new Block(header, buf);
-      let content = b.content();
-      common.assert(content.byteLength === 0x7A);
-      for (let i = 5; i < 127; i++) {
-        common.assert(content[i-5] === 0x94);
-      }
-    }
-  }
-];
+t.test('Block validates number of control bytes', function(t) {
+  let buf = new ArrayBuffer(10);
+  let view = new DataView(buf);
+  view.setUint8(9, 0x04);
+  view.setUint32(0, 0x02062900);
+  let header = common.validHeaderFromData(buf);
+  t.throws(function() { new Block(header, buf); }, ErrorType.Data.controlLength());
+  t.end();
+});
+
+t.test('Block validates data length', function(t) {
+  let buf = new ArrayBuffer(11);
+  let view = new DataView(buf);
+  view.setUint8(10, 0x04);
+  view.setUint32(0, 0x03000529);
+  let header = common.validHeaderFromData(buf);
+  t.throws(function() { new Block(header, buf); }, ErrorType.Data.length());
+  t.end();
+});
+
+t.test('Block validates data terminator byte', function(t) {
+  let buf = new ArrayBuffer(10);
+  let view = new DataView(buf);
+  view.setUint8(9, 0x07);
+  view.setUint32(0, 0x03000529);
+
+  let header = common.validHeaderFromData(buf);
+  t.throws(function() { new Block(header, buf); }, ErrorType.Data.delimiter());
+  t.end();
+});
+
+t.test('Block accepts valid header and data', function (t) {
+  let buf = new ArrayBuffer(128);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x03007B29);
+  view.setUint8(127, 0x04);
+  let header = common.validHeaderFromData(buf);
+  let b;
+  t.doesNotThrow(function() { b = new Block(header, buf); });
+  t.assert(b instanceof Block);
+  t.end();
+});
+
+t.test('Block getters return correct values', function(t) {
+  var buf = new ArrayBuffer(517);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x0401FFEF);
+  view.setUint32(4, 0x29000000)
+  view.setUint8(516, 0x04);
+  (new Uint8Array(buf)).fill(0x94, 5, 516);
+
+  var header = common.validHeaderFromData(buf);
+  var b = new Block(header, buf);
+
+  t.strictSame(b.hash(), common.hash(header.data),
+    'Block.hash() returns correct hash');
+  t.equal(b.controlLength(), 0x04,
+    'Block returns correct control length');
+  t.equal(b.contentLength(), 0x01FF,
+    'Block returns correct content length');
+
+  let content = b.content();
+  let expected_content = new Uint8Array(0x01FF);
+  expected_content.fill(0x94, 0, 0x01FF);
+  t.strictSame(content, expected_content,
+    'Block returns correct content');
+  t.end();
+});

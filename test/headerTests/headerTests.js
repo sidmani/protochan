@@ -23,150 +23,84 @@
 // SOFTWARE.
 
 var Header = require('../../js/block/header.js');
-var common = require('../testCommon.js');
+var t = require('tap');
+var ErrorType = require('../../js/error.js')
 
-// prevHash
-var prev_hash_result = new Uint8Array([ // random integers
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-]);
+t.test('Header constructor tests', function(t) {
+  t.throws(function() { new Header(undefined); }, ErrorType.Parameter.type(), 'Header rejects undefined data');
+  t.throws(function() { new Header(new Array()); }, ErrorType.Parameter.type(), 'Header rejects data of wrong type');
+  t.throws(function() { new Header(new ArrayBuffer(81)); }, ErrorType.Data.length(), 'Header rejects data of wrong length');
+  t.doesNotThrow(function() { h = new Header(new ArrayBuffer(80))}, 'Header accepts valid data');
+  t.end();
+});
 
-// dataHash
-var data_hash_result = new Uint8Array([
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-  0xea, 0x38, 0xad, 0x19,
-]);
+t.test('Header nonce methods', function(t) {
+  let h = new Header(new ArrayBuffer(80));
+  h.setNonce(0x5f4f3f2f);
+  t.equal(h.nonce(), 0x5f4f3f2f, 'Header sets nonce');
+  h.setNonce(0x5f4f3fff);
+  h.incrNonce();
+  t.equal(h.nonce(), 0x5f4f4000, 'Header increments nonce');
+  t.end();
+});
 
-function validBuffer() {
-  let valid_buffer = new ArrayBuffer(80);
-  let view = new DataView(valid_buffer);
+t.test('Header getter methods', function(t) {
+  let validBuffer = new ArrayBuffer(80);
+  let view = new DataView(validBuffer);
+  // prevHash
+  let prev_hash_result = new Uint8Array([ // random integers
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+  ]);
+
+  // dataHash
+  let data_hash_result = new Uint8Array([
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x19,
+  ]);
 
   // protocol version
   view.setUint16(0, 12345);
   // block type
-  view.setUint8(2, 234);
+  view.setUint8(2, 0x07);
   // timestamp
   view.setUint32(3, 274444555);
   // nonce
   view.setUint32(7, 777711889);
+  // prevHash
   for (let i = 0; i < 32; i++) {
     view.setUint8(11+i, prev_hash_result[i]);
   }
-
+  // dataHash
   for (let i = 0; i < 32; i++) {
     view.setUint8(43+i, data_hash_result[i]);
   }
-
+  // board ID
   view.setUint32(75, 0x4e5be7e9);
+  // reserved
   view.setUint8(79, 0x7c);
-  return valid_buffer;
-}
 
+  let h = new Header(validBuffer);
 
-module.exports = [
-  // these are all one-liners, so no need to use dual testing
-  { description: "Header rejects undefined data",
-    shouldFail: true,
-    fn: function() {
-      new Header(undefined);
-    }
-  },
-  { description: "Header rejects data of wrong type",
-    shouldFail: true,
-    fn: function() {
-      new Header(new Array());
-    }
-  },
-  { description: "Header rejects data of wrong length",
-    shouldFail: true,
-    fn: function() {
-      new Header(new ArrayBuffer(12));
-    }
-  },
-  { description: "Header accepts properly typed data",
-    fn: function() {
-      var h = new Header(new ArrayBuffer(80));
-      common.assert(h instanceof Header);
-    }
-  },
-  { description: "Header sets nonce",
-    fn: function() {
-      var h = new Header(validBuffer());
-      h.setNonce(0x5f4f3f2f);
-      common.assert(h.nonce() === 0x5f4f3f2f);
-    }
-  },
-  { description: "Header increments nonce",
-    fn: function() {
-      var h = new Header(validBuffer());
-      h.setNonce(0x5f4f3fff);
-      h.incrNonce();
-      common.assert(h.nonce() === 0x5f4f4000);
-    }
-  },
-  { description: "Header returns correct protocol version",
-    fn: function() {
-      var h = new Header(validBuffer());
-      common.assert(h.protocolVersion() === 12345);
-    }
-  },
-  { description: "Header returns correct block type",
-    fn: function() {
-      var h = new Header(validBuffer());
-      common.assert(h.blockType() === 234);
-    }
-  },
-  { description: "Header returns correct timestamp",
-    fn: function() {
-      var h = new Header(validBuffer());
-      common.assert(h.timestamp() === 274444555);
-    }
-  },
-  { description: "Header returns correct nonce",
-    fn: function() {
-      var h = new Header(validBuffer());
-      common.assert(h.nonce() === 777711889);
-    }
-  },
-  { description: "Header returns correct previous hash",
-    fn: function() {
-      var h = new Header(validBuffer());
-      common.assertArrayEquality(h.prevHash(), prev_hash_result);
-      // assertArrayEquality doesn't work since this is
-      // comparing uint32s using the dataview
-      // for (let i = 0; i < 8; i++) {
-      //   common.assert(prevHash.getUint32(i*4) === prev_hash_result[i], 'incorrect hash byte');
-      // }
-    }
-  },
-  { description: "Header returns correct data hash",
-    fn: function() {
-      var h = new Header(validBuffer());
-      common.assertArrayEquality(h.dataHash(), data_hash_result);
-    }
-  },
-  { description: "Header returns correct board ID",
-    fn: function() {
-      var h = new Header(validBuffer());
-      common.assert(h.board() === 0x4e5be7e9);
-    }
-  },
-  { description: "Header returns correct reserved data",
-      fn: function() {
-        var h = new Header(validBuffer());
-        common.assert(h.reserved() === 0x7c);
-      }
-  }
-]
+  t.equal(h.protocolVersion(), 12345, 'Header returns correct protocol version');
+  t.equal(h.blockType(), 0x07, 'Header returns correct block type');
+  t.equal(h.timestamp(), 274444555, 'Header returns correct timestamp');
+  t.equal(h.nonce(), 777711889, 'Header returns correct nonce');
+  t.strictSame(h.prevHash(), prev_hash_result, 'Header returns correct previous hash');
+  t.strictSame(h.dataHash(), data_hash_result, 'Header returns correct data hash');
+  t.equal(h.board(), 0x4e5be7e9, 'Header returns correct board ID');
+  t.equal(h.reserved(), 0x7c, 'Header returns correct reserved data');
+  t.end();
+});

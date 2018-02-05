@@ -24,15 +24,15 @@
 
 "use strict";
 
-var Util = require('../util.js');
+var ErrorType = require('../error.js');
 
 module.exports.verify = function(hash, leadingZeroes) {
-  Util.assert(hash instanceof Uint8Array);
-  Util.assert(hash.byteLength === 32);
+  if(!(hash instanceof Uint8Array)) throw ErrorType.Parameter.type();
+  if(hash.byteLength !== 32) throw ErrorType.Data.length();
 
-  Util.assert(typeof(leadingZeroes) === 'number');
+  if(typeof(leadingZeroes) !== 'number') throw ErrorType.Parameter.type();
 
-  Util.assert(countLeadingZeroes(hash) >= leadingZeroes);
+  if(countLeadingZeroes(hash) < leadingZeroes) throw ErrorType.Difficulty.notEnough();
 }
 
 var countLeadingZeroes = function(arr) {
