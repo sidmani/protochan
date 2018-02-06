@@ -25,349 +25,151 @@
 var common = require('../testCommon.js');
 var HashMap = require('../../js/hash/hashMap.js');
 var Head = require('../../js/chain/head.js');
+var t = require('tap');
+var ErrorType = require('../../js/error.js');
 
-module.exports = [
-  { description: "Head validates originalPost type",
-    dual: true,
-    fn: function(shouldPass) {
-      let originalPost;
-      let threadHash = new Uint8Array(32);
-      let map = new HashMap();
-      let startingHeight = 1;
-      if (shouldPass) {
-        originalPost = common.validPost();
-      } else {
-        originalPost = new Array(5);
-      }
+t.test('Head constructor', function(t) {
+  let originalPost = common.validPost();
+  originalPost.header._data.setUint32(3, 18643);
+  let threadHash = new Uint8Array(32);
+  threadHash.fill(18, 0, 19);
+  let map = new HashMap();
+  let startingHeight = 177;
+  t.throws(function() { new Head(new Array(5), threadHash, map, startingHeight); }, ErrorType.Parameter.type(), 'Head validates originalPost type');
+  t.throws(function() { new Head(originalPost, new Array(32), map, startingHeight); }, ErrorType.Parameter.type(), 'Head validates threadHash type');
+  t.throws(function() { new Head(originalPost, threadHash, new Array(15), startingHeight); }, ErrorType.Parameter.type(), 'Head validates map type');
+  t.throws(function() { new Head(originalPost, threadHash, map, 'hello'); }, ErrorType.Parameter.type(), 'Head validates startingHeight type');
+  t.throws(function() { new Head(originalPost, threadHash, map, -3); }, ErrorType.Parameter.invalid(), 'Head validates startingHeight value');
 
-      new Head(originalPost, threadHash, map, startingHeight);
-    }
-  },
-  { description: "Head validates threadHash type",
-    dual: true,
-    fn: function(shouldPass) {
-      let originalPost = common.validPost();
-      let threadHash;
-      let map = new HashMap();
-      let startingHeight = 1;
-      if (shouldPass) {
-        threadHash = new Uint8Array(32);
-      } else {
-        threadHash = new Array(10);
-      }
+  let head = new Head(originalPost, threadHash, map, startingHeight);
+  t.equal(head.height, 177, 'Head sets starting height');
+  t.strictSame(head.thread, threadHash, 'Head sets this.thread');
+  t.strictSame(originalPost.thread, threadHash, 'Head sets thread on original post');
+  t.equal(map.get(originalPost.hash()), originalPost, 'Head inserts original post into map');
+  t.equal(head.timestamp, 18643, 'Head sets timestamp from original post');
+  t.equal(head.unconfirmedPosts, 1, 'Head sets unconfirmed post count');
+  t.end();
+});
 
-      new Head(originalPost, threadHash, map, startingHeight);
-    }
-  },
-  { description: "Head validates map type",
-    dual: true,
-    fn: function(shouldPass) {
-      let originalPost = common.validPost();
-      let threadHash = new Uint8Array(32);
-      let map;
-      let startingHeight = 1;
-      if (shouldPass) {
-        map = new HashMap();
-      } else {
-        map = new Array(10);
-      }
-
-      new Head(originalPost, threadHash, map, startingHeight);
-    }
-  },
-  { description: "Head validates startingHeight type",
-    dual: true,
-    fn: function(shouldPass) {
-      let originalPost = common.validPost();
-      let threadHash = new Uint8Array(32);
-      let map = new HashMap();
-      let startingHeight;
-      if (shouldPass) {
-        startingHeight = 5;
-      } else {
-        startingHeight = 'hello';
-      }
-
-      new Head(originalPost, threadHash, map, startingHeight);
-    }
-  },
-  { description: "Head validates startingHeight value",
-    dual: true,
-    fn: function(shouldPass) {
-      let originalPost = common.validPost();
-      let threadHash = new Uint8Array(32);
-      let map = new HashMap();
-      let startingHeight;
-      if (shouldPass) {
-        startingHeight = 0;
-      } else {
-        startingHeight = -3;
-      }
-
-      new Head(originalPost, threadHash, map, startingHeight);
-    }
-  },
-  { description: "Head sets starting height",
-    fn: function() {
-      let head = new Head(common.validPost(), new Uint8Array(32), new HashMap(), 177);
-      common.assert(head.height === 177);
-    }
-  },
-  { description: "Head sets this.thread",
-    fn: function() {
-      let threadHash = new Uint8Array(32);
-      for (let i = 0; i < 32; i++) {
-        threadHash[i] = i*7;
-      }
-      let head = new Head(common.validPost(), threadHash, new HashMap(), 177);
-      common.assertArrayEquality(threadHash, head.thread);
-    }
-  },
-  { description: "Head sets thread on original post",
-    fn: function() {
-      let originalPost = common.validPost();
-      let threadHash = new Uint8Array(32);
-      for (let i = 0; i < 32; i++) {
-        threadHash[i] = i*7;
-      }
-      let map = new HashMap();
-
-      let head = new Head(originalPost, threadHash, map, 0);
-      common.assertArrayEquality(originalPost.thread, threadHash);
-    }
-  },
-  { description: "Head inserts original post into map",
-    fn: function() {
-      let originalPost = common.validPost();
-      let threadHash = new Uint8Array(32);
-      let map = new HashMap();
-
-      let head = new Head(originalPost, threadHash, map, 0);
-      common.assert(map.get(originalPost.hash()) === originalPost);
-    }
-  },
-  { description: "Head sets timestamp from original post",
-    fn: function() {
-      let originalPost = common.validPost();
-      let threadHash = new Uint8Array(32);
-      let map = new HashMap();
-      originalPost.header._data.setUint32(3, 18643);
-      let head = new Head(originalPost, threadHash, map, 0);
-      common.assert(head.timestamp === 18643);
-    }
-  },
-  { description: "Head sets unconfirmed post count",
-    fn: function() {
-      let originalPost = common.validPost();
-      let threadHash = new Uint8Array(32);
-      let map = new HashMap();
-      let head = new Head(originalPost, threadHash, map, 1077);
-      common.assert(head.unconfirmedPosts === 1);
-    }
-  },
-  { description: "Head.pushPost validates post type",
-    dual: true,
-    fn: function(shouldPass) {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      let nextPost;
-      if (shouldPass) {
-        nextPost = common.validPost();
-        for (let i = 11; i < 43; i++) {
-          nextPost.header.data[i] = originalPostHash[i-11];
-        }
-      } else {
-        nextPost = new Array(6);
-      }
-      head.pushPost(nextPost);
-    }
-  },
-  { description: "Head.pushPost validates prevHash",
-    dual: true,
-    fn: function(shouldPass) {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      let nextPost = common.validPost();
-      if (shouldPass) {
-        for (let i = 11; i < 43; i++) {
-          nextPost.header.data[i] = originalPostHash[i-11];
-        }
-      } else {
-        for (let i = 11; i < 43; i++) {
-          nextPost.header.data[i] = i * 5;
-        }
-      }
-      head.pushPost(nextPost);
-    }
-  },
-  { description: "Head.pushPost sets thread on post",
-    fn: function() {
-      let threadHash = new Uint8Array(32);
-      for (let i = 0; i < 32; i++) {
-        threadHash[i] = i*7;
-      }
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, threadHash, new HashMap(), 177);
-      let nextPost = common.validPost();
-      for (let i = 11; i < 43; i++) {
-        nextPost.header.data[i] = originalPostHash[i-11];
-      }
-      head.pushPost(nextPost);
-
-      common.assertArrayEquality(nextPost.thread, threadHash);
-    }
-  },
-  { description: "Head.pushPost sets pointer",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      let nextPost = common.validPost();
-      for (let i = 11; i < 43; i++) {
-        nextPost.header.data[i] = originalPostHash[i-11];
-      }
-      head.pushPost(nextPost);
-
-      common.assertArrayEquality(head.pointer, nextPost.hash());
-    }
-  },
-  { description: "Head.pushPost increments unconfirmed post count",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      let nextPost = common.validPost();
-      for (let i = 11; i < 43; i++) {
-        nextPost.header.data[i] = originalPostHash[i-11];
-      }
-      head.pushPost(nextPost);
-
-      common.assert(head.unconfirmedPosts === 2);
-    }
-  },
-  { description: "Head.pushPost sets timestamp",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      let nextPost = common.validPost();
-      nextPost.header._data.setUint32(3, 2077354);
-      for (let i = 11; i < 43; i++) {
-        nextPost.header.data[i] = originalPostHash[i-11];
-      }
-      head.pushPost(nextPost);
-
-      common.assert(head.timestamp === 2077354);
-    }
-  },
-  { description: "Head.pushPost inserts new post into map",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let map = new HashMap();
-      let head = new Head(originalPost, new Uint8Array(32), map, 177);
-      let nextPost = common.validPost();
-      for (let i = 11; i < 43; i++) {
-        nextPost.header.data[i] = originalPostHash[i-11];
-      }
-      head.pushPost(nextPost);
-
-      common.assert(map.get(nextPost.hash()) === nextPost);
-    }
-  },
-  { description: "Head.pushPost increments height",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      let nextPost = common.validPost();
-      for (let i = 11; i < 43; i++) {
-        nextPost.header.data[i] = originalPostHash[i-11];
-      }
-      head.pushPost(nextPost);
-
-      common.assert(head.height === 178);
-    }
-  },
-  { description: "Head.discardStage works",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      head.stage = common.validThread(originalPost); // not undefined
-      head.discardStage();
-      common.assert(head.stage === undefined);
-    }
-  },
-  { description: "Head.commitThread validates stage",
-    dual: true,
-    fn: function(shouldPass) {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-
-      if (shouldPass) {
-        head.stage = common.validThread(originalPost);
-      } else {
-        head.stage = 5;
-      }
-
-      head.commitThread();
-    }
-  },
-  { description: "Head.commitThread increments height",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      head.stage = common.validThread(originalPost);
-      head.commitThread();
-      common.assert(head.height === 178);
-    }
-  },
-  { description: "Head.commitThread resets unconfirmed post count",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      head.stage = common.validThread(originalPost);
-      common.assert(head.unconfirmedPosts === 1);
-      head.commitThread();
-      common.assert(head.unconfirmedPosts === 0);
-    }
-  },
-  { description: "Head.commitThread sets pointer",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      let thread = common.validThread(originalPost);
-      head.stage = thread;
-      head.commitThread();
-      common.assert(head.pointer === thread);
-    }
-  },
-  { description: "Head.commitThread clears stage",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-      let thread = common.validThread(originalPost);
-      head.stage = thread;
-      head.commitThread();
-      common.assert(head.stage === undefined);
-    }
-  },
-  { description: "Head.getBlockAtHead retrieves head from map",
-    fn: function() {
-      let originalPost = common.validPost();
-      let originalPostHash = originalPost.hash();
-      let map = new HashMap();
-      let head = new Head(originalPost, new Uint8Array(32), map, 177);
-      common.assert(head.getBlockAtHead() === originalPost);
-    }
+t.test('Head.pushPost', function(t) {
+  let originalPost = common.validPost();
+  let originalPostHash = originalPost.hash();
+  let threadHash = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) {
+    threadHash[i] = i*7;
   }
-]
+  let map = new HashMap();
+  let head = new Head(originalPost, threadHash, map, 177);
+
+  t.throws(function() { head.pushPost(new Array(6)); }, ErrorType.Parameter.type(), 'Head.pushPost validates post type');
+
+  let nextPost = common.validPost();
+  nextPost.header._data.setUint32(3, 2077354);
+  for (let i = 11; i < 43; i++) {
+    nextPost.header.data[i] = i * 5;
+  }
+  t.throws(function() { head.pushPost(nextPost); }, ErrorType.Data.hash(), 'Head.pushPost validates prevHash');
+
+  for (let i = 11; i < 43; i++) {
+    nextPost.header.data[i] = originalPostHash[i-11];
+  }
+  head.pushPost(nextPost);
+
+  t.strictSame(nextPost.thread, threadHash, 'Head.pushPost sets thread on post');
+  t.strictSame(head.pointer, nextPost.hash(), 'Head.pushPost sets pointer');
+  t.equal(head.unconfirmedPosts, 2, 'Head.pushPost increments unconfirmed post count');
+  t.equal(head.timestamp, 2077354, 'Head.pushPost sets timestamp');
+  t.equal(map.get(nextPost.hash()), nextPost, 'Head.pushPost inserts new post into map');
+  t.equal(head.height, 178, 'Head.pushPost increments height');
+  t.end();
+});
+
+t.test('Head.discardStage', function(t) {
+  let originalPost = common.validPost();
+  let originalPostHash = originalPost.hash();
+  let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+  head.stage = common.validThread(originalPost); // not undefined
+  head.discardStage();
+  t.equal(head.stage, undefined);
+  t.end();
+});
+
+t.test('Head.commitThread', function(t) {
+  let originalPost = common.validPost();
+  let originalPostHash = originalPost.hash();
+  let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+  head.stage = 5;
+  t.throws(function() { head.commitThread(); }, ErrorType.State.invalid(), 'Head.commitThread validates stage');
+  let threadHash = common.validThread(originalPost).hash();
+  head.stage = threadHash;
+  head.commitThread();
+  t.equal(head.height, 178, 'Head.commitThread increments height');
+  t.equal(head.unconfirmedPosts, 0, 'Head.commitThread resets unconfirmed post count');
+  t.strictSame(head.pointer, threadHash, 'Head.commitThread sets pointer');
+  t.equal(head.stage, undefined, 'Head.commitThread clears stage');
+  t.end();
+});
+
+t.test('Head.getBlockAtHead retrieves head from map', function(t) {
+  let originalPost = common.validPost();
+  let originalPostHash = originalPost.hash();
+  let map = new HashMap();
+  let head = new Head(originalPost, new Uint8Array(32), map, 177);
+  t.equal(head.getBlockAtHead(), originalPost);
+  t.end();
+});
+
+// module.exports = [
+//   { description: "Head.commitThread increments height",
+//     fn: function() {
+//       let originalPost = common.validPost();
+//       let originalPostHash = originalPost.hash();
+//       let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+//       head.stage = common.validThread(originalPost);
+//       head.commitThread();
+//       common.assert(head.height === 178);
+//     }
+//   },
+//   { description: "Head.commitThread resets unconfirmed post count",
+//     fn: function() {
+//       let originalPost = common.validPost();
+//       let originalPostHash = originalPost.hash();
+//       let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+//       head.stage = common.validThread(originalPost);
+//       common.assert(head.unconfirmedPosts === 1);
+//       head.commitThread();
+//       common.assert(head.unconfirmedPosts === 0);
+//     }
+//   },
+//   { description: "Head.commitThread sets pointer",
+//     fn: function() {
+//       let originalPost = common.validPost();
+//       let originalPostHash = originalPost.hash();
+//       let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+//       let thread = common.validThread(originalPost);
+//       head.stage = thread;
+//       head.commitThread();
+//       common.assert(head.pointer === thread);
+//     }
+//   },
+//   { description: "Head.commitThread clears stage",
+//     fn: function() {
+//       let originalPost = common.validPost();
+//       let originalPostHash = originalPost.hash();
+//       let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
+//       let thread = common.validThread(originalPost);
+//       head.stage = thread;
+//       head.commitThread();
+//       common.assert(head.stage === undefined);
+//     }
+//   },
+//   { description: "Head.getBlockAtHead retrieves head from map",
+//     fn: function() {
+//       let originalPost = common.validPost();
+//       let originalPostHash = originalPost.hash();
+//       let map = new HashMap();
+//       let head = new Head(originalPost, new Uint8Array(32), map, 177);
+//       common.assert(head.getBlockAtHead() === originalPost);
+//     }
+//   }
+// ]

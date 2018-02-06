@@ -30,7 +30,7 @@ var ErrorType = require('../../js/error.js');
 t.test('Post block validates block type', function(t) {
   let d_buf = new ArrayBuffer(41);
   let dataView = new DataView(d_buf);
-  dataView.setUint32(0, 0x03002429);
+  dataView.setUint32(0, 0x0300241D);
   dataView.setUint8(40, 0x04);
   let header = common.validHeaderFromData(d_buf);
   header.data[2] = 0x00;

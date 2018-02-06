@@ -63,7 +63,7 @@ module.exports.validThread = function(post) {
   let arr = new Uint8Array(d_buf);
 
   let view = new DataView(d_buf);
-  view.setUint32(0, 0x03004029);
+  view.setUint32(0, 0x0300401D);
   view.setUint8(68, 0x04);
 
   for (let i = 5; i < 37; i++) {
@@ -83,7 +83,7 @@ module.exports.validThread = function(post) {
 module.exports.validPost = function() {
   let d_buf = new ArrayBuffer(41);
   let view = new DataView(d_buf);
-  view.setUint32(0, 0x03002429);
+  view.setUint32(0, 0x0300241D);
   view.setUint8(40, 0x04);
 
   let header = validPostHeaderFromData(d_buf);
@@ -96,7 +96,7 @@ module.exports.validGenesisPost = function() {
   let dataView = new DataView(d_buf);
   dataView.setUint32(0, 0x080000cc);
   dataView.setUint32(4, 0xefacadae);
-  dataView.setUint8(8, 0x29);
+  dataView.setUint8(8, 0x1D);
   dataView.setUint8(9, 0x04);
   let header = validPostHeaderFromData(d_buf);
 
@@ -110,7 +110,7 @@ module.exports.validGenesis = function(post) {
   assert(post instanceof GenesisPost)
   let d_buf = new ArrayBuffer(69);
   let view = new DataView(d_buf);
-  view.setUint32(0, 0x03004029); // control + separator
+  view.setUint32(0, 0x0300401D); // control + separator
   view.setUint8(68, 0x04); //terminator
   let arr = new Uint8Array(d_buf);
   for (let i = 5; i < 37; i++) {

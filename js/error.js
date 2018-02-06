@@ -48,3 +48,7 @@ module.exports.Difficulty = {
 module.exports.HashMap = {
   duplicate: function() { return new Error('Value is already set for that key.'); }
 };
+
+module.exports.State = {
+  invalid: function() { return new Error('Invalid object state.'); }
+};

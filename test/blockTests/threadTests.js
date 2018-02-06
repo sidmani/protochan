@@ -30,7 +30,7 @@ var ErrorType = require('../../js/error.js');
 t.test('Thread block validates block type', function(t) {
   let buf = new ArrayBuffer(69);
   let view = new DataView(buf);
-  view.setUint32(0, 0x03004029);
+  view.setUint32(0, 0x0300401D);
   view.setUint8(68, 0x04);
 
   let header = common.validHeaderFromData(buf);
@@ -44,7 +44,7 @@ t.test('Thread block validates block type', function(t) {
 t.test('Thread block validates data length', function(t) {
   let buf = new ArrayBuffer(134);
   let view = new DataView(buf);
-  view.setUint32(0, 0x03008129);
+  view.setUint32(0, 0x0300811D);
   view.setUint8(133, 0x04);
   view.setUint8(75, 0x04);
   let header = common.validThreadHeaderFromData(buf);
@@ -55,7 +55,7 @@ t.test('Thread block validates data length', function(t) {
 t.test('Thread rejects duplicate thread hashes', function(t) {
   let buf = new ArrayBuffer(133);
   let view = new DataView(buf);
-  view.setUint32(0, 0x03008029);
+  view.setUint32(0, 0x0300801D);
   view.setUint8(132, 0x04);
   let header = common.validThreadHeaderFromData(buf);
   t.throws(function() { new Thread(header, buf) }, ErrorType.HashMap.duplicate());
@@ -65,7 +65,7 @@ t.test('Thread rejects duplicate thread hashes', function(t) {
 t.test('Thread block validates zero genesis row', function(t) {
   let buf = new ArrayBuffer(133);
   let view = new DataView(buf);
-  view.setUint32(0, 0x03008029);
+  view.setUint32(0, 0x0300801D);
   view.setUint8(132, 0x04);
   view.setUint8(75, 0x04);
   new Uint8Array(buf).fill(1, 5, 37);
@@ -77,7 +77,7 @@ t.test('Thread block validates zero genesis row', function(t) {
 t.test('Thread block getters', function(t) {
   let buf = new ArrayBuffer(133);
   let view = new DataView(buf);
-  view.setUint32(0, 0x03008029);
+  view.setUint32(0, 0x0300801D);
   view.setUint8(132, 0x04);
   view.setUint8(75, 0x04);
   let arr = new Uint8Array(buf);

@@ -29,6 +29,7 @@ var Post = require('../block/post.js');
 var Thread = require('../block/thread.js');
 var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
+var ErrorType = require('../error.js');
 
 ///////////////////////
 // A head represents the top of a chain of blocks
@@ -42,11 +43,13 @@ module.exports = class Head {
 
     //////////////////////////
     // parameter assertions
-    Util.assert(originalPost instanceof Post);
-    Util.assert(threadHash instanceof Uint8Array);
-    Util.assert(map instanceof HashMap);
-    Util.assert(typeof(startingHeight) === 'number');
-    Util.assert(startingHeight >= 0);
+    if (!(originalPost instanceof Post &&
+          threadHash instanceof Uint8Array &&
+          map instanceof HashMap &&
+          typeof(startingHeight) === 'number'))
+      throw ErrorType.Parameter.type();
+
+    if (startingHeight < 0) throw ErrorType.Parameter.invalid();
 
     //////////////////////////
     // Set instance variables
@@ -81,7 +84,7 @@ module.exports = class Head {
 
   pushPost(post) {
     // parameter validation
-    Util.assert(post instanceof Post);
+    if (!(post instanceof Post)) throw ErrorType.Parameter.type();
 
     let hash = post.hash();
     // TODO: difficulty check
@@ -93,10 +96,11 @@ module.exports = class Head {
     // this breaks the unit tests :(
 
     // check that post's prevHash points to head
-    Util.assertArrayEquality(
-      this.pointer,
-      post.header.prevHash()
-    );
+    if (!Util.arrayEquality(this.pointer, post.header.prevHash())) throw ErrorType.Data.hash();
+    // Util.assertArrayEquality(
+    //   this.pointer,
+    //   post.header.prevHash()
+    // );
 
     // post is OK!
     post.thread = this.thread;
@@ -144,8 +148,7 @@ module.exports = class Head {
   }
 
   commitThread() {
-    // since stage is never set from outside, check may be unnecessary
-    Util.assert(this.stage instanceof Thread);
+    if (!(this.stage instanceof Uint8Array)) throw ErrorType.State.invalid();
 
     this.pointer = this.stage;
     this.height += 1;

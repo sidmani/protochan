@@ -23,28 +23,37 @@
 // SOFTWARE.
 var Chain = require('../../js/chain/chain.js');
 var common = require('../testCommon.js');
+var t = require('tap');
 
-module.exports = [
-  { description: "Chain validates genesis block type",
-    dual: true,
-    fn: function(shouldPass) {
-      let post = common.validGenesisPost();
-      if (shouldPass) {
-        new Chain(common.validGenesis(post), post);
-      } else {
-        new Chain(new Array(5), post);
-      }
-    }
-  },
-  { description: "Chain validates genesis post type",
-    dual: true,
-    fn: function(shouldPass) {
-      let post = common.validGenesisPost();
-      if (shouldPass) {
-        new Chain(common.validGenesis(post), post);
-      } else {
-        new Chain(common.validGenesis(post), new Array(5));
-      }
-    }
-  }
-];
+t.test('Chain constructor', function(t) {
+  let post = common.validGenesisPost();
+
+  t.throws(function() { new Chain(new Array(5), post); });
+  t.end();
+  //t.throws(function())
+});
+//
+// module.exports = [
+//   { description: "Chain validates genesis block type",
+//     dual: true,
+//     fn: function(shouldPass) {
+//       let post = common.validGenesisPost();
+//       if (shouldPass) {
+//         new Chain(common.validGenesis(post), post);
+//       } else {
+//         new Chain(new Array(5), post);
+//       }
+//     }
+//   },
+//   { description: "Chain validates genesis post type",
+//     dual: true,
+//     fn: function(shouldPass) {
+//       let post = common.validGenesisPost();
+//       if (shouldPass) {
+//         new Chain(common.validGenesis(post), post);
+//       } else {
+//         new Chain(common.validGenesis(post), new Array(5));
+//       }
+//     }
+//   }
+// ];

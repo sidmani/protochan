@@ -30,7 +30,7 @@ var t = require('tap');
 t.test('Block validates header type', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);
-  view.setUint32(0, 0x03000529);
+  view.setUint32(0, 0x0300051D);
   view.setUint8(9, 0x04);
   t.throws(function() { new Block(new Array(80), buf); }, ErrorType.Parameter.type());
   t.end();
@@ -39,8 +39,8 @@ t.test('Block validates header type', function(t) {
 t.test('Block validates data type', function(t) {
   let buf = new ArrayBuffer(64);
   let view = new DataView(buf);
-  view.setUint32(0, 0x04003A29);
-  view.setUint8(4, 0x29);
+  view.setUint32(0, 0x04003A1D);
+  view.setUint8(4, 0x1D);
   view.setUint8(63, 0x04);
   let header = common.validHeaderFromData(buf);
 
@@ -51,7 +51,7 @@ t.test('Block validates data type', function(t) {
 t.test('Block validates data hash', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);
-  view.setUint32(0, 0x03000529);
+  view.setUint32(0, 0x0300051D);
   view.setUint8(9, 0x04);
   let header = common.validHeaderFromData(buf);
   (new Uint8Array(buf))[5] = 0x05;
@@ -64,7 +64,7 @@ t.test('Block validates data separator byte', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);
   view.setUint8(9, 0x04);
-  view.setUint32(0, 0x03000528);
+  view.setUint32(0, 0x0300051E);
   let header = common.validHeaderFromData(buf);
   t.throws(function() { new Block(header, buf); }, ErrorType.Data.delimiter());
   t.end()
@@ -74,7 +74,7 @@ t.test('Block validates number of control bytes', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);
   view.setUint8(9, 0x04);
-  view.setUint32(0, 0x02062900);
+  view.setUint32(0, 0x02061D00);
   let header = common.validHeaderFromData(buf);
   t.throws(function() { new Block(header, buf); }, ErrorType.Data.controlLength());
   t.end();
@@ -84,7 +84,7 @@ t.test('Block validates data length', function(t) {
   let buf = new ArrayBuffer(11);
   let view = new DataView(buf);
   view.setUint8(10, 0x04);
-  view.setUint32(0, 0x03000529);
+  view.setUint32(0, 0x0300051D);
   let header = common.validHeaderFromData(buf);
   t.throws(function() { new Block(header, buf); }, ErrorType.Data.length());
   t.end();
@@ -94,7 +94,7 @@ t.test('Block validates data terminator byte', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);
   view.setUint8(9, 0x07);
-  view.setUint32(0, 0x03000529);
+  view.setUint32(0, 0x0300051D);
 
   let header = common.validHeaderFromData(buf);
   t.throws(function() { new Block(header, buf); }, ErrorType.Data.delimiter());
@@ -104,7 +104,7 @@ t.test('Block validates data terminator byte', function(t) {
 t.test('Block accepts valid header and data', function (t) {
   let buf = new ArrayBuffer(128);
   let view = new DataView(buf);
-  view.setUint32(0, 0x03007B29);
+  view.setUint32(0, 0x03007B1D);
   view.setUint8(127, 0x04);
   let header = common.validHeaderFromData(buf);
   let b;
@@ -117,7 +117,7 @@ t.test('Block getters return correct values', function(t) {
   var buf = new ArrayBuffer(517);
   let view = new DataView(buf);
   view.setUint32(0, 0x0401FFEF);
-  view.setUint32(4, 0x29000000)
+  view.setUint32(4, 0x1D000000)
   view.setUint8(516, 0x04);
   (new Uint8Array(buf)).fill(0x94, 5, 516);
 

@@ -33,7 +33,7 @@ t.test('Genesis post validates zero prevHash', function(t) {
   dataView.setUint32(0, 0x08001D00);
   dataView.setUint32(4, 0x000000ff); // maxThreads != 0
 
-  dataView.setUint8(8, 0x29);
+  dataView.setUint8(8, 0x1D);
   dataView.setUint8(38, 0x04);
   let header = common.validPostHeaderFromData(d_buf);
 
@@ -51,7 +51,7 @@ t.test('Genesis post validates minimum control length', function(t) {
   let d_buf = new ArrayBuffer(10);
   let dataView = new DataView(d_buf);
   dataView.setUint32(0, 0x07000100);
-  dataView.setUint32(4, 0x0000ff29);
+  dataView.setUint32(4, 0x0000ff1D);
   dataView.setUint8(9, 0x04);
   let header = common.validPostHeaderFromData(d_buf);
   t.throws(function() { new GenesisPost(header, d_buf); }, ErrorType.Data.controlLength());
@@ -63,7 +63,7 @@ t.test('Genesis post validates max post difficulty greater than min post difficu
   let dataView = new DataView(d_buf);
   dataView.setUint32(0, 0x080000cc);
   dataView.setUint32(4, 0xcb0000ff);
-  dataView.setUint8(8, 0x29);
+  dataView.setUint8(8, 0x1D);
   dataView.setUint8(9, 0x04);
 
   let header = common.validPostHeaderFromData(d_buf);
@@ -76,7 +76,7 @@ t.test('Genesis post validates max thread difficulty greater than min post diffi
   let dataView = new DataView(d_buf);
   dataView.setUint32(0, 0x080000cc);
   dataView.setUint32(4, 0xefab00ff);
-  dataView.setUint8(8, 0x29);
+  dataView.setUint8(8, 0x1D);
   dataView.setUint8(9, 0x04);
 
   let header = common.validPostHeaderFromData(d_buf);
@@ -89,7 +89,7 @@ t.test('Genesis post validates max thread count > 0', function(t) {
   let dataView = new DataView(d_buf);
   dataView.setUint32(0, 0x080000cc);
   dataView.setUint32(4, 0xefacad00);
-  dataView.setUint8(8, 0x29);
+  dataView.setUint8(8, 0x1D);
   dataView.setUint8(9, 0x04);
 
   let header = common.validPostHeaderFromData(d_buf);
@@ -102,7 +102,7 @@ t.test('Genesis post accepts valid data', function(t) {
   let dataView = new DataView(d_buf);
   dataView.setUint32(0, 0x080000cc);
   dataView.setUint32(4, 0xefacad9a);
-  dataView.setUint8(8, 0x29);
+  dataView.setUint8(8, 0x1D);
   dataView.setUint8(9, 0x04);
 
   let header = common.validPostHeaderFromData(d_buf);
@@ -116,7 +116,7 @@ t.test('Genesis post getters', function(t) {
   let dataView = new DataView(d_buf);
   dataView.setUint32(0, 0x080000cc);
   dataView.setUint32(4, 0xefacadae);
-  dataView.setUint8(8, 0x29);
+  dataView.setUint8(8, 0x1D);
   dataView.setUint8(9, 0x04);
   let header = common.validPostHeaderFromData(d_buf);
   let p = new GenesisPost(header, d_buf);

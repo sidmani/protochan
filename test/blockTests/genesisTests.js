@@ -32,7 +32,7 @@ t.test('Genesis block validates data length', function(t) {
   // make sure that super constructor check is not failing
   d_buf = new ArrayBuffer(133);
   let view = new DataView(d_buf);
-  view.setUint32(0, 0x03008029);
+  view.setUint32(0, 0x0300801D);
   view.setUint32(75, 0xcefdab64);
   view.setUint8(132, 0x04);
 
@@ -44,7 +44,7 @@ t.test('Genesis block validates data length', function(t) {
 t.test('Genesis block validates zero prevHash', function(t) {
   let d_buf = new ArrayBuffer(69);
   let view = new DataView(d_buf);
-  view.setUint32(0, 0x03004029);
+  view.setUint32(0, 0x0300401D);
   view.setUint8(68, 0x04);
 
   let header = common.validThreadHeaderFromData(d_buf);
@@ -59,7 +59,7 @@ t.test('Genesis block validates zero prevHash', function(t) {
 t.test('Genesis block accepts valid data', function(t) {
   let d_buf = new ArrayBuffer(69);
   let view = new DataView(d_buf);
-  view.setUint32(0, 0x03004029);
+  view.setUint32(0, 0x0300401D);
   view.setUint8(68, 0x04);
 
   let header = common.validThreadHeaderFromData(d_buf);

@@ -49,8 +49,8 @@ module.exports = class Block {
     // hash stored in the header
     if (!Util.arrayEquality(Hash.digest(this.data), header.dataHash())) throw ErrorType.Data.hash();
 
-    // # of control bytes (1byte), control bytes, 0x29, content bytes, 0x04
-    if (this.data[this.controlLength()] !== 0x29) throw ErrorType.Data.delimiter();
+    // # of control bytes (1byte), control bytes, 0x1D, content bytes, 0x04
+    if (this.data[this.controlLength()] !== 0x1D) throw ErrorType.Data.delimiter();
 
     // at least 3 control bytes (control length, content length)
     if (this.controlLength() < 3) throw ErrorType.Data.controlLength();
@@ -71,7 +71,7 @@ module.exports = class Block {
     return Hash.digest(this.header.data);
   }
 
-  // index of 0x29 end byte
+  // index of 0x1D end byte
   controlLength() {
     return this.data[0];
   }
