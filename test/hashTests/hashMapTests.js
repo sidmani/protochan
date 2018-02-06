@@ -27,12 +27,15 @@ var common = require('../testCommon.js');
 var t = require('tap');
 var ErrorType = require('../../js/error.js');
 
-t.test('HashMap.set', function(t) {
+t.test('HashMap functions', function(t) {
   let block = common.validPost();
   let map = new HashMap();
+  t.equal(map.isEmpty(), true, 'HashMap.isEmpty is true after construction');
   let hash = map.set(block);
   t.equal(map.get(hash), block, 'HashMap sets and gets block');
   t.throws(function() { map.set(block); }, ErrorType.HashMap.duplicate(), 'HashMap refuses to set same object twice');
+  map.unset(block);
+  t.equal(map.get(hash), undefined, 'HashMap unsets object');
   t.end();
 });
 

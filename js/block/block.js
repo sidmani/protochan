@@ -45,17 +45,16 @@ module.exports = class Block {
     // TODO: move to the post and thread blocks
     // and replace with a merkle tree for the thread block?
 
-    // Assert that the hash of the data is equal to the
-    // hash stored in the header
+    // Assert that the hash of the data is equal to the hash stored in the header
     if (!Util.arrayEquality(Hash.digest(this.data), header.dataHash())) throw ErrorType.Data.hash();
 
-    // # of control bytes (1byte), control bytes, 0x1D, content bytes, 0x04
+    // the separator must be at the index specified by the control length
     if (this.data[this.controlLength()] !== 0x1D) throw ErrorType.Data.delimiter();
 
     // at least 3 control bytes (control length, content length)
     if (this.controlLength() < 3) throw ErrorType.Data.controlLength();
 
-    // data length = 2b len + #b control + delimiter + #b content + EOT
+    // control length, content length, control bytes, 0x1D, content bytes, 0x04
     if (this.data.byteLength !==
         this.contentLength() // content bytes
       + this.controlLength() // control bytes
@@ -63,7 +62,7 @@ module.exports = class Block {
       + 1 // terminator
     ) throw ErrorType.Data.length();
 
-    // last byte is 0x04 end of transmission
+    // last byte is 0x04 end-of-transmission
     if (this.data[this.data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
   }
 
@@ -83,6 +82,6 @@ module.exports = class Block {
 
   content() {
     let length = this.contentLength();
-    return new Uint8Array(this.data.buffer, this.controlLength() + 1, length);
+    return this.data.subarray(this.controlLength() + 1, this.controlLength() + 1 + length);
   }
 };

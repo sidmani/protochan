@@ -31,12 +31,12 @@ var ErrorType = require('../error.js');
 module.exports = class HashMap {
   constructor() {}
 
-  set(block) {
-    if (!(block instanceof Block)) throw ErrorType.Parameter.type();
-    let hash = block.hash();
+  set(obj) {
+    if (typeof(obj.hash) !== 'function') throw ErrorType.Parameter.type();
+    let hash = obj.hash();
     let str = HashMap.uint8ArrToHex(hash);
     if (this[str] !== undefined) throw ErrorType.HashMap.duplicate();
-    this[str] = block;
+    this[str] = obj;
     return hash;
   }
 
@@ -47,6 +47,13 @@ module.exports = class HashMap {
     this[str] = obj;
   }
 
+  unset(obj) {
+    if (typeof(obj.hash) !== 'function') throw ErrorType.Parameter.type();
+    let hash = obj.hash();
+    let str = HashMap.uint8ArrToHex(hash);
+    this[str] = undefined;
+  }
+
   get(hash) {
     if (!(hash instanceof Uint8Array)) throw ErrorType.Parameter.type();
     return this[HashMap.uint8ArrToHex(hash)];
@@ -55,6 +62,14 @@ module.exports = class HashMap {
   enumerate() {
     // return array of objects in the order they were added
     return Object.keys(this).map(key => this[key]);
+  }
+
+  isEmpty() {
+    return Object.keys(this).length === 0;
+  }
+
+  enumerateKeys() {
+    return Object.keys(this);
   }
 
   // XXX: untested

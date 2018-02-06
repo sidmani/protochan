@@ -24,61 +24,62 @@
 
 "use strict";
 
-var Hash = require('./blake2s.js');
-var Util = require('../util.js');
+var Hash = require('../blake2s.js');
+var ErrorType = require('../../error.js');
+var Node = require('./merkleNode.js');
+var Leaf = require('./merkleLeaf.js');
 
-class MerkleTree {
+module.exports = class MerkleTree {
   constructor(data) {
     // pass in thread.content()
-    Util.assert(data instanceof Uint8Array);
+    if (!(data instanceof Uint8Array)) throw ErrorType.Parameter.type();
 
     // must be pairs of 32-byte hashes
-    Util.assert(data.byteLength % 64 === 0);
+    if (data.byteLength % 64 !== 0) throw ErrorType.Data.length();
 
-    let count = data.byteLength / 64;
+    // count is 2*num threads
+    let count = data.byteLength / 32;
 
     // array of uint8arrays
     let builtArray = new Array();
 
     for (let i = 0; i < count; i++) {
-      builtArray.push(data.subArray(i * 64, i * 64 + 64));
+      // every post and thread is a leaf
+      builtArray.push(new Leaf(data.subarray(i * 32, i * 32 + 32)));
     }
 
     this.depth = 0;
     do {
       let newArray = new Array();
-      // if there's an odd # of pairs, duplicate the final one
-      if (builtArray.length % 2 === 1) {
-        builtArray.push(builtArray[builtArray.length - 1]);
-      }
-
-      // remove this after unit tests
-      Util.assert(builtArray.length % 2 === 0);
-
       for (let i = 0; i < builtArray.length/2; i++) {
         // pair the 2i and 2i+1 indices
-        let pair = this.concat(builtArray[2*i], builtArray[2*i+1]);
-
-        // add the hash of the concatenated pair to the new array
-        newArray.push(Hash.digest(pair));
+        // if builtArray.length is odd, length/2 will have a 0.5
+        // so the last i*2+1 will be out of bounds
+        // this is not a problem, since the MerkleNode handles that
+        // case and duplicates the hash
+        newArray.push(new Node(builtArray[i*2], builtArray[i*2+1]));
       }
+
       // builtArray now represents the next level of the tree
       builtArray = newArray;
       this.depth += 1;
     } while (builtArray.length > 1);
 
-    this.root = builtArray[0];
-  }
-
-  concat(arr1, arr2) {
-    let newArr = new Uint8Array(arr1.byteLength + arr2.byteLength);
-    newArr.set(arr1, 0);
-    newArr.set(arr2, arr1.byteLength);
-    return newArr;
+    this.root = builtArray[0].hash();
   }
 
   // Verify that a 64-byte thread/post pair is contained in this tree
-  verify(pair, intermediates) {
+  get(intermediates) {
+    return this.root.path(intermediates);
     // intermediates.length must equal depth - 1
+  }
+
+  index(idx) {
+    // split index into binary array
+    // traverse tree
+  }
+
+  prune() {
+    this.root.prune()
   }
 }

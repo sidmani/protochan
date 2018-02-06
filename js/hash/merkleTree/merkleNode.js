@@ -24,22 +24,57 @@
 
 "use strict";
 
-var mode = 'debug';
+var Hash = require('../blake2s.js');
+var HashMap = require('../hashMap.js');
 
-module.exports.assert = function(condition, description) {
-  if (!condition) {
-    throw new Error(description)
+module.exports = class Node {
+  constructor(childA, childB) {
+    this.map = new HashMap();
+
+    this.hashA = this.map.set(childA);
+
+    let concat = new Uint8Array(64);
+    concat.set(this.hashA, 0);
+
+    if (childB) {
+      this.hashB = this.map.set(childB);
+
+      childA.sibling = childB;
+      childB.sibling = childA;
+      concat.set(this.hashB, 32);
+    } else {
+      concat.set(this.hashA, 32);
+    }
+
+    this._hash = Hash.digest(concat);
   }
-}
 
-module.exports.arrayEquality = function(arr1, arr2) {
-  if (arr1.byteLength !== arr2.byteLength) return false;
-  for (let i = 0; i < arr1.byteLength; i++) {
-    if (arr1[i] !== arr2[i]) return false;
+  path(intermediates) {
+    // retrieve a key by its intermediate hashes
+    if (intermediates.length === 0) { return undefined; }
+    let nextNode = this.map.get(intermediates[0]);
+    return nextNode.path(intermediates.slice(1));
   }
-  return true;
-}
 
-module.exports.time = function() {
-  return Math.round(new Date().getTime() / 1000);
-}
+  hash() {
+    return this._hash;
+  }
+
+  prune() {
+    this.map.enumerate().forEach(child => child.prune());
+  }
+
+  // idx as bit array
+  index(idx) {
+    if (idx.length === 0) return undefined;
+    let nextNode;
+    if (idx[0] === 0) {
+      nextNode = this.map.get(this.hashA);
+    } else if (this.hashB) {
+      nextNode = this.map.get(this.hashB);
+    } else {
+      return undefined;
+    }
+    return nextNode.index(idx.slice(1));
+  }
+};

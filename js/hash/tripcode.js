@@ -59,10 +59,12 @@ var Util = require('../util.js');
 
 const MAX_TRIPCODE_USES = 16;
 
+var ErrorType = require('../error.js');
+
 module.exports = class Tripcode {
   constructor(pwd) {
     // parameter validation
-    Util.assert(typeof(pwd) === 'string');
+    if (typeof(pwd) !== 'string') throw ErrorType.Parameter.type();
     // encode the string into a uint8array
     let arr = ;
 

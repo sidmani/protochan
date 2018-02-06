@@ -41,6 +41,15 @@ t.test('Header nonce methods', function(t) {
   h.setNonce(0x5f4f3fff);
   h.incrNonce();
   t.equal(h.nonce(), 0x5f4f4000, 'Header increments nonce');
+
+  h.setNonce(0x55ffffff);
+  h.incrNonce();
+  t.equal(h.nonce(), 0x56000000, 'Header increments nonce');
+
+  h.setNonce(0x579effff);
+  h.incrNonce();
+  t.equal(h.nonce(), 0x579f0000, 'Header increments nonce');
+
   t.end();
 });
 

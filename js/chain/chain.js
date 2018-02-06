@@ -33,17 +33,18 @@ var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
 var Head = require('./head.js');
 var Configuration = require('../board/config.js');
+var ErrorType = require('../error.js');
 
 module.exports = class Chain {
   constructor(originalPost, genesisBlock) {
     // validate parameters
-    Util.assert(genesisBlock instanceof Genesis);
-    Util.assert(originalPost instanceof GenesisPost);
+    if (!(genesisBlock instanceof Genesis)) throw ErrorType.Parameter.type();
+    if (!(originalPost instanceof GenesisPost)) throw ErrorType.Parameter.type();
 
     // TODO: protocol version
 
     // XXX: untested
-    Util.assert(originalPost.header.board() === genesisBlock.header.board());
+///    Util.assert(originalPost.header.board() === genesisBlock.header.board());
 
     // XXX: untested
     this.config = new Configuration(originalPost);
