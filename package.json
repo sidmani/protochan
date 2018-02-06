@@ -7,8 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tap test/*Tests --cov && tap --coverage-report=lcov",
-    "posttest": "codeclimate-test-reporter < coverage/lcov.info",
+    "test": "tap test/*Tests --cov",
+    "posttest": "tap --coverage-report=lcov && codeclimate-test-reporter < coverage/lcov.info",
     "testLocal": "tap test/*Tests --cov && tap --coverage-report=lcov"
   },
   "repository": {
