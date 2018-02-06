@@ -25,12 +25,13 @@
 var common = require('../testCommon.js');
 var HashMap = require('../../js/hash/hashMap.js');
 var Head = require('../../js/chain/head.js');
+var Post = require('../../js/block/post.js');
 var t = require('tap');
 var ErrorType = require('../../js/error.js');
 
 t.test('Head constructor', function(t) {
   let originalPost = common.validPost();
-  originalPost.header._data.setUint32(3, 18643);
+  new DataView(originalPost.header.data.buffer).setUint32(3, 18643);
   let threadHash = new Uint8Array(32);
   threadHash.fill(18, 0, 19);
   let map = new HashMap();
@@ -63,16 +64,23 @@ t.test('Head.pushPost', function(t) {
 
   t.throws(function() { head.pushPost(new Array(6)); }, ErrorType.Parameter.type(), 'Head.pushPost validates post type');
 
-  let nextPost = common.validPost();
-  nextPost.header._data.setUint32(3, 2077354);
+  let buf = new ArrayBuffer(41);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x0300241D);
+  view.setUint8(40, 0x04);
+
+  let header = common.validPostHeaderFromData(buf);
+  new DataView(header.data.buffer).setUint32(3, 2077354);
   for (let i = 11; i < 43; i++) {
-    nextPost.header.data[i] = i * 5;
+    header.data[i] = i * 5;
   }
-  t.throws(function() { head.pushPost(nextPost); }, ErrorType.Data.hash(), 'Head.pushPost validates prevHash');
+
+  t.throws(function() { head.pushPost(new Post(header, buf)); }, ErrorType.Data.hash(), 'Head.pushPost validates prevHash');
 
   for (let i = 11; i < 43; i++) {
-    nextPost.header.data[i] = originalPostHash[i-11];
+    header.data[i] = originalPostHash[i-11];
   }
+  let nextPost = new Post(header, buf);
   head.pushPost(nextPost);
 
   t.strictSame(nextPost.thread, threadHash, 'Head.pushPost sets thread on post');
@@ -118,58 +126,3 @@ t.test('Head.getBlockAtHead retrieves head from map', function(t) {
   t.equal(head.getBlockAtHead(), originalPost);
   t.end();
 });
-
-// module.exports = [
-//   { description: "Head.commitThread increments height",
-//     fn: function() {
-//       let originalPost = common.validPost();
-//       let originalPostHash = originalPost.hash();
-//       let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-//       head.stage = common.validThread(originalPost);
-//       head.commitThread();
-//       common.assert(head.height === 178);
-//     }
-//   },
-//   { description: "Head.commitThread resets unconfirmed post count",
-//     fn: function() {
-//       let originalPost = common.validPost();
-//       let originalPostHash = originalPost.hash();
-//       let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-//       head.stage = common.validThread(originalPost);
-//       common.assert(head.unconfirmedPosts === 1);
-//       head.commitThread();
-//       common.assert(head.unconfirmedPosts === 0);
-//     }
-//   },
-//   { description: "Head.commitThread sets pointer",
-//     fn: function() {
-//       let originalPost = common.validPost();
-//       let originalPostHash = originalPost.hash();
-//       let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-//       let thread = common.validThread(originalPost);
-//       head.stage = thread;
-//       head.commitThread();
-//       common.assert(head.pointer === thread);
-//     }
-//   },
-//   { description: "Head.commitThread clears stage",
-//     fn: function() {
-//       let originalPost = common.validPost();
-//       let originalPostHash = originalPost.hash();
-//       let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
-//       let thread = common.validThread(originalPost);
-//       head.stage = thread;
-//       head.commitThread();
-//       common.assert(head.stage === undefined);
-//     }
-//   },
-//   { description: "Head.getBlockAtHead retrieves head from map",
-//     fn: function() {
-//       let originalPost = common.validPost();
-//       let originalPostHash = originalPost.hash();
-//       let map = new HashMap();
-//       let head = new Head(originalPost, new Uint8Array(32), map, 177);
-//       common.assert(head.getBlockAtHead() === originalPost);
-//     }
-//   }
-// ]

@@ -121,10 +121,10 @@ t.test('Genesis post getters', function(t) {
   let header = common.validPostHeaderFromData(d_buf);
   let p = new GenesisPost(header, d_buf);
 
-  t.equal(p.minPostDifficulty(), 0xcc, 'Genesis post returns correct minimum post difficulty');
-  t.equal(p.maxPostDifficulty(), 0xef, 'Genesis post returns correct maximum post difficulty');
-  t.equal(p.minThreadDifficulty(), 0xac, 'Genesis post returns correct minimum thread difficulty');
-  t.equal(p.maxThreadDifficulty(), 0xad, 'Genesis post returns correct maximum thread difficulty');
-  t.equal(p.maxThreads(), 0xae, 'Genesis post returns correct maximum thread count');
+  t.equal(p.minPostDifficulty, 0xcc, 'Genesis post returns correct minimum post difficulty');
+  t.equal(p.maxPostDifficulty, 0xef, 'Genesis post returns correct maximum post difficulty');
+  t.equal(p.minThreadDifficulty, 0xac, 'Genesis post returns correct minimum thread difficulty');
+  t.equal(p.maxThreadDifficulty, 0xad, 'Genesis post returns correct maximum thread difficulty');
+  t.equal(p.maxThreads, 0xae, 'Genesis post returns correct maximum thread count');
   t.end();
 });

@@ -31,49 +31,31 @@ var ErrorType = require('../error.js');
 module.exports = class GenesisPost extends Post {
   constructor(header, data) {
     super(header, data);
+
     // Assert that prevHash has maximum difficulty
     Difficulty.verify(header.prevHash(), 256);
 
     // 1 byte control length
     // 2 bytes content length
     // 5 bytes genesis options
-    if (this.controlLength() < 8) throw ErrorType.Data.controlLength();
+    if (this.controlLength < 8) throw ErrorType.Data.controlLength();
+
+    // set instance fields
+    this.minPostDifficulty = this.data[3];
+    this.maxPostDifficulty = this.data[4];
+    this.minThreadDifficulty = this.data[5];
+    this.maxThreadDifficulty = this.data[6];
+    this.maxThreads = this.data[7];
+    // to extend the protocol with options, store additional
+    // bytes in the post block's data and parse them with
+    // here
 
     // max >= min difficulty
-    if (this.maxPostDifficulty() < this.minPostDifficulty()) throw ErrorType.Block.illegalControlValues();
-    if (this.maxThreadDifficulty() < this.minThreadDifficulty()) throw ErrorType.Block.illegalControlValues();
+    if (this.maxPostDifficulty < this.minPostDifficulty) throw ErrorType.Block.illegalControlValues();
+    if (this.maxThreadDifficulty < this.minThreadDifficulty) throw ErrorType.Block.illegalControlValues();
 
     // nonzero max threads
-    if (this.maxThreads() <= 0) throw ErrorType.Block.illegalControlValues();
+    if (this.maxThreads <= 0) throw ErrorType.Block.illegalControlValues();
   }
 
-  // the data contains the configuration for the board
-  // MIN_POST_DIFFICULTY: uint8,
-  // MAX_POST_DIFFICULTY: uint8,
-  // MIN_THREAD_DIFFICULTY: uint8,
-  // MAX_THREAD_DIFFICULTY: uint8,
-  // MAX_THREAD_COUNT
-  minPostDifficulty() {
-    return this.data[3];
-  }
-
-  maxPostDifficulty() {
-    return this.data[4];
-  }
-
-  minThreadDifficulty() {
-    return this.data[5];
-  }
-
-  maxThreadDifficulty() {
-    return this.data[6];
-  }
-
-  maxThreads() {
-    return this.data[7];
-  }
-
-  // to extend the protocol with options, store additional
-  // bytes in the post block's data and parse them with
-  // additional functions here
 }

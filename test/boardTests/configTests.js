@@ -23,18 +23,27 @@
 // SOFTWARE.
 var common = require('../testCommon.js');
 var Configuration = require('../../js/board/config.js');
+var GenesisPost = require('../../js/block/genesisPost.js');
 var ErrorType = require('../../js/error.js');
 var t = require('tap');
 
 t.test('Configuration constructor', function(t) {
   t.throws(function() { new Configuration(new Array(12)); }, ErrorType.Parameter.type());
-  let post = common.validGenesisPost();
-  post.data[3] = 0xf5;
-  post.data[4] = 0xf6;
-  post.data[5] = 0xf7;
-  post.data[6] = 0xf8;
-  post.data[7] = 0xf9;
-  post.header._data.setUint32(75, 0x18f3e974)
+  let buf = new ArrayBuffer(46);
+  let arr = new Uint8Array(buf);
+  arr[0] = 0x08;
+  arr[2] = 0x24
+  arr[3] = 0xf5;
+  arr[4] = 0xf6;
+  arr[5] = 0xf7;
+  arr[6] = 0xf8;
+  arr[7] = 0xf9;
+  arr[8] = 0x1D;
+  arr[45] = 0x04;
+  let header = common.validPostHeaderFromData(buf);
+  new DataView(header.data.buffer).setUint32(75, 0x18f3e974);
+  let post = new GenesisPost(header, buf);
+
   let config = new Configuration(post);
   t.equal(config.MIN_POST_DIFFICULTY, 0xf5, 'Configuration sets minimum post difficulty');
   t.equal(config.MAX_POST_DIFFICULTY, 0xf6, 'Configuration sets maximum post difficulty');

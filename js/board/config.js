@@ -30,11 +30,11 @@ var ErrorType = require('../error.js');
 module.exports = class Configuration {
   constructor(originalPost) {
     if(!(originalPost instanceof GenesisPost)) throw ErrorType.Parameter.type();
-    this.MIN_POST_DIFFICULTY = originalPost.minPostDifficulty();
-    this.MAX_POST_DIFFICULTY = originalPost.maxPostDifficulty();
-    this.MIN_THREAD_DIFFICULTY = originalPost.minThreadDifficulty();
-    this.MAX_THREAD_DIFFICULTY = originalPost.maxThreadDifficulty();
-    this.MAX_THREAD_COUNT = originalPost.maxThreads();
+    this.MIN_POST_DIFFICULTY = originalPost.minPostDifficulty;
+    this.MAX_POST_DIFFICULTY = originalPost.maxPostDifficulty;
+    this.MIN_THREAD_DIFFICULTY = originalPost.minThreadDifficulty;
+    this.MAX_THREAD_DIFFICULTY = originalPost.maxThreadDifficulty;
+    this.MAX_THREAD_COUNT = originalPost.maxThreads;
     this.BOARD_ID = originalPost.header.board();
   }
 }

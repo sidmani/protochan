@@ -38,7 +38,7 @@ module.exports = class ThreadBlock extends Block {
 
     // thread data comes in sets of 64 bytes (32 thread, 32 post)
     let threadDataLength = data.byteLength
-    - this.controlLength()
+    - this.controlLength
     - 2; // separator and terminator
 
     if (threadDataLength < 64) throw ErrorType.Data.length();
@@ -69,8 +69,8 @@ module.exports = class ThreadBlock extends Block {
   getThread(index) {
     if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
     return this.data.subarray(
-      this.controlLength() + 1 + index*64,
-      this.controlLength() + 1 + index*64 + 32
+      this.controlLength + 1 + index*64,
+      this.controlLength + 1 + index*64 + 32
     );
   }
 
@@ -78,8 +78,8 @@ module.exports = class ThreadBlock extends Block {
   getPost(index) {
     if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
     return this.data.subarray(
-      this.controlLength() + 1 + index*64 + 32,
-      this.controlLength() + 1 + index*64 + 64
+      this.controlLength + 1 + index*64 + 32,
+      this.controlLength + 1 + index*64 + 64
     );
   }
 

@@ -42,6 +42,11 @@ module.exports = class Block {
     this.header = header;
     this.data = new Uint8Array(data);
 
+    // set instance fields from data
+    this.controlLength = this.data[0];
+    this.contentLength = (this.data[1] << 8) + this.data[2];
+    this._hash = Hash.digest(this.header.data);
+
     // TODO: move to the post and thread blocks
     // and replace with a merkle tree for the thread block?
 
@@ -49,41 +54,38 @@ module.exports = class Block {
     if (!Util.arrayEquality(Hash.digest(this.data), header.dataHash())) throw ErrorType.Data.hash();
 
     // the separator must be at the index specified by the control length
-    if (this.data[this.controlLength()] !== 0x1D) throw ErrorType.Data.delimiter();
+    if (this.data[this.controlLength] !== 0x1D) throw ErrorType.Data.delimiter();
 
     // at least 3 control bytes (control length, content length)
-    if (this.controlLength() < 3) throw ErrorType.Data.controlLength();
+    if (this.controlLength < 3) throw ErrorType.Data.controlLength();
 
     // control length, content length, control bytes, 0x1D, content bytes, 0x04
     if (this.data.byteLength !==
-        this.contentLength() // content bytes
-      + this.controlLength() // control bytes
+        this.contentLength // content bytes
+      + this.controlLength // control bytes
       + 1 // separator
       + 1 // terminator
     ) throw ErrorType.Data.length();
 
     // last byte is 0x04 end-of-transmission
     if (this.data[this.data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
-
-    // set instance fields from data
   }
 
   hash() {
-    return Hash.digest(this.header.data);
+    return this._hash;
   }
 
   // index of 0x1D end byte
-  controlLength() {
-    return this.data[0];
-  }
+  // controlLength() {
+  //   return this._controlLength;
+  // }
 
-  contentLength() {
-    // big endian
-    return (this.data[1] << 8) + this.data[2];
-  }
+  // contentLength() {
+  //   // big endian
+  //   return this._contentLength;
+  // }
 
-  content() {
-    let length = this.contentLength();
-    return this.data.subarray(this.controlLength() + 1, this.controlLength() + 1 + length);
-  }
+  // content() {
+  //   return this.data.subarray(this._controlLength + 1, this._controlLength + 1 + this._contentLength);
+  // }
 };

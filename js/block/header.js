@@ -42,13 +42,15 @@ class Header {
     // Assert that the buffer is exactly 80 bytes long
     if (buffer.byteLength !== 80) throw ErrorType.Data.length();
 
-    this._data = new DataView(buffer);
     this.data = new Uint8Array(buffer);
   }
 
   // For mining
   setNonce(value) {
-    this._data.setUint32(7, value);
+    this.data[7] = value >> 24;
+    this.data[8] = value >> 16;
+    this.data[9] = value >> 8;
+    this.data[10] = value;
   }
 
   // fastest way to increment a uint32 that's split by bytes (?)
@@ -72,42 +74,42 @@ class Header {
 
   /// Protocol version (uint16)
   protocolVersion() {
-    return this._data.getUint16(0);
+    return (this.data[0] << 8) + this.data[1];
   }
 
   /// Block type (uint8)
   blockType() {
-    return this._data.getUint8(2);
+    return this.data[2];
   }
 
   // Unix timestamp (uint32)
   timestamp() {
-    return this._data.getUint32(3);
+    return (this.data[3] << 24) + (this.data[4] << 16) + (this.data[5] << 8) + this.data[6];
   }
 
   // nonce (uint32)
   nonce() {
-    return this._data.getUint32(7);
+    return (this.data[7] << 24) + (this.data[8] << 16) + (this.data[9] << 8) + this.data[10];
   }
 
   // 32 bytes
   prevHash() {
-    return new Uint8Array(this.data.buffer, 11, 32);
+    return this.data.subarray(11, 43);
   }
 
   // 32 bytes
   dataHash() {
-    return new Uint8Array(this.data.buffer, 43, 32);
+    return this.data.subarray(43, 75);
   }
 
   // board id (uint32)
   board() {
-    return this._data.getUint32(75);
+    return (this.data[75] << 24) + (this.data[76] << 16) + (this.data[77] << 8) + this.data[78];
   }
 
   // additional flags
   reserved() {
-    return this._data.getUint8(79);
+    return this.data[79];
   }
 }
 
