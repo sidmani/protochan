@@ -64,6 +64,8 @@ module.exports = class Block {
 
     // last byte is 0x04 end-of-transmission
     if (this.data[this.data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
+
+    // set instance fields from data
   }
 
   hash() {

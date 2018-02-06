@@ -155,6 +155,6 @@ t.test('MerkleTree constructor', function(t) {
   let tree = new MerkleTree(data);
 
   t.strictSame(tree.root, expectedRoot, 'Merkle tree sets root correctly');
-
+  t.equal(tree.depth, 4);
   t.end();
 });

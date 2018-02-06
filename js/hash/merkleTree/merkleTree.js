@@ -45,16 +45,16 @@ module.exports = class MerkleTree {
 
     for (let i = 0; i < count; i++) {
       // every post and thread is a leaf
-      builtArray.push(new Leaf(data.subarray(i * 32, i * 32 + 32)));
+      builtArray.push(new Leaf(data.subarray(i*32, i*32 + 32)));
     }
 
-    this.depth = 0;
+    this.depth = 1;
     do {
       let newArray = new Array();
       for (let i = 0; i < builtArray.length/2; i++) {
         // pair the 2i and 2i+1 indices
         // if builtArray.length is odd, length/2 will have a 0.5
-        // so the last i*2+1 will be out of bounds
+        // so the last index i*2+1 will be undefined
         // this is not a problem, since the MerkleNode handles that
         // case and duplicates the hash
         newArray.push(new Node(builtArray[i*2], builtArray[i*2+1]));
@@ -68,13 +68,15 @@ module.exports = class MerkleTree {
     this.root = builtArray[0].hash();
   }
 
-  // Verify that a 64-byte thread/post pair is contained in this tree
+  // Verify that a thread or post is contained in this tree
   get(intermediates) {
     return this.root.path(intermediates);
     // intermediates.length must equal depth - 1
   }
 
   index(idx) {
+    let idxArr = idx.toString(2).split('');
+    return this.root.index(idxArr);
     // split index into binary array
     // traverse tree
   }
