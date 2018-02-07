@@ -48,8 +48,6 @@ module.exports = class Block {
     this.hash = Hash.digest(this.header.data);
 
     // TODO: move to the post and thread blocks
-    // and replace with a merkle tree for the thread block?
-
     // Assert that the hash of the data is equal to the hash stored in the header
     if (!Util.arrayEquality(Hash.digest(this.data), header.dataHash())) throw ErrorType.Data.hash();
 

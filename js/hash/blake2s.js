@@ -28,7 +28,6 @@
 // SOFTWARE.
 
 "use strict";
-var ErrorType = require('../error.js');
 
 // Little-endian byte access.
 // Expects a Uint8Array and an index
@@ -159,7 +158,6 @@ function blake2sFinal (ctx) {
 // Parameters:
 // - input - the input bytes, as a Uint8Array
 module.exports.digest = function blake2s(input) {
-  if(!(input instanceof Uint8Array)) throw ErrorType.Parameter.type();
   var ctx = blake2sInit()
   blake2sUpdate(ctx, input)
   return blake2sFinal(ctx)

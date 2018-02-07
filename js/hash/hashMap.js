@@ -33,7 +33,6 @@ module.exports = class HashMap {
   }
 
   set(obj) {
-    if (!(obj.hash instanceof Uint8Array)) throw ErrorType.Parameter.type();
     let str = HashMap.uint8ArrToHex(obj.hash);
     if (this.map.has(str)) throw ErrorType.HashMap.duplicate();
     this.map.set(str, obj);
@@ -42,20 +41,17 @@ module.exports = class HashMap {
   }
 
   setRaw(hash, obj, overwrite) {
-    if (!(hash instanceof Uint8Array)) throw ErrorType.Parameter.type();
     let str = HashMap.uint8ArrToHex(hash);
     if (this.map.has(str) && !overwrite) throw ErrorType.HashMap.duplicate();
     this.map.set(str, obj);
   }
 
   unset(obj) {
-    if (!(obj.hash instanceof Uint8Array)) throw ErrorType.Parameter.type();
     let str = HashMap.uint8ArrToHex(obj.hash);
     this.map.delete(str);
   }
 
   get(hash) {
-    if (!(hash instanceof Uint8Array)) throw ErrorType.Parameter.type();
     return this.map.get(HashMap.uint8ArrToHex(hash));
   }
 
@@ -64,16 +60,24 @@ module.exports = class HashMap {
     return Array.from(this.map.values());
   }
 
+  size() {
+    return this.map.size;
+  }
+
   isEmpty() {
     return this.map.size === 0;
   }
 
-  // XXX: untested
   forEach(fn) {
     this.map.forEach(fn);
   }
 
+  clear() {
+    this.map.clear();
+  }
+
   static uint8ArrToHex(arr) {
+    if (!(arr instanceof Uint8Array)) throw ErrorType.Parameter.type();
   	let str = '';
   	for (let i = 0; i < arr.byteLength; i++) {
   			str += (arr[i]<16?'0':'') + arr[i].toString(16);

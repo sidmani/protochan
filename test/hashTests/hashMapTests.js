@@ -55,6 +55,7 @@ t.test('HashMap enumerates set objects', function(t) {
   let block1 = common.validPost();
   let block2 = common.validPost();
   let block3 = common.validPost();
+  let blocks = [block1, block2, block3];
 
   // the blocks need to be different for the test to be useful
   block1.header.data[5] = 0x07;
@@ -67,6 +68,14 @@ t.test('HashMap enumerates set objects', function(t) {
   let hash3 = map.setRaw(new Uint8Array([5, 7, 8]), block3);
 
   let result = map.enumerate();
-  t.strictSame(result, [block1, block2, block3], 'HashMap.enumerate returns correct array');
+  t.strictSame(result, blocks, 'HashMap.enumerate returns correct array');
+  let count = 0;
+  map.forEach(function(value, key, map) {
+    count += 1;
+  });
+  t.equal(count, 3, 'HashMap.forEach iterates over all objects');
+  t.equal(map.size(), 3, 'HashMap returns correct size');
+  map.clear();
+  t.assert(map.isEmpty(), 'HashMap.clear empties contents');
   t.end();
 });

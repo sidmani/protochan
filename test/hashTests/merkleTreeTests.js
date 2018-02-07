@@ -94,8 +94,8 @@ t.test('MerkleNode (1 child)', function(t) {
 });
 
 t.test('MerkleTree', function(t) {
-  t.throws(function() { new MerkleTree(new Array(64)); }, ErrorType.Parameter.type(), 'Merkle tree rejects wrong data type');
   t.throws(function() { new MerkleTree(new Uint8Array(65)); }, ErrorType.Data.length(), 'Merkle tree rejects wrong data length');
+  t.throws(function() { new MerkleTree(new Uint8Array(0)); }, ErrorType.Data.length(), 'Merkle tree rejects zero length arrow');
 
   let data = new Uint8Array(192);
   data.fill(1, 0, 32);
@@ -156,7 +156,10 @@ t.test('MerkleTree', function(t) {
   t.strictSame(tree.root.hash, expectedRoot, 'Merkle tree sets root correctly');
   let expectedArr = new Uint8Array(32);
   expectedArr.fill(3, 0, 32);
-  t.strictSame(tree.index(2), expectedArr, 'Merkle tree gets index');
+  t.strictSame(tree.index(2), expectedArr, 'Merkle tree gets object at index');
+  t.strictSame(tree.get([level1[0], level2[1], level3[2]]), expectedArr, 'Merkle tree gets object from intermediates path');
+
+  t.equal(tree.indexOf(expectedArr), 2, 'Merkle tree gets index of object');
 
   t.equal(tree.depth, 4);
   tree.prune();

@@ -51,11 +51,7 @@ module.exports = class ThreadBlock extends Block {
 
     // verify no duplicates using hashmap
     // and create lookup table at the same time! :)
-    this.indexMap = new HashMap();
-    for (let i = 0; i < this.numThreads*2; i++) {
-      this.indexMap.setRaw(new Uint8Array(data, this.controlLength + 1 + 32 * i, 32), i);
-    }
-
+    // TODO: replace block hash check with hash check here
     this.merkleTree = new MerkleTree(new Uint8Array(data, this.controlLength + 1, this.contentLength));
   }
 
@@ -75,7 +71,7 @@ module.exports = class ThreadBlock extends Block {
 
   // get the post associated with a particular thread
   getCorrespondingItem(hash) {
-    let idx = this.indexMap.get(hash);
+    let idx = this.merkleTree.indexOf(hash);
     if (idx !== undefined) {
       if (idx % 2 === 0) {
         // get post for thread

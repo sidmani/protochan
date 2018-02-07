@@ -25,7 +25,6 @@
 "use strict";
 
 var Hash = require('./blake2s.js');
-var Util = require('../util.js');
 
 // on 2chan and 4chan, a tripcode is the hash of a secret password
 // the server replaces the password with the hash, allowing a user
@@ -53,7 +52,7 @@ var Util = require('../util.js');
 // This implementation uses pattern (B).
 
 // To prevent abuse of the system, we will require a difficulty
-// on the resulting hash
+// on the resulting hash (?)
 
 //TODO: implementation
 

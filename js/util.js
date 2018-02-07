@@ -26,12 +26,6 @@
 
 var mode = 'debug';
 
-module.exports.assert = function(condition, description) {
-  if (!condition) {
-    throw new Error(description)
-  }
-}
-
 module.exports.arrayEquality = function(arr1, arr2) {
   if (arr1.byteLength !== arr2.byteLength) return false;
   for (let i = 0; i < arr1.byteLength; i++) {

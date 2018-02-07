@@ -25,26 +25,29 @@
 "use strict";
 
 var ErrorType = require('../../error.js');
+var HashMap = require('../hashMap.js');
 var Node = require('./merkleNode.js');
 var Leaf = require('./merkleLeaf.js');
 
 module.exports = class MerkleTree {
   constructor(data) {
     // pass in thread.content()
-    if (!(data instanceof Uint8Array)) throw ErrorType.Parameter.type();
-
     // must be pairs of 32-byte hashes
-    if (data.byteLength % 64 !== 0) throw ErrorType.Data.length();
+    if (data.byteLength % 64 !== 0 || data.byteLength === 0) throw ErrorType.Data.length();
 
-    // count is 2*num threads
+    // total count of items
     let count = data.byteLength / 32;
 
     // array of uint8arrays
     let builtArray = new Array();
 
+    // maps hashes to their index in the tree for fast lookup
+    this.indexMap = new HashMap();
     for (let i = 0; i < count; i++) {
-      // every post and thread is a leaf
-      builtArray.push(new Leaf(data.subarray(i*32, i*32 + 32)));
+      // each post and thread is an item
+      let item = data.subarray(i*32, i*32 + 32);
+      this.indexMap.setRaw(item, i);
+      builtArray.push(new Leaf(item));
     }
 
     this.depth = 1;
@@ -83,7 +86,12 @@ module.exports = class MerkleTree {
     // traverse tree
   }
 
+  indexOf(hash) {
+    return this.indexMap.get(hash);
+  }
+
   prune() {
     this.root.prune();
+    this.indexMap.clear();
   }
 }
