@@ -30,6 +30,7 @@ var Block = require('./block.js');
 var Difficulty = require('../hash/difficulty.js');
 var MerkleTree = require('../hash/merkleTree/merkleTree.js');
 var ErrorType = require('../error.js');
+var Util = require('../util.js');
 
 module.exports = class ThreadBlock extends Block {
   constructor(header, data) {
@@ -48,10 +49,12 @@ module.exports = class ThreadBlock extends Block {
     // the first thread has a zero hash
     Difficulty.verify(data.subarray(this.controlLength + 1, this.controlLength + 1 + 32), 256);
 
-    // verify no duplicates using hashmap
-    // and create lookup table at the same time! :)
-    // TODO: replace block hash check with hash check here
+    // merkle tree does not allow duplicates since it has a
+    // one-to-one index map
     this.merkleTree = new MerkleTree(data.subarray(this.controlLength + 1, this.controlLength + 1 + this.contentLength));
+
+    // check that the merkle root equals the header's dataHash
+    if (!Util.arrayEquality(this.merkleTree.root.hash, header.dataHash())) throw ErrorType.Data.hash();
   }
 
   // data is pairs of 32-byte hashes

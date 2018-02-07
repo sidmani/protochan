@@ -48,19 +48,6 @@ t.test('Block validates data type', function(t) {
   t.end();
 });
 
-t.test('Block validates data hash', function(t) {
-  let buf = new ArrayBuffer(10);
-  let view = new DataView(buf);
-  view.setUint32(0, 0x0300051D);
-  view.setUint8(9, 0x04);
-  let header = common.validHeaderFromData(buf);
-  let arr = new Uint8Array(buf);
-  arr[5] = 0x05;
-
-  t.throws(function() { new Block(header, arr); }, ErrorType.Data.hash());
-  t.end();
-});
-
 t.test('Block validates data separator byte', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);

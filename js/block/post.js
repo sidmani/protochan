@@ -26,6 +26,8 @@
 
 var Block = require('./block.js');
 var ErrorType = require('../error.js');
+var Util = require('../util.js');
+var Hash = require('../hash/blake2s.js');
 
 const POST_BLOCK_ID = 0x01;
 
@@ -33,6 +35,9 @@ module.exports = class Post extends Block {
   constructor(header, data) {
     super(header, data);
     if (header.blockType() !== POST_BLOCK_ID) throw ErrorType.Block.type();
+
+    // Assert that the hash of the data is equal to the hash stored in the header
+    if (!Util.arrayEquality(Hash.digest(data), header.dataHash())) throw ErrorType.Data.hash();
   }
 
   prune() {

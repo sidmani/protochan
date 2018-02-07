@@ -47,10 +47,6 @@ module.exports = class Block {
     this.controlSector = data.subarray(0, this.controlLength);
     this.hash = Hash.digest(this.header.data);
 
-    // TODO: move to the post and thread blocks
-    // Assert that the hash of the data is equal to the hash stored in the header
-    if (!Util.arrayEquality(Hash.digest(data), header.dataHash())) throw ErrorType.Data.hash();
-
     // the separator must be at the index specified by the control length
     if (data[this.controlLength] !== 0x1D) throw ErrorType.Data.delimiter();
 

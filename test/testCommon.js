@@ -28,6 +28,7 @@ var Genesis = require('../js/block/genesis.js');
 var Thread = require('../js/block/thread.js');
 var GenesisPost = require('../js/block/genesisPost.js');
 var Hash = require('../js/hash/blake2s.js');
+var MerkleTree = require('../js/hash/merkleTree/merkleTree.js');
 
 module.exports.assert = assert = function(condition, description) {
   if (!condition) {
@@ -39,23 +40,23 @@ module.exports.hash = function(data) {
   return Hash.digest(data);
 }
 
-module.exports.assertArrayEquality = function(arr1, arr2) {
-  assert(arr1 instanceof Uint8Array);
-  assert(arr2 instanceof Uint8Array);
-  assert(arr1.byteLength === arr2.byteLength);
-  for (let i = 0; i < arr1.byteLength; i++) {
-    assert(arr1[i] === arr2[i]);
-  }
-}
-
-module.exports.assertJSArrayEquality = function(arr1, arr2) {
-  assert(arr1 instanceof Array);
-  assert(arr2 instanceof Array);
-  assert(arr1.length === arr2.length);
-  for (let i = 0; i < arr1.length; i++) {
-    assert(arr1[i] === arr2[i]);
-  }
-}
+// module.exports.assertArrayEquality = function(arr1, arr2) {
+//   assert(arr1 instanceof Uint8Array);
+//   assert(arr2 instanceof Uint8Array);
+//   assert(arr1.byteLength === arr2.byteLength);
+//   for (let i = 0; i < arr1.byteLength; i++) {
+//     assert(arr1[i] === arr2[i]);
+//   }
+// }
+//
+// module.exports.assertJSArrayEquality = function(arr1, arr2) {
+//   assert(arr1 instanceof Array);
+//   assert(arr2 instanceof Array);
+//   assert(arr1.length === arr2.length);
+//   for (let i = 0; i < arr1.length; i++) {
+//     assert(arr1[i] === arr2[i]);
+//   }
+// }
 
 module.exports.validThread = function(post) {
   assert(post instanceof Post)
@@ -153,5 +154,10 @@ module.exports.validPostHeaderFromData = validPostHeaderFromData = function(data
 module.exports.validThreadHeaderFromData = validThreadHeaderFromData = function(dataBuffer) {
   let h = validHeaderFromData(dataBuffer);
   h.data[2] = 0x00;
+  let arr = new Uint8Array(dataBuffer);
+  let hash = new MerkleTree(arr.subarray(arr[0] + 1, arr.length - 1)).root.hash;
+  for (let i = 43; i < 75; i++) {
+    h.data[i] = hash[i-43];
+  }
   return h;
 }

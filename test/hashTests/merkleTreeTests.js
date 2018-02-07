@@ -95,7 +95,8 @@ t.test('MerkleNode (1 child)', function(t) {
 
 t.test('MerkleTree', function(t) {
   t.throws(function() { new MerkleTree(new Uint8Array(65)); }, ErrorType.Data.length(), 'Merkle tree rejects wrong data length');
-  t.throws(function() { new MerkleTree(new Uint8Array(0)); }, ErrorType.Data.length(), 'Merkle tree rejects zero length arrow');
+  t.throws(function() { new MerkleTree(new Uint8Array(0)); }, ErrorType.Data.length(), 'Merkle tree rejects zero length array');
+  t.throws(function() { new MerkleTree(new Uint8Array(64)); }, ErrorType.HashMap.duplicate(), 'Merkle tree rejects duplicate hashes');
 
   let data = new Uint8Array(192);
   data.fill(1, 0, 32);

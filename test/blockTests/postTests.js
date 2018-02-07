@@ -39,3 +39,17 @@ t.test('Post block validates block type', function(t) {
   t.doesNotThrow(function() { new Post(header, new Uint8Array(d_buf)); }, 'Post block accepts correct block type');
   t.end();
 });
+
+t.test('Post validates data hash', function(t) {
+  let buf = new ArrayBuffer(10);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x0300051D);
+  view.setUint8(9, 0x04);
+  let header = common.validHeaderFromData(buf);
+  let arr = new Uint8Array(buf);
+  header.data[2] = 0x01;
+  arr[5] = 0x05;
+
+  t.throws(function() { new Post(header, arr); }, ErrorType.Data.hash());
+  t.end();
+});

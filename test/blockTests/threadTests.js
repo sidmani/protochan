@@ -34,7 +34,7 @@ t.test('Thread block validates block type', function(t) {
   view.setUint8(64, 0x06);
   view.setUint8(68, 0x04);
 
-  let header = common.validHeaderFromData(buf);
+  let header = common.validThreadHeaderFromData(buf);
   header.data[2] = 0x01;
   t.throws(function() { new Thread(header, new Uint8Array(buf)); }, ErrorType.Block.type(), 'Thread block rejects wrong block type');
   header.data[2] = 0x00;
@@ -42,26 +42,19 @@ t.test('Thread block validates block type', function(t) {
   t.end();
 });
 
-t.test('Thread block validates data length', function(t) {
-  let buf = new ArrayBuffer(134);
+t.test('Thread block validates data hash', function(t) {
+  let buf = new ArrayBuffer(69);
+  let arr = new Uint8Array(buf);
   let view = new DataView(buf);
-  view.setUint32(0, 0x0300811D);
+  view.setUint32(0, 0x0300401D);
   view.setUint8(64, 0x06);
-  view.setUint8(96, 0x04);
-  view.setUint8(128, 0x03);
-  view.setUint8(133, 0x04);
-  let header = common.validThreadHeaderFromData(buf);
-  t.throws(function() { new Thread(header, new Uint8Array(buf)); }, ErrorType.Data.length());
-  t.end();
-});
+  view.setUint8(68, 0x04);
 
-t.test('Thread rejects duplicate thread hashes', function(t) {
-  let buf = new ArrayBuffer(133);
-  let view = new DataView(buf);
-  view.setUint32(0, 0x0300801D);
-  view.setUint8(132, 0x04);
   let header = common.validThreadHeaderFromData(buf);
-  t.throws(function() { new Thread(header, new Uint8Array(buf)); }, ErrorType.HashMap.duplicate());
+  t.doesNotThrow(function() { new Thread(header, arr); }, 'Thread block accepts valid merkle hash');
+  arr[64] = 0x05;
+  t.throws(function() { new Thread(header, arr); }, ErrorType.Data.hash(), 'Thread block rejects invalid merkle hash');
+
   t.end();
 });
 
