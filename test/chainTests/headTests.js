@@ -75,12 +75,12 @@ t.test('Head.pushPost', function(t) {
     header.data[i] = i * 5;
   }
 
-  t.throws(function() { head.pushPost(new Post(header, buf)); }, ErrorType.Data.hash(), 'Head.pushPost validates prevHash');
+  t.throws(function() { head.pushPost(new Post(header, new Uint8Array(buf))); }, ErrorType.Data.hash(), 'Head.pushPost validates prevHash');
 
   for (let i = 11; i < 43; i++) {
     header.data[i] = originalPostHash[i-11];
   }
-  let nextPost = new Post(header, buf);
+  let nextPost = new Post(header, new Uint8Array(buf));
   head.pushPost(nextPost);
 
   t.strictSame(nextPost.thread, threadHash, 'Head.pushPost sets thread on post');

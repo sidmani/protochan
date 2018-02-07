@@ -36,9 +36,9 @@ t.test('Thread block validates block type', function(t) {
 
   let header = common.validHeaderFromData(buf);
   header.data[2] = 0x01;
-  t.throws(function() { new Thread(header, buf); }, ErrorType.Block.type(), 'Thread block rejects wrong block type');
+  t.throws(function() { new Thread(header, new Uint8Array(buf)); }, ErrorType.Block.type(), 'Thread block rejects wrong block type');
   header.data[2] = 0x00;
-  t.doesNotThrow(function() { new Thread(header, buf); }, 'Thread block accepts correct block type');
+  t.doesNotThrow(function() { new Thread(header, new Uint8Array(buf)); }, 'Thread block accepts correct block type');
   t.end();
 });
 
@@ -51,7 +51,7 @@ t.test('Thread block validates data length', function(t) {
   view.setUint8(128, 0x03);
   view.setUint8(133, 0x04);
   let header = common.validThreadHeaderFromData(buf);
-  t.throws(function() { new Thread(header, buf) }, ErrorType.Data.length());
+  t.throws(function() { new Thread(header, new Uint8Array(buf)); }, ErrorType.Data.length());
   t.end();
 });
 
@@ -61,7 +61,7 @@ t.test('Thread rejects duplicate thread hashes', function(t) {
   view.setUint32(0, 0x0300801D);
   view.setUint8(132, 0x04);
   let header = common.validThreadHeaderFromData(buf);
-  t.throws(function() { new Thread(header, buf) }, ErrorType.HashMap.duplicate());
+  t.throws(function() { new Thread(header, new Uint8Array(buf)); }, ErrorType.HashMap.duplicate());
   t.end();
 });
 
@@ -71,13 +71,14 @@ t.test('Thread block validates zero genesis row', function(t) {
   view.setUint32(0, 0x0300801D);
   view.setUint8(132, 0x04);
   view.setUint8(75, 0x04);
-  new Uint8Array(buf).fill(1, 5, 37);
+  let arr = new Uint8Array(buf);
+  arr.fill(1, 5, 37);
   let header = common.validThreadHeaderFromData(buf);
-  t.throws(function() { new Thread(header, buf); }, ErrorType.Difficulty.insufficient);
+  t.throws(function() { new Thread(header, arr); }, ErrorType.Difficulty.insufficient);
   t.end();
 });
 
-t.test('Thread block getters', function(t) {
+t.test('Thread block functions', function(t) {
   let buf = new ArrayBuffer(133);
   let view = new DataView(buf);
   view.setUint32(0, 0x0300801D);
@@ -89,7 +90,7 @@ t.test('Thread block getters', function(t) {
   arr.fill(9, 100, 132);
 
   let header = common.validThreadHeaderFromData(buf);
-  let thread = new Thread(header, buf);
+  let thread = new Thread(header, new Uint8Array(buf));
   t.equal(thread.numThreads, 2, 'Thread block sets correct number of threads');
   let expected = new Uint8Array(32);
   expected.fill(9, 0, 32);
@@ -108,5 +109,9 @@ t.test('Thread block getters', function(t) {
 
   expected.fill(9, 0, 32);
   t.strictSame(thread.getCorrespondingItem(expected), expectedThread, 'Thread block thread from post hash');
+
+  thread.prune();
+  t.equal(thread.merkleTree.isPruned, true, 'Thread prunes merkle tree');
+  t.equal(thread.isPruned(), true, 'Thread gets pruning status');
   t.end();
 });

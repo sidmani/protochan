@@ -93,5 +93,6 @@ module.exports = class MerkleTree {
   prune() {
     this.root.prune();
     this.indexMap.clear();
+    this.isPruned = true;
   }
 }

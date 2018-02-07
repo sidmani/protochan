@@ -27,7 +27,6 @@
 const THREAD_BLOCK_ID = 0x00;
 
 var Block = require('./block.js');
-var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
 var MerkleTree = require('../hash/merkleTree/merkleTree.js');
 var ErrorType = require('../error.js');
@@ -47,12 +46,12 @@ module.exports = class ThreadBlock extends Block {
     this.numThreads = threadDataLength / 64;
 
     // the first thread has a zero hash
-    Difficulty.verify(new Uint8Array(data, this.controlLength + 1, 32), 256);
+    Difficulty.verify(data.subarray(this.controlLength + 1, this.controlLength + 1 + 32), 256);
 
     // verify no duplicates using hashmap
     // and create lookup table at the same time! :)
     // TODO: replace block hash check with hash check here
-    this.merkleTree = new MerkleTree(new Uint8Array(data, this.controlLength + 1, this.contentLength));
+    this.merkleTree = new MerkleTree(data.subarray(this.controlLength + 1, this.controlLength + 1 + this.contentLength));
   }
 
   // data is pairs of 32-byte hashes
@@ -86,6 +85,10 @@ module.exports = class ThreadBlock extends Block {
   }
 
   prune() {
-    // TODO: prune data
+    this.merkleTree.prune();
+  }
+
+  isPruned() {
+    return this.merkleTree.isPruned;
   }
 };

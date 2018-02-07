@@ -43,7 +43,7 @@ t.test('Genesis post validates zero prevHash', function(t) {
   for (let i = 33; i < 43; i++) {
     header.data[i] = 1;
   }
-  t.throws(function() { new GenesisPost(header, d_buf); }, ErrorType.Difficulty.insufficient());
+  t.throws(function() { new GenesisPost(header, new Uint8Array(d_buf)); }, ErrorType.Difficulty.insufficient());
   t.end();
 });
 
@@ -54,7 +54,7 @@ t.test('Genesis post validates minimum control length', function(t) {
   dataView.setUint32(4, 0x0000ff1D);
   dataView.setUint8(9, 0x04);
   let header = common.validPostHeaderFromData(d_buf);
-  t.throws(function() { new GenesisPost(header, d_buf); }, ErrorType.Data.controlLength());
+  t.throws(function() { new GenesisPost(header, new Uint8Array(d_buf)); }, ErrorType.Data.controlLength());
   t.end();
 });
 
@@ -67,7 +67,7 @@ t.test('Genesis post validates max post difficulty greater than min post difficu
   dataView.setUint8(9, 0x04);
 
   let header = common.validPostHeaderFromData(d_buf);
-  t.throws(function() { new GenesisPost(header, d_buf); }, ErrorType.Block.illegalControlValues());
+  t.throws(function() { new GenesisPost(header, new Uint8Array(d_buf)); }, ErrorType.Block.illegalControlValues());
   t.end();
 });
 
@@ -80,7 +80,7 @@ t.test('Genesis post validates max thread difficulty greater than min post diffi
   dataView.setUint8(9, 0x04);
 
   let header = common.validPostHeaderFromData(d_buf);
-  t.throws(function() { new GenesisPost(header, d_buf); }, ErrorType.Block.illegalControlValues());
+  t.throws(function() { new GenesisPost(header, new Uint8Array(d_buf)); }, ErrorType.Block.illegalControlValues());
   t.end();
 });
 
@@ -93,7 +93,7 @@ t.test('Genesis post validates max thread count > 0', function(t) {
   dataView.setUint8(9, 0x04);
 
   let header = common.validPostHeaderFromData(d_buf);
-  t.throws(function() { new GenesisPost(header, d_buf); }, ErrorType.Block.illegalControlValues());
+  t.throws(function() { new GenesisPost(header, new Uint8Array(d_buf)); }, ErrorType.Block.illegalControlValues());
   t.end();
 });
 
@@ -106,7 +106,7 @@ t.test('Genesis post accepts valid data', function(t) {
   dataView.setUint8(9, 0x04);
 
   let header = common.validPostHeaderFromData(d_buf);
-  t.doesNotThrow(function() { new GenesisPost(header, d_buf); });
+  t.doesNotThrow(function() { new GenesisPost(header, new Uint8Array(d_buf)); });
   t.end()
 });
 
@@ -119,7 +119,7 @@ t.test('Genesis post getters', function(t) {
   dataView.setUint8(8, 0x1D);
   dataView.setUint8(9, 0x04);
   let header = common.validPostHeaderFromData(d_buf);
-  let p = new GenesisPost(header, d_buf);
+  let p = new GenesisPost(header, new Uint8Array(d_buf));
 
   t.equal(p.minPostDifficulty, 0xcc, 'Genesis post returns correct minimum post difficulty');
   t.equal(p.maxPostDifficulty, 0xef, 'Genesis post returns correct maximum post difficulty');

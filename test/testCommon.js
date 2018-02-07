@@ -77,7 +77,7 @@ module.exports.validThread = function(post) {
 
   let header = validThreadHeaderFromData(d_buf);
 
-  return new Thread(header, d_buf);
+  return new Thread(header, arr);
 }
 
 module.exports.validPost = function() {
@@ -88,7 +88,7 @@ module.exports.validPost = function() {
 
   let header = validPostHeaderFromData(d_buf);
 
-  return new Post(header, d_buf);
+  return new Post(header, new Uint8Array(d_buf));
 };
 
 module.exports.validGenesisPost = function() {
@@ -103,7 +103,7 @@ module.exports.validGenesisPost = function() {
   for (let i = 11; i < 43; i++) {
     header.data[i] = 0;
   }
-  return new GenesisPost(header, d_buf);
+  return new GenesisPost(header, new Uint8Array(d_buf));
 };
 
 module.exports.validGenesis = function(post) {
@@ -125,13 +125,13 @@ module.exports.validGenesis = function(post) {
 
   let header = validThreadHeaderFromData(d_buf);
 
-  return new Genesis(header, d_buf);
+  return new Genesis(header, new Uint8Array(d_buf));
 }
 
 module.exports.validBlock = function() {
   var buf = new ArrayBuffer(128);
 
-  return new Block(validHeaderFromData(buf), buf);
+  return new Block(validHeaderFromData(buf), new Uint8Array(buf));
 };
 
 module.exports.validHeaderFromData = validHeaderFromData = function(dataBuffer) {

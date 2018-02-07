@@ -34,8 +34,8 @@ t.test('Post block validates block type', function(t) {
   dataView.setUint8(40, 0x04);
   let header = common.validHeaderFromData(d_buf);
   header.data[2] = 0x00;
-  t.throws(function() { new Post(header, d_buf); }, ErrorType.Block.type(), 'Post block rejects wrong block type');
+  t.throws(function() { new Post(header, new Uint8Array(d_buf)); }, ErrorType.Block.type(), 'Post block rejects wrong block type');
   header.data[2] = 0x01;
-  t.doesNotThrow(function() { new Post(header, d_buf); }, 'Post block accepts correct block type');
+  t.doesNotThrow(function() { new Post(header, new Uint8Array(d_buf)); }, 'Post block accepts correct block type');
   t.end();
 });

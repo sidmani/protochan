@@ -42,7 +42,7 @@ t.test('Configuration constructor', function(t) {
   arr[45] = 0x04;
   let header = common.validPostHeaderFromData(buf);
   new DataView(header.data.buffer).setUint32(75, 0x18f3e974);
-  let post = new GenesisPost(header, buf);
+  let post = new GenesisPost(header, new Uint8Array(buf));
 
   let config = new Configuration(post);
   t.equal(config.MIN_POST_DIFFICULTY, 0xf5, 'Configuration sets minimum post difficulty');

@@ -41,11 +41,11 @@ module.exports = class GenesisPost extends Post {
     if (this.controlLength < 8) throw ErrorType.Data.controlLength();
 
     // set instance fields
-    this.minPostDifficulty = this.data[3];
-    this.maxPostDifficulty = this.data[4];
-    this.minThreadDifficulty = this.data[5];
-    this.maxThreadDifficulty = this.data[6];
-    this.maxThreads = this.data[7];
+    this.minPostDifficulty = data[3];
+    this.maxPostDifficulty = data[4];
+    this.minThreadDifficulty = data[5];
+    this.maxThreadDifficulty = data[6];
+    this.maxThreads = data[7];
     // to extend the protocol with options, store additional
     // bytes in the post block's data and parse them with
     // here

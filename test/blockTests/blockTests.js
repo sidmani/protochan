@@ -32,7 +32,7 @@ t.test('Block validates header type', function(t) {
   let view = new DataView(buf);
   view.setUint32(0, 0x0300051D);
   view.setUint8(9, 0x04);
-  t.throws(function() { new Block(new Array(80), buf); }, ErrorType.Parameter.type());
+  t.throws(function() { new Block(new Array(80), new Uint8Array(buf)); }, ErrorType.Parameter.type());
   t.end();
 });
 
@@ -44,7 +44,7 @@ t.test('Block validates data type', function(t) {
   view.setUint8(63, 0x04);
   let header = common.validHeaderFromData(buf);
 
-  t.throws(function() { new Block(header, new Array()); }, ErrorType.Parameter.type());
+  t.throws(function() { new Block(header, buf); }, ErrorType.Parameter.type());
   t.end();
 });
 
@@ -54,9 +54,10 @@ t.test('Block validates data hash', function(t) {
   view.setUint32(0, 0x0300051D);
   view.setUint8(9, 0x04);
   let header = common.validHeaderFromData(buf);
-  (new Uint8Array(buf))[5] = 0x05;
+  let arr = new Uint8Array(buf);
+  arr[5] = 0x05;
 
-  t.throws(function() { new Block(header, buf); }, ErrorType.Data.hash());
+  t.throws(function() { new Block(header, arr); }, ErrorType.Data.hash());
   t.end();
 });
 
@@ -66,7 +67,7 @@ t.test('Block validates data separator byte', function(t) {
   view.setUint8(9, 0x04);
   view.setUint32(0, 0x0300051E);
   let header = common.validHeaderFromData(buf);
-  t.throws(function() { new Block(header, buf); }, ErrorType.Data.delimiter());
+  t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.delimiter());
   t.end()
 });
 
@@ -76,7 +77,7 @@ t.test('Block validates number of control bytes', function(t) {
   view.setUint8(9, 0x04);
   view.setUint32(0, 0x02061D00);
   let header = common.validHeaderFromData(buf);
-  t.throws(function() { new Block(header, buf); }, ErrorType.Data.controlLength());
+  t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.controlLength());
   t.end();
 });
 
@@ -86,7 +87,7 @@ t.test('Block validates data length', function(t) {
   view.setUint8(10, 0x04);
   view.setUint32(0, 0x0300051D);
   let header = common.validHeaderFromData(buf);
-  t.throws(function() { new Block(header, buf); }, ErrorType.Data.length());
+  t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.length());
   t.end();
 });
 
@@ -97,7 +98,7 @@ t.test('Block validates data terminator byte', function(t) {
   view.setUint32(0, 0x0300051D);
 
   let header = common.validHeaderFromData(buf);
-  t.throws(function() { new Block(header, buf); }, ErrorType.Data.delimiter());
+  t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.delimiter());
   t.end();
 });
 
@@ -108,7 +109,7 @@ t.test('Block accepts valid header and data', function (t) {
   view.setUint8(127, 0x04);
   let header = common.validHeaderFromData(buf);
   let b;
-  t.doesNotThrow(function() { b = new Block(header, buf); });
+  t.doesNotThrow(function() { b = new Block(header, new Uint8Array(buf)); });
   t.assert(b instanceof Block);
   t.end();
 });
@@ -122,7 +123,7 @@ t.test('Block getters return correct values', function(t) {
   (new Uint8Array(buf)).fill(0x94, 5, 516);
 
   var header = common.validHeaderFromData(buf);
-  var b = new Block(header, buf);
+  var b = new Block(header, new Uint8Array(buf));
 
   t.strictSame(b.hash, common.hash(header.data),
     'Block returns correct hash');

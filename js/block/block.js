@@ -32,7 +32,7 @@ var ErrorType = require('../error.js');
 module.exports = class Block {
   constructor(header, data) {
     if (!(header instanceof Header)) throw ErrorType.Parameter.type();
-    if (!(data instanceof ArrayBuffer)) throw ErrorType.Parameter.type();
+    if (!(data instanceof Uint8Array)) throw ErrorType.Parameter.type();
 
     // XXX: untested
     // Absolute max size of a block's databuffer is
@@ -40,25 +40,25 @@ module.exports = class Block {
     if (data.byteLength >= 65355) throw ErrorType.Data.length();
 
     this.header = header;
-    this.data = new Uint8Array(data);
 
     // set instance fields from data
-    this.controlLength = this.data[0];
-    this.contentLength = (this.data[1] << 8) + this.data[2];
+    this.controlLength = data[0];
+    this.contentLength = (data[1] << 8) + data[2];
+    this.controlSector = data.subarray(0, this.controlLength);
     this.hash = Hash.digest(this.header.data);
 
     // TODO: move to the post and thread blocks
     // Assert that the hash of the data is equal to the hash stored in the header
-    if (!Util.arrayEquality(Hash.digest(this.data), header.dataHash())) throw ErrorType.Data.hash();
+    if (!Util.arrayEquality(Hash.digest(data), header.dataHash())) throw ErrorType.Data.hash();
 
     // the separator must be at the index specified by the control length
-    if (this.data[this.controlLength] !== 0x1D) throw ErrorType.Data.delimiter();
+    if (data[this.controlLength] !== 0x1D) throw ErrorType.Data.delimiter();
 
     // at least 3 control bytes (control length, content length)
     if (this.controlLength < 3) throw ErrorType.Data.controlLength();
 
     // control length, content length, control bytes, 0x1D, content bytes, 0x04
-    if (this.data.byteLength !==
+    if (data.byteLength !==
         this.contentLength // content bytes
       + this.controlLength // control bytes
       + 1 // separator
@@ -66,6 +66,6 @@ module.exports = class Block {
     ) throw ErrorType.Data.length();
 
     // last byte is 0x04 end-of-transmission
-    if (this.data[this.data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
+    if (data[data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
   }
 };

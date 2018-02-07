@@ -164,5 +164,6 @@ t.test('MerkleTree', function(t) {
   t.equal(tree.depth, 4);
   tree.prune();
   t.equal(tree.index(2), true, 'Merkle tree prunes data');
+  t.equal(tree.isPruned, true, 'Merkle tree sets isPruned');
   t.end();
 });

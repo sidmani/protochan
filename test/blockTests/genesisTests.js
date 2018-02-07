@@ -39,7 +39,7 @@ t.test('Genesis block validates data length', function(t) {
   view.setUint8(132, 0x04);
 
   let header = common.validThreadHeaderFromData(d_buf);
-  t.throws(function() { new Genesis(header, d_buf); }, ErrorType.Data.length());
+  t.throws(function() { new Genesis(header, new Uint8Array(d_buf)); }, ErrorType.Data.length());
   t.end();
 });
 
@@ -55,7 +55,7 @@ t.test('Genesis block validates zero prevHash', function(t) {
   for (let i = 11; i < 43; i++) {
     header.data[i] = 1;
   }
-  t.throws(function() { new Genesis(header, d_buf); }, ErrorType.Difficulty.insufficient());
+  t.throws(function() { new Genesis(header, new Uint8Array(d_buf)); }, ErrorType.Difficulty.insufficient());
   t.end();
 });
 
@@ -68,6 +68,6 @@ t.test('Genesis block accepts valid data', function(t) {
 
   let header = common.validThreadHeaderFromData(d_buf);
 
-  t.doesNotThrow(function() { new Genesis(header, d_buf); });
+  t.doesNotThrow(function() { new Genesis(header, new Uint8Array(d_buf)); });
   t.end();
 });
