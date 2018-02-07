@@ -24,15 +24,12 @@
 
 "use strict";
 
-var Util = require('../../util.js');
-var ErrorType = require('../../error.js');
 var Hash = require('../blake2s.js');
 
 module.exports = class Leaf {
   constructor(data) {
-    if (!(data instanceof Uint8Array)) throw ErrorType.Parameter.type();
     this.data = data;
-    this._hash = Hash.digest(this.data);
+    this.hash = Hash.digest(this.data);
   }
 
   path() {
@@ -41,10 +38,6 @@ module.exports = class Leaf {
 
   index() {
     return this.data;
-  }
-
-  hash() {
-    return this._hash;
   }
 
   // delete the data to save space

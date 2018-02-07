@@ -34,7 +34,7 @@ t.test('MerkleLeaf', function(t) {
   let data = new Uint8Array(64);
   let leaf = new MerkleLeaf(data);
   let hash = Hash.digest(data)
-  t.strictSame(leaf.hash(), hash, 'Leaf returns correct data hash');
+  t.strictSame(leaf.hash, hash, 'Leaf returns correct data hash');
   t.strictSame(leaf.path(), data, 'Leaf returns data for path');
   t.strictSame(leaf.index(), data, 'Leaf returns data for index');
   leaf.prune();
@@ -59,7 +59,7 @@ t.test('MerkleNode (2 children)', function(t) {
 
   t.equal(childA.sibling, childB, 'Node sets sibling on childA');
   t.equal(childB.sibling, childA, 'Node sets sibling on childB');
-  t.strictSame(node.hash(), Hash.digest(concat), 'Node returns correct hash');
+  t.strictSame(node.hash, Hash.digest(concat), 'Node returns correct hash');
   t.strictSame(node.path([hashB]), dataB, 'Node returns correct data for path');
   t.equal(node.path([]), undefined, 'Node returns undefined for empty path');
   t.equal(node.index([0]), dataA, 'Node returns childA for 0 index');
@@ -83,10 +83,10 @@ t.test('MerkleNode (1 child)', function(t) {
   let node = new MerkleNode(childA);
 
   t.equal(childA.sibling, undefined, 'Node does not set sibling for childA');
-  t.strictSame(node.hash(), Hash.digest(concat), 'Node returns  hash of duplicated child hash');
+  t.strictSame(node.hash, Hash.digest(concat), 'Node returns  hash of duplicated child hash');
   t.strictSame(node.path([hashA]), dataA, 'Node returns correct data for path');
   t.equal(node.index([0]), dataA, 'Node returns childA for 0 index');
-  t.equal(node.index([1]), undefined, 'Node returns undefined for 1 index');
+  t.equal(node.index([1, 0]), undefined, 'Node returns undefined for 1 index');
   node.prune();
   t.equal(childA.data, true, 'Node prunes childA');
 
@@ -113,7 +113,6 @@ t.test('MerkleTree constructor', function(t) {
     Hash.digest(data.subarray(128, 160)),
     Hash.digest(data.subarray(160, 192))
   ];
-
 
   let concat3_1 = new Uint8Array(64);
   concat3_1.set(level3[0], 0);
@@ -154,7 +153,7 @@ t.test('MerkleTree constructor', function(t) {
 
   let tree = new MerkleTree(data);
 
-  t.strictSame(tree.root, expectedRoot, 'Merkle tree sets root correctly');
+  t.strictSame(tree.root.hash, expectedRoot, 'Merkle tree sets root correctly');
   t.equal(tree.depth, 4);
   t.end();
 });

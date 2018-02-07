@@ -41,8 +41,7 @@ module.exports = class ThreadBlock extends Block {
     - this.controlLength
     - 2; // separator and terminator
 
-    if (threadDataLength < 64) throw ErrorType.Data.length();
-    if (threadDataLength % 64 !== 0) throw ErrorType.Data.length();
+    if (threadDataLength < 64 || threadDataLength % 64 !== 0) throw ErrorType.Data.length();
 
     this.numThreads = threadDataLength / 64;
 
@@ -88,13 +87,7 @@ module.exports = class ThreadBlock extends Block {
     return this.map.get(hash);
   }
 
-  // // the number of threads listed in this block
-  // numThreads() {
-  //   return this.data.byteLength / 64;
-  // }
-
   prune() {
     // TODO: prune data
-    // what can be pruned? write details on this
   }
 };

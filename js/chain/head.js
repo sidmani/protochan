@@ -86,7 +86,7 @@ module.exports = class Head {
     // parameter validation
     if (!(post instanceof Post)) throw ErrorType.Parameter.type();
 
-    let hash = post.hash();
+    let hash = post.hash;
     // TODO: difficulty check
     // XXX: timestamp should be calculated based on last post block, not last any block
     let delta_t = post.header.timestamp() - this.timestamp;

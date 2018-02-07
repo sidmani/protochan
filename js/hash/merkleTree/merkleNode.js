@@ -31,22 +31,25 @@ module.exports = class Node {
   constructor(childA, childB) {
     this.map = new HashMap();
 
-    this.hashA = this.map.set(childA);
+    this.map.set(childA);
 
     let concat = new Uint8Array(64);
-    concat.set(this.hashA, 0);
+    concat.set(childA.hash, 0);
 
     if (childB) {
-      this.hashB = this.map.set(childB);
+      this.map.set(childB);
 
       childA.sibling = childB;
       childB.sibling = childA;
-      concat.set(this.hashB, 32);
+      concat.set(childB.hash, 32);
     } else {
-      concat.set(this.hashA, 32);
+      // this node is on the right edge of the tree
+      // second child does not exist
+      // duplicate first child hash
+      concat.set(childA.hash, 32);
     }
 
-    this._hash = Hash.digest(concat);
+    this.hash = Hash.digest(concat);
   }
 
   path(intermediates) {
@@ -56,25 +59,18 @@ module.exports = class Node {
     return nextNode.path(intermediates.slice(1));
   }
 
-  hash() {
-    return this._hash;
-  }
-
   prune() {
-    this.map.enumerate().forEach(child => child.prune());
+    this.map.forEach(child => child.prune());
   }
 
   // idx as bit array
   index(idx) {
     if (idx.length === 0) return undefined;
-    let nextNode;
-    if (idx[0] === 0) {
-      nextNode = this.map.get(this.hashA);
-    } else if (this.hashB) {
-      nextNode = this.map.get(this.hashB);
+    let nextNode = this.map.enumerate()[idx[0]];
+    if (nextNode) {
+      return nextNode.index(idx.slice(1));
     } else {
       return undefined;
     }
-    return nextNode.index(idx.slice(1));
   }
 };

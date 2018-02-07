@@ -24,7 +24,6 @@
 
 "use strict";
 
-var Util = require('../util.js');
 var ErrorType = require('../error.js');
 
 /**
@@ -84,12 +83,12 @@ class Header {
 
   // Unix timestamp (uint32)
   timestamp() {
-    return (this.data[3] << 24) + (this.data[4] << 16) + (this.data[5] << 8) + this.data[6];
+    return this.getUint32(3);
   }
 
   // nonce (uint32)
   nonce() {
-    return (this.data[7] << 24) + (this.data[8] << 16) + (this.data[9] << 8) + this.data[10];
+    return this.getUint32(7);
   }
 
   // 32 bytes
@@ -104,12 +103,16 @@ class Header {
 
   // board id (uint32)
   board() {
-    return (this.data[75] << 24) + (this.data[76] << 16) + (this.data[77] << 8) + this.data[78];
+    return this.getUint32(75);
   }
 
   // additional flags
   reserved() {
     return this.data[79];
+  }
+
+  getUint32(index) {
+    return (this.data[index] << 24) + (this.data[index+1] << 16) + (this.data[index+2] << 8) + this.data[index+3];
   }
 }
 

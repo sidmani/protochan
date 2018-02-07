@@ -45,7 +45,7 @@ module.exports = class Block {
     // set instance fields from data
     this.controlLength = this.data[0];
     this.contentLength = (this.data[1] << 8) + this.data[2];
-    this._hash = Hash.digest(this.header.data);
+    this.hash = Hash.digest(this.header.data);
 
     // TODO: move to the post and thread blocks
     // and replace with a merkle tree for the thread block?
@@ -70,22 +70,4 @@ module.exports = class Block {
     // last byte is 0x04 end-of-transmission
     if (this.data[this.data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
   }
-
-  hash() {
-    return this._hash;
-  }
-
-  // index of 0x1D end byte
-  // controlLength() {
-  //   return this._controlLength;
-  // }
-
-  // contentLength() {
-  //   // big endian
-  //   return this._contentLength;
-  // }
-
-  // content() {
-  //   return this.data.subarray(this._controlLength + 1, this._controlLength + 1 + this._contentLength);
-  // }
 };

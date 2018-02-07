@@ -24,7 +24,6 @@
 
 "use strict";
 
-var Hash = require('../blake2s.js');
 var ErrorType = require('../../error.js');
 var Node = require('./merkleNode.js');
 var Leaf = require('./merkleLeaf.js');
@@ -65,7 +64,7 @@ module.exports = class MerkleTree {
       this.depth += 1;
     } while (builtArray.length > 1);
 
-    this.root = builtArray[0].hash();
+    this.root = builtArray[0];
   }
 
   // Verify that a thread or post is contained in this tree
@@ -82,6 +81,6 @@ module.exports = class MerkleTree {
   }
 
   prune() {
-    this.root.prune()
+    this.root.prune();
   }
 }

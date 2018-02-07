@@ -66,7 +66,7 @@ module.exports = class Chain {
   }
 
   createHead(originalPost, thread) {
-    let threadHash = thread.hash();
+    let threadHash = thread.hash;
     let head = new Head(
       originalPost,
       threadHash,

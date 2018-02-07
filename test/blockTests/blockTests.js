@@ -124,8 +124,8 @@ t.test('Block getters return correct values', function(t) {
   var header = common.validHeaderFromData(buf);
   var b = new Block(header, buf);
 
-  t.strictSame(b.hash(), common.hash(header.data),
-    'Block.hash() returns correct hash');
+  t.strictSame(b.hash, common.hash(header.data),
+    'Block returns correct hash');
   t.equal(b.controlLength, 0x04,
     'Block returns correct control length');
   t.equal(b.contentLength, 0x01FF,

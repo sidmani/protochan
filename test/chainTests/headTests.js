@@ -46,7 +46,7 @@ t.test('Head constructor', function(t) {
   t.equal(head.height, 177, 'Head sets starting height');
   t.strictSame(head.thread, threadHash, 'Head sets this.thread');
   t.strictSame(originalPost.thread, threadHash, 'Head sets thread on original post');
-  t.equal(map.get(originalPost.hash()), originalPost, 'Head inserts original post into map');
+  t.equal(map.get(originalPost.hash), originalPost, 'Head inserts original post into map');
   t.equal(head.timestamp, 18643, 'Head sets timestamp from original post');
   t.equal(head.unconfirmedPosts, 1, 'Head sets unconfirmed post count');
   t.end();
@@ -54,7 +54,7 @@ t.test('Head constructor', function(t) {
 
 t.test('Head.pushPost', function(t) {
   let originalPost = common.validPost();
-  let originalPostHash = originalPost.hash();
+  let originalPostHash = originalPost.hash;
   let threadHash = new Uint8Array(32);
   for (let i = 0; i < 32; i++) {
     threadHash[i] = i*7;
@@ -84,17 +84,17 @@ t.test('Head.pushPost', function(t) {
   head.pushPost(nextPost);
 
   t.strictSame(nextPost.thread, threadHash, 'Head.pushPost sets thread on post');
-  t.strictSame(head.pointer, nextPost.hash(), 'Head.pushPost sets pointer');
+  t.strictSame(head.pointer, nextPost.hash, 'Head.pushPost sets pointer');
   t.equal(head.unconfirmedPosts, 2, 'Head.pushPost increments unconfirmed post count');
   t.equal(head.timestamp, 2077354, 'Head.pushPost sets timestamp');
-  t.equal(map.get(nextPost.hash()), nextPost, 'Head.pushPost inserts new post into map');
+  t.equal(map.get(nextPost.hash), nextPost, 'Head.pushPost inserts new post into map');
   t.equal(head.height, 178, 'Head.pushPost increments height');
   t.end();
 });
 
 t.test('Head.discardStage', function(t) {
   let originalPost = common.validPost();
-  let originalPostHash = originalPost.hash();
+  let originalPostHash = originalPost.hash;
   let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
   head.stage = common.validThread(originalPost); // not undefined
   head.discardStage();
@@ -104,11 +104,11 @@ t.test('Head.discardStage', function(t) {
 
 t.test('Head.commitThread', function(t) {
   let originalPost = common.validPost();
-  let originalPostHash = originalPost.hash();
+  let originalPostHash = originalPost.hash;
   let head = new Head(originalPost, new Uint8Array(32), new HashMap(), 177);
   head.stage = 5;
   t.throws(function() { head.commitThread(); }, ErrorType.State.invalid(), 'Head.commitThread validates stage');
-  let threadHash = common.validThread(originalPost).hash();
+  let threadHash = common.validThread(originalPost).hash;
   head.stage = threadHash;
   head.commitThread();
   t.equal(head.height, 178, 'Head.commitThread increments height');
@@ -120,7 +120,7 @@ t.test('Head.commitThread', function(t) {
 
 t.test('Head.getBlockAtHead retrieves head from map', function(t) {
   let originalPost = common.validPost();
-  let originalPostHash = originalPost.hash();
+  let originalPostHash = originalPost.hash;
   let map = new HashMap();
   let head = new Head(originalPost, new Uint8Array(32), map, 177);
   t.equal(head.getBlockAtHead(), originalPost);
