@@ -29,6 +29,7 @@ const THREAD_BLOCK_ID = 0x00;
 var Block = require('./block.js');
 var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
+var MerkleTree = require('../hash/merkleTree/merkleTree.js');
 var ErrorType = require('../error.js');
 
 module.exports = class ThreadBlock extends Block {
@@ -46,20 +47,16 @@ module.exports = class ThreadBlock extends Block {
     this.numThreads = threadDataLength / 64;
 
     // the first thread has a zero hash
-    Difficulty.verify(this.getThread(0), 256);
+    Difficulty.verify(new Uint8Array(data, this.controlLength + 1, 32), 256);
 
-    this.map = new HashMap();
-
-    // put all threads in data into a hashmap for easy lookup
-    // there is probably a better way to do this (with indices)
-    // XXX: check duplication of post?
-    for (let i = 0; i < this.numThreads; i++) {
-      // no overwrites allowed, since that implies a hash collision
-      this.map.setRaw(this.getThread(i), this.getPost(i), false);
+    // verify no duplicates using hashmap
+    // and create lookup table at the same time! :)
+    this.indexMap = new HashMap();
+    for (let i = 0; i < this.numThreads*2; i++) {
+      this.indexMap.setRaw(new Uint8Array(data, this.controlLength + 1 + 32 * i, 32), i);
     }
 
-    // TODO: count # of items in the map and make sure it's
-    // equal to numThreads
+    this.merkleTree = new MerkleTree(new Uint8Array(data, this.controlLength + 1, this.contentLength));
   }
 
   // data is pairs of 32-byte hashes
@@ -67,24 +64,29 @@ module.exports = class ThreadBlock extends Block {
   // first row is { 0, post hash } (genesis)
   getThread(index) {
     if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
-    return this.data.subarray(
-      this.controlLength + 1 + index*64,
-      this.controlLength + 1 + index*64 + 32
-    );
+    return this.merkleTree.index(index*2);
   }
 
   // TODO: optimize to use hashmap and not create extra arrays
   getPost(index) {
     if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
-    return this.data.subarray(
-      this.controlLength + 1 + index*64 + 32,
-      this.controlLength + 1 + index*64 + 64
-    );
+    return this.merkleTree.index(index*2+1);
   }
 
   // get the post associated with a particular thread
-  getPostForThread(hash) {
-    return this.map.get(hash);
+  getCorrespondingItem(hash) {
+    let idx = this.indexMap.get(hash);
+    if (idx !== undefined) {
+      if (idx % 2 === 0) {
+        // get post for thread
+        return this.merkleTree.index(idx + 1);
+      } else {
+        // get thread for post
+        return this.merkleTree.index(idx - 1);
+      }
+    } else {
+      throw ErrorType.Parameter.invalid();
+    }
   }
 
   prune() {

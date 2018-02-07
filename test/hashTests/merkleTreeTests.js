@@ -39,7 +39,7 @@ t.test('MerkleLeaf', function(t) {
   t.strictSame(leaf.index(), data, 'Leaf returns data for index');
   leaf.prune();
   t.equal(leaf.data, true, 'Leaf clears data on prune');
-  t.end()
+  t.end();
 });
 
 t.test('MerkleNode (2 children)', function(t) {
@@ -62,8 +62,8 @@ t.test('MerkleNode (2 children)', function(t) {
   t.strictSame(node.hash, Hash.digest(concat), 'Node returns correct hash');
   t.strictSame(node.path([hashB]), dataB, 'Node returns correct data for path');
   t.equal(node.path([]), undefined, 'Node returns undefined for empty path');
-  t.equal(node.index([0]), dataA, 'Node returns childA for 0 index');
-  t.equal(node.index([1]), dataB, 'Node returns childA for 1 index');
+  t.strictSame(node.index([0, 0]), dataA, 'Node returns childA for 0 index');
+  t.strictSame(node.index([1, 0]), dataB, 'Node returns childB for 1 index');
   node.prune();
   t.equal(childA.data, true, 'Node prunes childA');
   t.equal(childB.data, true, 'Node prunes childB');
@@ -85,7 +85,7 @@ t.test('MerkleNode (1 child)', function(t) {
   t.equal(childA.sibling, undefined, 'Node does not set sibling for childA');
   t.strictSame(node.hash, Hash.digest(concat), 'Node returns  hash of duplicated child hash');
   t.strictSame(node.path([hashA]), dataA, 'Node returns correct data for path');
-  t.equal(node.index([0]), dataA, 'Node returns childA for 0 index');
+  t.strictSame(node.index([0]), dataA, 'Node returns childA for 0 index');
   t.equal(node.index([1, 0]), undefined, 'Node returns undefined for 1 index');
   node.prune();
   t.equal(childA.data, true, 'Node prunes childA');
@@ -93,7 +93,7 @@ t.test('MerkleNode (1 child)', function(t) {
   t.end();
 });
 
-t.test('MerkleTree constructor', function(t) {
+t.test('MerkleTree', function(t) {
   t.throws(function() { new MerkleTree(new Array(64)); }, ErrorType.Parameter.type(), 'Merkle tree rejects wrong data type');
   t.throws(function() { new MerkleTree(new Uint8Array(65)); }, ErrorType.Data.length(), 'Merkle tree rejects wrong data length');
 
@@ -154,6 +154,12 @@ t.test('MerkleTree constructor', function(t) {
   let tree = new MerkleTree(data);
 
   t.strictSame(tree.root.hash, expectedRoot, 'Merkle tree sets root correctly');
+  let expectedArr = new Uint8Array(32);
+  expectedArr.fill(3, 0, 32);
+  t.strictSame(tree.index(2), expectedArr, 'Merkle tree gets index');
+
   t.equal(tree.depth, 4);
+  tree.prune();
+  t.equal(tree.index(2), true, 'Merkle tree prunes data');
   t.end();
 });

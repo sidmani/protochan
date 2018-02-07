@@ -74,7 +74,10 @@ module.exports = class MerkleTree {
   }
 
   index(idx) {
-    let idxArr = idx.toString(2).split('');
+    let idxArr = idx.toString(2).split('').map(num => parseInt(num));
+    while (idxArr.length < this.depth - 1) {
+      idxArr.unshift(0);
+    }
     return this.root.index(idxArr);
     // split index into binary array
     // traverse tree

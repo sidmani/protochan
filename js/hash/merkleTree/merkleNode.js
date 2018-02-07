@@ -65,7 +65,6 @@ module.exports = class Node {
 
   // idx as bit array
   index(idx) {
-    if (idx.length === 0) return undefined;
     let nextNode = this.map.enumerate()[idx[0]];
     if (nextNode) {
       return nextNode.index(idx.slice(1));

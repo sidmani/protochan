@@ -62,17 +62,13 @@ module.exports = class HashMap {
   enumerate() {
     // return array of objects in the order they were added
     return Array.from(this.map.values());
-  //  return Object.keys(this).map(key => this[key]);
   }
 
   isEmpty() {
     return this.map.size === 0;
   }
 
-  enumerateKeys() {
-    return Array.from(this.map.keys());
-  }
-
+  // XXX: untested
   forEach(fn) {
     this.map.forEach(fn);
   }

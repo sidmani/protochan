@@ -33,7 +33,9 @@ t.test('Genesis block validates data length', function(t) {
   d_buf = new ArrayBuffer(133);
   let view = new DataView(d_buf);
   view.setUint32(0, 0x0300801D);
-  view.setUint32(75, 0xcefdab64);
+  view.setUint8(64, 0x06);
+  view.setUint8(96, 0x07);
+  view.setUint8(128, 0x08);
   view.setUint8(132, 0x04);
 
   let header = common.validThreadHeaderFromData(d_buf);
@@ -45,6 +47,7 @@ t.test('Genesis block validates zero prevHash', function(t) {
   let d_buf = new ArrayBuffer(69);
   let view = new DataView(d_buf);
   view.setUint32(0, 0x0300401D);
+  view.setUint8(64, 0x06);
   view.setUint8(68, 0x04);
 
   let header = common.validThreadHeaderFromData(d_buf);
@@ -60,6 +63,7 @@ t.test('Genesis block accepts valid data', function(t) {
   let d_buf = new ArrayBuffer(69);
   let view = new DataView(d_buf);
   view.setUint32(0, 0x0300401D);
+  view.setUint8(64, 0x06);
   view.setUint8(68, 0x04);
 
   let header = common.validThreadHeaderFromData(d_buf);

@@ -31,6 +31,7 @@ t.test('Thread block validates block type', function(t) {
   let buf = new ArrayBuffer(69);
   let view = new DataView(buf);
   view.setUint32(0, 0x0300401D);
+  view.setUint8(64, 0x06);
   view.setUint8(68, 0x04);
 
   let header = common.validHeaderFromData(buf);
@@ -45,8 +46,10 @@ t.test('Thread block validates data length', function(t) {
   let buf = new ArrayBuffer(134);
   let view = new DataView(buf);
   view.setUint32(0, 0x0300811D);
+  view.setUint8(64, 0x06);
+  view.setUint8(96, 0x04);
+  view.setUint8(128, 0x03);
   view.setUint8(133, 0x04);
-  view.setUint8(75, 0x04);
   let header = common.validThreadHeaderFromData(buf);
   t.throws(function() { new Thread(header, buf) }, ErrorType.Data.length());
   t.end();
@@ -92,14 +95,18 @@ t.test('Thread block getters', function(t) {
   expected.fill(9, 0, 32);
   t.strictSame(thread.getPost(1), expected, 'Thread block returns correct post hash');
 
+  // TODO: fix
   let expectedThread = new Uint8Array(32);
   expectedThread.fill(7, 0, 32);
-  t.strictSame(thread.getPostForThread(expectedThread), expected, 'Thread retrieves post from thread hash');
+  t.strictSame(thread.getCorrespondingItem(expectedThread), expected, 'Thread retrieves post from thread hash');
 
   expected.fill(7, 0, 32);
   t.strictSame(thread.getThread(1), expected, 'Thread block returns correct thread hash');
 
   expected.fill(17, 0, 32);
-  t.strictSame(thread.getPostForThread(new Uint8Array(32)), expected, 'Thread block retrieves genesis post from zero array');
+  t.strictSame(thread.getCorrespondingItem(new Uint8Array(32)), expected, 'Thread block retrieves genesis post from zero array');
+
+  expected.fill(9, 0, 32);
+  t.strictSame(thread.getCorrespondingItem(expected), expectedThread, 'Thread block thread from post hash');
   t.end();
 });
