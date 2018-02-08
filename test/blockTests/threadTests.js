@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Thread = require('../../js/block/thread.js');
+var Thread = require('../../js/block/thread/thread.js');
 var common = require('../testCommon.js');
 var t = require('tap');
 var ErrorType = require('../../js/error.js');
@@ -41,6 +41,18 @@ t.test('Thread block validates block type', function(t) {
   t.doesNotThrow(function() { new Thread(header, new Uint8Array(buf)); }, 'Thread block accepts correct block type');
   t.end();
 });
+
+t.test('Thread block validates data length', function(t) {
+  let buf = new ArrayBuffer(70);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x0300411D);
+  view.setUint8(64, 0x06);
+  view.setUint8(69, 0x04);
+  let header = common.validHeaderFromData(buf);
+  t.throws(function() { new Thread(header, new Uint8Array(buf)); }, ErrorType.Data.length(), 'Thread block rejects wrong block type');
+  t.end();
+});
+
 
 t.test('Thread block validates data hash', function(t) {
   let buf = new ArrayBuffer(69);

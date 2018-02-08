@@ -26,7 +26,7 @@
 
 var Util = require('../util.js');
 var Post = require('../block/post.js');
-var Thread = require('../block/thread.js');
+var Thread = require('../block/thread/thread.js');
 var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
 var ErrorType = require('../error.js');

@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Genesis = require('../../js/block/genesis.js');
+var Genesis = require('../../js/block/thread/genesis.js');
 var common = require('../testCommon.js');
 var t = require('tap');
 var ErrorType = require('../../js/error.js');

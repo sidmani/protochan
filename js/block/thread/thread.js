@@ -26,11 +26,11 @@
 
 const THREAD_BLOCK_ID = 0x00;
 
-var Block = require('./block.js');
-var Difficulty = require('../hash/difficulty.js');
-var MerkleTree = require('../hash/merkleTree/merkleTree.js');
-var ErrorType = require('../error.js');
-var Util = require('../util.js');
+var Block = require('../block.js');
+var Difficulty = require('../../hash/difficulty.js');
+var MerkleTree = require('../../hash/merkleTree/merkleTree.js');
+var ErrorType = require('../../error.js');
+var Util = require('../../util.js');
 
 module.exports = class ThreadBlock extends Block {
   constructor(header, data) {

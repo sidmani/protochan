@@ -28,6 +28,7 @@ var ErrorType = require('../../error.js');
 var HashMap = require('../hashMap.js');
 var Node = require('./merkleNode.js');
 var Leaf = require('./merkleLeaf.js');
+var Hash = require('../blake2s.js');
 
 module.exports = class MerkleTree {
   constructor(data) {
@@ -74,6 +75,13 @@ module.exports = class MerkleTree {
   get(intermediates) {
     return this.root.path(intermediates);
     // intermediates.length must equal depth - 1
+  }
+
+  verify(hash, intermediates, index) {
+    while (intermediates.length > 0) {
+        let concat = new Uint8Array(64);
+        concat.set()
+    }
   }
 
   index(idx) {

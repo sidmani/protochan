@@ -25,8 +25,8 @@
 "use strict";
 
 var Thread = require('./thread.js');
-var Difficulty = require('../hash/difficulty.js');
-var ErrorType = require('../error.js');
+var Difficulty = require('../../hash/difficulty.js');
+var ErrorType = require('../../error.js');
 
 module.exports = class Genesis extends Thread {
   constructor(header, data) {

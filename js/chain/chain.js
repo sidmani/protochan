@@ -26,8 +26,8 @@
 
 var Util = require('../util.js');
 var Post = require('../block/post.js');
-var Thread = require('../block/thread.js');
-var Genesis = require('../block/genesis.js');
+var Thread = require('../block/thread/thread.js');
+var Genesis = require('../block/thread/genesis.js');
 var GenesisPost = require('../block/genesisPost.js');
 var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
