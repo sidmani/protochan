@@ -24,7 +24,7 @@
 
 "use strict";
 
-var Util = require('../util.js');
+var Util = require('../util/util.js');
 var Post = require('../block/post.js');
 var Thread = require('../block/thread/thread.js');
 var HashMap = require('../hash/hashMap.js');
@@ -86,10 +86,11 @@ module.exports = class Head {
     // parameter validation
     if (!(post instanceof Post)) throw ErrorType.Parameter.type();
 
-    let hash = post.hash;
+    //let hash = post.hash;
     // TODO: difficulty check
     // XXX: timestamp should be calculated based on last post block, not last any block
     let delta_t = post.header.timestamp() - this.timestamp;
+    if (delta_t < 0) throw ErrorType.Parameter.invalid();
     // XXX: max diff and min diff need to be set globally
     let reqDiff = Difficulty.requiredPostDifficulty(delta_t);
     // Difficulty.verify(hash, reqDiff);
@@ -97,16 +98,14 @@ module.exports = class Head {
 
     // check that post's prevHash points to head
     if (!Util.arrayEquality(this.pointer, post.header.prevHash())) throw ErrorType.Data.hash();
-    // Util.assertArrayEquality(
-    //   this.pointer,
-    //   post.header.prevHash()
-    // );
+
+    // insertion into map automatically checks duplication
+    // duplication would imply a hash collision or a code issue
+    this.map.set(post);
 
     // post is OK!
     post.thread = this.thread;
-    // don't need to compute the hash again
-    this.map.setRaw(hash, post);
-    this.pointer = hash;
+    this.pointer = post.hash;
     this.height += 1;
     this.timestamp = post.header.timestamp();
     this.unconfirmedPosts += 1;

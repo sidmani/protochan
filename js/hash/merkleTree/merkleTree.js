@@ -78,10 +78,14 @@ module.exports = class MerkleTree {
   }
 
   verify(hash, intermediates, index) {
-    while (intermediates.length > 0) {
-        let concat = new Uint8Array(64);
-        concat.set()
-    }
+    // let idxArr = idx.toString(2).split('').map(num => parseInt(num));
+    // while (idxArr.length < this.depth - 1) {
+    //   idxArr.unshift(0);
+    // }
+    // while (intermediates.length > 0) {
+    //     let concat = new Uint8Array(64);
+    //     concat.set()
+    // }
   }
 
   index(idx) {

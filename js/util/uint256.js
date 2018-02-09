@@ -22,65 +22,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
-
-var ErrorType = require('../error.js');
-
-module.exports = class HashMap {
-  constructor() {
-    this.map = new Map();
+module.exports = class Uint256 {
+  constructor(value) {
+    this.array = new Uint8Array(32);
+    if (typeof(value) === 'number') {
+      this.array[28] = value >> 24;
+      this.array[29] = value >> 16;
+      this.array[30] = value >> 8;
+      this.array[31] = value;
+    } else if (value instanceof Uint8Array) {
+      this.array.set(0, value);
+    }
   }
 
-  set(obj) {
-    let str = HashMap.uint8ArrToHex(obj.hash);
-    if (this.map.has(str)) throw ErrorType.HashMap.duplicate();
-    this.map.set(str, obj);
-    // todo: remove this
-    return obj.hash;
+  add(other) {
+    let carry = 0;
+    for (let i = 31; i >= 0; i--) {
+      let sum = this.array[i] + other.array[i] + carry;
+      this.array[i] = sum;
+      if (sum > 255) {
+        carry = sum - 255;
+      } else {
+        carry = 0;
+      }
+    }
   }
 
-  setRaw(hash, obj, overwrite) {
-    let str = HashMap.uint8ArrToHex(hash);
-    if (this.map.has(str) && !overwrite) throw ErrorType.HashMap.duplicate();
-    this.map.set(str, obj);
-  }
-
-  unset(obj) {
-    let str = HashMap.uint8ArrToHex(obj.hash);
-    this.map.delete(str);
-  }
-
-  get(hash) {
-    return this.map.get(HashMap.uint8ArrToHex(hash));
-  }
-
-  enumerate() {
-    // return array of objects in the order they were added
-    return Array.from(this.map.values());
-  }
-
-  size() {
-    return this.map.size;
-  }
-
-  isEmpty() {
-    return this.map.size === 0;
-  }
-
-  forEach(fn) {
-    this.map.forEach(fn);
-  }
-
-  clear() {
-    this.map.clear();
-  }
-
-  static uint8ArrToHex(arr) {
-    if (!(arr instanceof Uint8Array)) throw ErrorType.Parameter.type();
-  	let str = '';
-  	for (let i = 0; i < arr.byteLength; i++) {
-  			str += (arr[i]<16?'0':'') + arr[i].toString(16);
-  	}
-  	return str;
+  copy() {
+    return new Uint256(this.array);
   }
 }

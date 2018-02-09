@@ -30,7 +30,7 @@ var Block = require('../block.js');
 var Difficulty = require('../../hash/difficulty.js');
 var MerkleTree = require('../../hash/merkleTree/merkleTree.js');
 var ErrorType = require('../../error.js');
-var Util = require('../../util.js');
+var Util = require('../../util/util.js');
 
 module.exports = class ThreadBlock extends Block {
   constructor(header, data) {
@@ -49,23 +49,21 @@ module.exports = class ThreadBlock extends Block {
     // the first thread has a zero hash
     Difficulty.verify(data.subarray(this.controlLength + 1, this.controlLength + 1 + 32), 256);
 
-    // merkle tree does not allow duplicates since it has a
-    // one-to-one index map
+    // merkle tree does not allow duplicates since it has a one-to-one index map
     this.merkleTree = new MerkleTree(data.subarray(this.controlLength + 1, this.controlLength + 1 + this.contentLength));
 
     // check that the merkle root equals the header's dataHash
     if (!Util.arrayEquality(this.merkleTree.root.hash, header.dataHash())) throw ErrorType.Data.hash();
   }
 
-  // data is pairs of 32-byte hashes
-  // { thread hash, post hash}
+  // data = pairs of 32-byte hashes
+  // { thread hash + post hash }
   // first row is { 0, post hash } (genesis)
   getThread(index) {
     if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
     return this.merkleTree.index(index*2);
   }
 
-  // TODO: optimize to use hashmap and not create extra arrays
   getPost(index) {
     if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
     return this.merkleTree.index(index*2+1);

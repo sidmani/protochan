@@ -47,15 +47,14 @@ module.exports = class GenesisPost extends Post {
     this.maxThreadDifficulty = data[6];
     this.maxThreads = data[7];
     // to extend the protocol with options, store additional
-    // bytes in the post block's data and parse them with
-    // here
-
+    // bytes in the post block's data and parse them here
+    
     // max >= min difficulty
     if (this.maxPostDifficulty < this.minPostDifficulty) throw ErrorType.Block.illegalControlValues();
     if (this.maxThreadDifficulty < this.minThreadDifficulty) throw ErrorType.Block.illegalControlValues();
 
     // nonzero max threads
-    if (this.maxThreads <= 0) throw ErrorType.Block.illegalControlValues();
+    if (this.maxThreads === 0) throw ErrorType.Block.illegalControlValues();
   }
 
 }

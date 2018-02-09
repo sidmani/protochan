@@ -30,36 +30,12 @@ var GenesisPost = require('../js/block/genesisPost.js');
 var Hash = require('../js/hash/blake2s.js');
 var MerkleTree = require('../js/hash/merkleTree/merkleTree.js');
 
-module.exports.assert = assert = function(condition, description) {
-  if (!condition) {
-    throw new Error(description)
-  }
-}
-
 module.exports.hash = function(data) {
   return Hash.digest(data);
 }
 
-// module.exports.assertArrayEquality = function(arr1, arr2) {
-//   assert(arr1 instanceof Uint8Array);
-//   assert(arr2 instanceof Uint8Array);
-//   assert(arr1.byteLength === arr2.byteLength);
-//   for (let i = 0; i < arr1.byteLength; i++) {
-//     assert(arr1[i] === arr2[i]);
-//   }
-// }
-//
-// module.exports.assertJSArrayEquality = function(arr1, arr2) {
-//   assert(arr1 instanceof Array);
-//   assert(arr2 instanceof Array);
-//   assert(arr1.length === arr2.length);
-//   for (let i = 0; i < arr1.length; i++) {
-//     assert(arr1[i] === arr2[i]);
-//   }
-// }
-
 module.exports.validThread = function(post) {
-  assert(post instanceof Post)
+  if (!(post instanceof Post)) { throw new Error(); }
   let d_buf = new ArrayBuffer(69);
   let arr = new Uint8Array(d_buf);
 
@@ -108,7 +84,6 @@ module.exports.validGenesisPost = function() {
 };
 
 module.exports.validGenesis = function(post) {
-  assert(post instanceof GenesisPost)
   let d_buf = new ArrayBuffer(69);
   let view = new DataView(d_buf);
   view.setUint32(0, 0x0300401D); // control + separator
@@ -124,40 +99,23 @@ module.exports.validGenesis = function(post) {
     arr[i] = postHash[i-32];
   }
 
-  let header = validThreadHeaderFromData(d_buf);
+  let header = Header.createFrom(0, 1, 0, 0, new Uint8Array(32), Hash.digest(new Uint8Array(d_buf)), 0, 0);
 
-  return new Genesis(header, new Uint8Array(d_buf));
+  return new Genesis(header, arr);
 }
 
-module.exports.validBlock = function() {
-  var buf = new ArrayBuffer(128);
-
-  return new Block(validHeaderFromData(buf), new Uint8Array(buf));
-};
-
 module.exports.validHeaderFromData = validHeaderFromData = function(dataBuffer) {
-  let h_buf = new ArrayBuffer(80);
-  let h_arr = new Uint8Array(h_buf);
-  let hash = Hash.digest(new Uint8Array(dataBuffer));
-  for (let i = 43; i < 75; i++) {
-    h_arr[i] = hash[i-43];
-  }
-  return new Header(h_buf);
+  return Header.createFrom(0, 0, 0, 0, new Uint8Array(32), Hash.digest(new Uint8Array(dataBuffer)), 0, 0);
 }
 
 module.exports.validPostHeaderFromData = validPostHeaderFromData = function(dataBuffer) {
-  let h = validHeaderFromData(dataBuffer);
-  h.data[2] = 0x01;
-  return h;
+  return Header.createFrom(0, 1, 0, 0, new Uint8Array(32), Hash.digest(new Uint8Array(dataBuffer)), 0, 0);
 }
 
 module.exports.validThreadHeaderFromData = validThreadHeaderFromData = function(dataBuffer) {
-  let h = validHeaderFromData(dataBuffer);
-  h.data[2] = 0x00;
   let arr = new Uint8Array(dataBuffer);
-  let hash = new MerkleTree(arr.subarray(arr[0] + 1, arr.length - 1)).root.hash;
-  for (let i = 43; i < 75; i++) {
-    h.data[i] = hash[i-43];
-  }
-  return h;
+  let merkleRoot = new MerkleTree(arr.subarray(arr[0] + 1, arr.length - 1)).root.hash;
+  return Header.createFrom(0, 0, 0, 0,
+    new Uint8Array(32),
+    merkleRoot, 0, 0);
 }

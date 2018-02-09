@@ -114,6 +114,24 @@ class Header {
   getUint32(index) {
     return (this.data[index] << 24) + (this.data[index+1] << 16) + (this.data[index+2] << 8) + this.data[index+3];
   }
+
+  static createFrom(protocolVersion, blockType, timestamp, nonce, prevHash, dataHash, board, reserved) {
+    let buffer = new ArrayBuffer(80);
+    let data = new DataView(buffer);
+    data.setUint16(0, protocolVersion);
+    data.setUint8(2, blockType);
+    data.setUint32(3, timestamp);
+    data.setUint32(7, nonce);
+    for (let i = 11; i < 43; i++) {
+      data.setUint8(i, prevHash[i-11]);
+    }
+    for (let i = 43; i < 75; i++) {
+      data.setUint8(i, dataHash[i-43]);
+    }
+    data.setUint32(75, board);
+    data.setUint8(79, reserved);
+    return new Header(data.buffer);
+  }
 }
 
 module.exports = Header;

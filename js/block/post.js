@@ -26,7 +26,7 @@
 
 var Block = require('./block.js');
 var ErrorType = require('../error.js');
-var Util = require('../util.js');
+var Util = require('../util/util.js');
 var Hash = require('../hash/blake2s.js');
 
 const POST_BLOCK_ID = 0x01;

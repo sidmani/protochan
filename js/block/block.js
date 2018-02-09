@@ -24,7 +24,6 @@
 
 "use strict";
 
-var Util = require('../util.js');
 var Header = require('./header.js');
 var Hash = require('../hash/blake2s.js');
 var ErrorType = require('../error.js');
@@ -64,4 +63,19 @@ module.exports = class Block {
     // last byte is 0x04 end-of-transmission
     if (data[data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
   }
+
+  static createFrom(header, control, content) {
+    let data = new Uint8Array(control.byteLength + content.byteLength + 2);
+    data.set(0, controlSector);
+    data[control.byteLength] = 0x1D;
+    data.set(control.byteLength + 1, content);
+    data[data.byteLength - 1] = 0x04;
+    return new Block(header, data);
+  }
+
+  // serialize() {
+  //   let arr = new Uint8Array(this.contentLength + this.controlLength + 2);
+  //   arr.set(0, this.controlSector);
+  //   arr[this.controlLength] =
+  // }
 };

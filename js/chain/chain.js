@@ -24,7 +24,7 @@
 
 "use strict";
 
-var Util = require('../util.js');
+var Util = require('../util/util.js');
 var Post = require('../block/post.js');
 var Thread = require('../block/thread/thread.js');
 var Genesis = require('../block/thread/genesis.js');
