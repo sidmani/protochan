@@ -34,14 +34,14 @@ class Header {
    * Create a header from an 80-byte ArrayBuffer.
    * @param {ArrayBuffer} buffer - The source buffer.
    */
-  constructor(buffer) {
+  constructor(data) {
     // parameter validation
-    if (!(buffer instanceof ArrayBuffer)) throw ErrorType.Parameter.type();
+    if (!(data instanceof Uint8Array)) throw ErrorType.Parameter.type();
 
     // Assert that the buffer is exactly 80 bytes long
-    if (buffer.byteLength !== 80) throw ErrorType.Data.length();
+    if (data.byteLength !== 80) throw ErrorType.Data.length();
 
-    this.data = new Uint8Array(buffer);
+    this.data = data;
   }
 
   // For mining
@@ -130,7 +130,15 @@ class Header {
     }
     data.setUint32(75, board);
     data.setUint8(79, reserved);
-    return new Header(data.buffer);
+    return new Header(new Uint8Array(data.buffer));
+  }
+
+  serialize() {
+    return this.data;
+  }
+
+  static deserialize(data) {
+    return new Header(data.subarray(0, 80));
   }
 }
 

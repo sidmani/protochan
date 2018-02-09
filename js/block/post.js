@@ -38,13 +38,25 @@ module.exports = class Post extends Block {
 
     // Assert that the hash of the data is equal to the hash stored in the header
     if (!Util.arrayEquality(Hash.digest(data), header.dataHash())) throw ErrorType.Data.hash();
+
     // XXX: untested
-    this.content = data.subarray(this.controlLength + 1, data.length - 1);
+    this.content = data.subarray(
+      this.controlLength + 1,
+      this.controlLength + 1 + this.contentLength
+    );
+  }
+
+  // XXX: untested
+  serialize() {
+    let data = super.serialize();
+    data.set(this.controlLength + 1, this.content);
+    return data;
   }
 
   prune() {
     // TODO: prune data
     // what does pruning mean in this context?
+    this.isPruned = true;
     this.content = undefined;
   }
 }

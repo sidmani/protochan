@@ -28,14 +28,14 @@ var ErrorType = require('../../js/error.js')
 
 t.test('Header constructor tests', function(t) {
   t.throws(function() { new Header(undefined); }, ErrorType.Parameter.type(), 'Header rejects undefined data');
-  t.throws(function() { new Header(new Array()); }, ErrorType.Parameter.type(), 'Header rejects data of wrong type');
-  t.throws(function() { new Header(new ArrayBuffer(81)); }, ErrorType.Data.length(), 'Header rejects data of wrong length');
-  t.doesNotThrow(function() { h = new Header(new ArrayBuffer(80))}, 'Header accepts valid data');
+  t.throws(function() { new Header(new ArrayBuffer(80)); }, ErrorType.Parameter.type(), 'Header rejects data of wrong type');
+  t.throws(function() { new Header(new Uint8Array(81)); }, ErrorType.Data.length(), 'Header rejects data of wrong length');
+  t.doesNotThrow(function() { h = new Header(new Uint8Array(80))}, 'Header accepts valid data');
   t.end();
 });
 
 t.test('Header nonce methods', function(t) {
-  let h = new Header(new ArrayBuffer(80));
+  let h = new Header(new Uint8Array(80));
   h.setNonce(0x5f4f3f2f);
   t.equal(h.nonce(), 0x5f4f3f2f, 'Header sets nonce');
   h.setNonce(0x5f4f3fff);
@@ -101,7 +101,7 @@ t.test('Header getter methods', function(t) {
   // reserved
   view.setUint8(79, 0x7c);
 
-  let h = new Header(validBuffer);
+  let h = new Header(new Uint8Array(validBuffer));
 
   t.equal(h.protocolVersion(), 12345, 'Header returns correct protocol version');
   t.equal(h.blockType(), 0x07, 'Header returns correct block type');
@@ -111,5 +111,10 @@ t.test('Header getter methods', function(t) {
   t.strictSame(h.dataHash(), data_hash_result, 'Header returns correct data hash');
   t.equal(h.board(), 0x4e5be7e9, 'Header returns correct board ID');
   t.equal(h.reserved(), 0x7c, 'Header returns correct reserved data');
+
+  let serialized = h.serialize();
+  t.strictSame(serialized, new Uint8Array(validBuffer), 'Header serializes data');
+  let deserialized = Header.deserialize(serialized);
+  t.strictSame(h, deserialized, 'Header deserializes data')
   t.end();
 });

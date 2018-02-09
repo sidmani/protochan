@@ -101,6 +101,20 @@ t.test('Block accepts valid header and data', function (t) {
   t.end();
 });
 
+t.test('Block serialization', function (t) {
+  let buf = new ArrayBuffer(128);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x03007B1D);
+  view.setUint8(127, 0x04);
+  let header = common.validHeaderFromData(buf);
+  let block = new Block(header, new Uint8Array(buf));
+  let serialized = block.serialize();
+  t.strictSame(serialized.subarray(80), new Uint8Array(buf), 'Block serializes data');
+  let deserialized = Block.deserialize(serialized);
+  t.strictSame(block, deserialized, 'Block deserializes data');
+  t.end();
+});
+
 t.test('Block getters return correct values', function(t) {
   var buf = new ArrayBuffer(517);
   let view = new DataView(buf);

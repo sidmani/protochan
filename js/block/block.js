@@ -49,7 +49,7 @@ module.exports = class Block {
     // the separator must be at the index specified by the control length
     if (data[this.controlLength] !== 0x1D) throw ErrorType.Data.delimiter();
 
-    // at least 3 control bytes (control length, content length)
+    // at least 3 control bytes (1 control length, 2 content length)
     if (this.controlLength < 3) throw ErrorType.Data.controlLength();
 
     // control length, content length, control bytes, 0x1D, content bytes, 0x04
@@ -73,9 +73,18 @@ module.exports = class Block {
     return new Block(header, data);
   }
 
-  // serialize() {
-  //   let arr = new Uint8Array(this.contentLength + this.controlLength + 2);
-  //   arr.set(0, this.controlSector);
-  //   arr[this.controlLength] =
-  // }
+  serialize() {
+    let data = new Uint8Array(80 + this.contentLength + this.controlLength + 2);
+    data.set(this.header.serialize(), 0);
+    data.set(this.controlSector, 80);
+    data[80 + this.controlLength] = 0x1D;
+    // subclass must set data here
+    data[data.byteLength - 1] = 0x04;
+    return data;
+  }
+
+  static deserialize(data) {
+    let header = Header.deserialize(data);
+    return new Block(header, data.subarray(80));
+  }
 };

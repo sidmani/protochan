@@ -58,30 +58,25 @@ module.exports = class ThreadBlock extends Block {
 
   // data = pairs of 32-byte hashes
   // { thread hash + post hash }
-  // first row is { 0, post hash } (genesis)
+  // genesis row is { 0, post hash }
   getThread(index) {
-    if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
     return this.merkleTree.index(index*2);
   }
 
   getPost(index) {
-    if (index >= this.numThreads) throw ErrorType.Parameter.invalid();
     return this.merkleTree.index(index*2+1);
   }
 
   // get the post associated with a particular thread
   getCorrespondingItem(hash) {
     let idx = this.merkleTree.indexOf(hash);
-    if (idx !== undefined) {
-      if (idx % 2 === 0) {
-        // get post for thread
-        return this.merkleTree.index(idx + 1);
-      } else {
-        // get thread for post
-        return this.merkleTree.index(idx - 1);
-      }
+    if (idx === undefined) { return undefined; }
+    if (idx % 2 === 0) {
+      // get post for thread
+      return this.merkleTree.index(idx + 1);
     } else {
-      throw ErrorType.Parameter.invalid();
+      // get thread for post
+      return this.merkleTree.index(idx - 1);
     }
   }
 

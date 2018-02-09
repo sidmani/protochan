@@ -24,14 +24,14 @@
 
 module.exports = class Uint256 {
   constructor(value) {
-    this.array = new Uint8Array(32);
     if (typeof(value) === 'number') {
+      this.array = new Uint8Array(32);
       this.array[28] = value >> 24;
       this.array[29] = value >> 16;
       this.array[30] = value >> 8;
       this.array[31] = value;
     } else if (value instanceof Uint8Array) {
-      this.array.set(0, value);
+      this.array = value;
     }
   }
 
@@ -40,15 +40,20 @@ module.exports = class Uint256 {
     for (let i = 31; i >= 0; i--) {
       let sum = this.array[i] + other.array[i] + carry;
       this.array[i] = sum;
-      if (sum > 255) {
-        carry = sum - 255;
-      } else {
-        carry = 0;
-      }
+      carry = Math.floor(sum / 256);
     }
   }
 
   copy() {
-    return new Uint256(this.array);
+    let newArr = new Uint8Array(32);
+    newArr.set(this.array, 0);
+    return new Uint256(newArr);
+  }
+
+  static exp2(exponent) {
+    let array = new Uint8Array(32);
+    let posInByte = exponent % 8;
+    array[Math.floor(exponent / 8)] = 1 << posInByte;
+    return new Uint256(array);
   }
 }
