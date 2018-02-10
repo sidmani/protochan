@@ -24,38 +24,11 @@
 
 "use strict";
 
-module.exports = class Uint256 {
-  constructor(value) {
-    if (typeof(value) === 'number') {
-      this.array = new Uint8Array(32);
-      this.array[28] = value >> 24;
-      this.array[29] = value >> 16;
-      this.array[30] = value >> 8;
-      this.array[31] = value;
-    } else if (value instanceof Uint8Array) {
-      this.array = value;
-    }
-  }
-
-  add(other) {
-    let carry = 0;
-    for (let i = 31; i >= 0; i--) {
-      let sum = this.array[i] + other.array[i] + carry;
-      this.array[i] = sum;
-      carry = Math.floor(sum / 256);
-    }
-  }
-
-  copy() {
-    let newArr = new Uint8Array(32);
-    newArr.set(this.array, 0);
-    return new Uint256(newArr);
-  }
-
-  static exp2(exponent) {
-    let array = new Uint8Array(32);
-    let posInByte = exponent % 8;
-    array[Math.floor(exponent / 8)] = 1 << posInByte;
-    return new Uint256(array);
-  }
+module.exports = function score(totalPostCount, genesisDepth, activity, timestamp, maxThreads) {
+  // score depends on:
+  // total number of posts (+)
+  // depth of genesis thread block (-)
+  // activity (number of posts since last thread block) (+)
+  // time since latest post (-)
+  return totalPostCount / maxThreads - genesisDepth / maxThreads + activity / totalPostCount - timestamp / 3600;
 }

@@ -32,9 +32,7 @@ module.exports = class HashMap {
   }
 
   set(obj) {
-    let str = HashMap.uint8ArrToHex(obj.hash);
-    if (this.map.has(str)) throw ErrorType.HashMap.duplicate();
-    this.map.set(str, obj);
+    this.setRaw(obj.hash, obj, false);
     // todo: remove this
     return obj.hash;
   }
@@ -46,8 +44,7 @@ module.exports = class HashMap {
   }
 
   unset(obj) {
-    let str = HashMap.uint8ArrToHex(obj.hash);
-    this.map.delete(str);
+    this.map.delete(HashMap.uint8ArrToHex(obj.hash));
   }
 
   get(hash) {

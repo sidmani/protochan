@@ -31,6 +31,12 @@ module.exports.Data = {
   delimiter: function() { return new Error('Malformed delimiter byte.'); }
 };
 
+module.exports.Chain = {
+  wrongBoard: function() { return new Error('Board ID mismatch.'); },
+  missingReference: function() { return new Error('Referenced block does not exist.')},
+  hashMismatch: function() { return new Error('Hashes were not equal as expected.')}
+}
+
 module.exports.Block = {
   type: function() { return new Error('Block type is incorrect.'); },
   illegalControlValues: function() { return new Error('Control bytes contain illegal values.'); }

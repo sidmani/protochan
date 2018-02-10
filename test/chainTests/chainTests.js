@@ -25,13 +25,13 @@ var Chain = require('../../js/chain/chain.js');
 var common = require('../testCommon.js');
 var t = require('tap');
 
-t.test('Chain constructor', function(t) {
-  let post = common.validGenesisPost();
-
-  t.throws(function() { new Chain(new Array(5), post); });
-  t.end();
-  //t.throws(function())
-});
+// t.test('Chain constructor', function(t) {
+//   let post = common.validGenesisPost();
+//
+//   t.throws(function() { new Chain(new Array(5), post); });
+//   t.end();
+//   //t.throws(function())
+// });
 //
 // module.exports = [
 //   { description: "Chain validates genesis block type",

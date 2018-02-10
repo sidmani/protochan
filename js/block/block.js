@@ -64,13 +64,9 @@ module.exports = class Block {
     if (data[data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
   }
 
-  static createFrom(header, control, content) {
-    let data = new Uint8Array(control.byteLength + content.byteLength + 2);
-    data.set(0, controlSector);
-    data[control.byteLength] = 0x1D;
-    data.set(control.byteLength + 1, content);
-    data[data.byteLength - 1] = 0x04;
-    return new Block(header, data);
+  // XXX: untested
+  timestamp() {
+    return header.timestamp();
   }
 
   serialize() {
@@ -86,5 +82,14 @@ module.exports = class Block {
   static deserialize(data) {
     let header = Header.deserialize(data);
     return new Block(header, data.subarray(80));
+  }
+
+  static createFrom(header, control, content) {
+    let data = new Uint8Array(control.byteLength + content.byteLength + 2);
+    data.set(0, controlSector);
+    data[control.byteLength] = 0x1D;
+    data.set(control.byteLength + 1, content);
+    data[data.byteLength - 1] = 0x04;
+    return new Block(header, data);
   }
 };

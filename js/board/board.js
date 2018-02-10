@@ -24,10 +24,28 @@
 
 "use strict";
 
-module.exports = function score(threadA) {
-  // score depends on:
-  // total number of posts (+)
-  // depth of genesis thread block (- exp)
-  // activity (number of posts since last thread block) (+)
-  // time since latest post (-)
+var Config = require('./config.js');
+var Chain = require('../chain/chain.js');
+var ErrorType = require('../error.js');
+
+var Board = class Board {
+  constructor(originalPost) {
+      this.config = new Config(originalPost);
+      this.chain = new Chain(this.config);
+
+  }
+
+  pushPost(post) {
+    // check board id
+    if (post.header.board() !== this.config.BOARD_ID)
+      throw ErrorType.Chain.wrongBoard();
+
+    try {
+      this.chain.pushPost(post);
+    } catch (error) {
+
+    }
+  }
 }
+
+module.exports = Board;

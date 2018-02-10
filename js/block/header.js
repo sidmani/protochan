@@ -38,7 +38,7 @@ class Header {
     // parameter validation
     if (!(data instanceof Uint8Array)) throw ErrorType.Parameter.type();
 
-    // Assert that the buffer is exactly 80 bytes long
+    // Assert that the array is exactly 80 bytes long
     if (data.byteLength !== 80) throw ErrorType.Data.length();
 
     this.data = data;
