@@ -26,6 +26,7 @@
 
 var Util = require('../util/util.js');
 var Post = require('../block/post.js');
+var GenesisPost = require('../block/genesisPost.js');
 var Thread = require('../block/thread/thread.js');
 var Difficulty = require('../hash/difficulty.js');
 var Uint256 = require('../util/uint256.js');
@@ -65,47 +66,75 @@ module.exports = class Head {
     this.work = new Uint256();
   }
 
+  ///////////////////////
+  // Post insertion methods
+  // only pushPost should be called from outside this class
   pushPost(post) {
     let leadingZeroes = Difficulty.countLeadingZeroes(post.hash);
 
     if (this.pointer) {
       // this is not the first block
-      // check that post's prevHash points to head
-      if (!Util.arrayEquality(this.pointer, post.header.prevHash())) {
-        // either invalid or a fork
-        // see analogous situation in Chain.pushThread
-        throw ErrorType.Chain.hashMismatch();
-      }
-
-      let deltaT = post.timestamp() - this.timestamp();
-
-      // timestamp is strictly increasing
-      if (deltaT <= 0) throw ErrorType.Parameter.invalid();
-
-      // calculate the required difficulty of this post
-      let reqDiff = Difficulty.requiredPostDifficulty(
-        deltaT,
-        this.config.MIN_POST_DIFFICULTY,
-        this.config.MAX_POST_DIFFICULTY
-      );
-
-      // assert that the has meets the difficulty requirement
-      if (leadingZeroes < reqDiff) throw ErrorType.Difficulty.insufficient();
-
+      this.postChecks(post, leadingZeroes);
       // post is OK.
     } else {
       // this is the first block
-      // make sure this is a valid genesis post
-      if (!(post instanceof GenesisPost)) throw ErrorType.Parameter.invalid();
-
-      // sanity check
-      // the block can't be older than this code
-      // 0x5A7E6FC0 = Friday, Feb. 9, 2018 8:06:24 PM PST
-      if (thread.timestamp() < 0x5A7E6FC0) throw Error.Parameter.invalid();
-
-      // post is OK.
+      this.genesisPostChecks(post);
     }
 
+    // post is OK.
+    this.finalizePostInsertion(post, leadingZeroes);
+  }
+
+  checkPostDifficulty(deltaT, leadingZeroes) {
+    // timestamp is strictly increasing
+    if (deltaT <= 0) throw ErrorType.Parameter.invalid();
+
+    // calculate the required difficulty of this post
+    let reqDiff = Difficulty.requiredPostDifficulty(
+      deltaT,
+      this.config.MIN_POST_DIFFICULTY,
+      this.config.MAX_POST_DIFFICULTY
+    );
+
+    // assert that the has meets the difficulty requirement
+    if (leadingZeroes < reqDiff) throw ErrorType.Difficulty.insufficient();
+  }
+
+  genesisPostChecks(post) {
+    // make sure this is a valid genesis post
+    if (!(post instanceof GenesisPost)) throw ErrorType.Parameter.type();
+
+    // sanity check
+    // the block can't be older than this code
+    // 0x5A7E6FC0 = Friday, Feb. 9, 2018 8:06:24 PM PST
+    if (post.timestamp() < 0x5A7E6FC0) throw ErrorType.Parameter.invalid();
+  }
+
+  postChecks(post, leadingZeroes) {
+    // check that post's prevHash points to head
+    if (!Util.arrayEquality(this.pointer, post.header.prevHash())) {
+      // either invalid or a fork
+      // see analogous situation in Chain.pushThread
+
+      // get the referenced block
+      let referencedBlock = this.blockMap.get(post.header.prevHash());
+
+      if (referencedBlock) {
+        if (!Util.arrayEquality(referencedBlock.thread, this.thread)) throw ErrorType
+        // check if .hash (if thread) or .thread (if post)
+        // equals this.thread
+      } else {
+        throw ErrorType.Chain.hashMismatch();
+      }
+    }
+
+    this.checkPostDifficulty(
+      post.timestamp() - this.timestamp(),
+      leadingZeroes
+    );
+  }
+
+  finalizePostInsertion(post, leadingZeroes) {
     // insertion into map automatically checks duplication
     // duplication implies a hash collision or a bug
     this.blockMap.set(post);
@@ -125,6 +154,9 @@ module.exports = class Head {
     // add to total work
     this.work.add(Uint256.exp2(leadingZeroes));
   }
+
+  /////////////////////
+  // Thread insertion methods
 
   // XXX: untested
   stageThread(thread) {
@@ -161,10 +193,14 @@ module.exports = class Head {
     this.stage = thread.hash;
   }
 
+  /////////////////////////
+  // discard the staged thread
   discardStage() {
     this.stage = undefined;
   }
 
+  /////////////////////////
+  // commit a staged thread and update all necessary fields
   commitThread() {
     if (!(this.stage instanceof Uint8Array)) throw ErrorType.State.invalid();
 
@@ -180,7 +216,8 @@ module.exports = class Head {
     this.unconfirmedPosts = 0;
   }
 
-  // Convenience
+  /////////////////////////
+  // Convenience methods
   getBlockAtHead() {
     if (this.pointer) {
       return this.blockMap.get(this.pointer);
@@ -188,6 +225,7 @@ module.exports = class Head {
     return undefined;
   }
 
+  /////////////////////////
   timestamp() {
     let latestBlock = this.getBlockAtHead();
     if (latestBlock) {

@@ -54,6 +54,10 @@ module.exports = class ThreadBlock extends Block {
 
     // check that the merkle root equals the header's dataHash
     if (!Util.arrayEquality(this.merkleTree.root.hash, header.dataHash())) throw ErrorType.Data.hash();
+
+    // XXX: untested
+    // so that we don't need to check if block is post or thread
+    this.thread = this.hash;
   }
 
   // data = pairs of 32-byte hashes

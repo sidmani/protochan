@@ -53,48 +53,67 @@ t.test('Head constructor', function(t) {
   t.end();
 });
 
-// t.test('Head.pushPost')
-//
-// t.test('Head.pushPost', function(t) {
-//   let originalPost = common.validPost();
-//   let originalPostHash = originalPost.hash;
-//   let threadHash = new Uint8Array(32);
-//   for (let i = 0; i < 32; i++) {
-//     threadHash[i] = i*7;
-//   }
-//   let map = new HashMap();
-//   let head = new Head(originalPost, threadHash, map, 177);
-//
-//   t.throws(function() { head.pushPost(new Array(6)); }, ErrorType.Parameter.type(), 'Head.pushPost validates post type');
-//
-//   let buf = new ArrayBuffer(41);
-//   let view = new DataView(buf);
-//   view.setUint32(0, 0x0300241D);
-//   view.setUint8(40, 0x04);
-//
-//   let header = common.validPostHeaderFromData(buf);
-//   new DataView(header.data.buffer).setUint32(3, 2077354);
-//   for (let i = 11; i < 43; i++) {
-//     header.data[i] = i * 5;
-//   }
-//
-//   t.throws(function() { head.pushPost(new Post(header, new Uint8Array(buf))); }, ErrorType.Data.hash(), 'Head.pushPost validates prevHash');
-//
-//   for (let i = 11; i < 43; i++) {
-//     header.data[i] = originalPostHash[i-11];
-//   }
-//   let nextPost = new Post(header, new Uint8Array(buf));
-//   head.pushPost(nextPost);
-//
-//   t.strictSame(nextPost.thread, threadHash, 'Head.pushPost sets thread on post');
-//   t.strictSame(head.pointer, nextPost.hash, 'Head.pushPost sets pointer');
-//   t.equal(head.unconfirmedPosts, 2, 'Head.pushPost increments unconfirmed post count');
-//   t.equal(head.timestamp, 2077354, 'Head.pushPost sets timestamp');
-//   t.equal(map.get(nextPost.hash), nextPost, 'Head.pushPost inserts new post into map');
-//   t.equal(head.height, 178, 'Head.pushPost increments height');
-//   t.end();
-// });
-//
+t.test('Head.checkPostDifficulty', function(t) {
+  let originalPost = common.validGenesisPost();
+  let config = new Config(originalPost);
+
+  let threadHash = new Uint8Array(32);
+  threadHash.fill(18, 0, 19);
+  let blockMap = new HashMap();
+
+  let head = new Head(config, blockMap, threadHash);
+  head.config.MIN_POST_DIFFICULTY = 10;
+  head.config.MAX_POST_DIFFICULTY = 40;
+
+  t.throws(function() { head.checkPostDifficulty(-1, 5); }, ErrorType.Parameter.invalid(), 'checkPostDifficulty rejects negative time difference');
+  t.throws(function() { head.checkPostDifficulty(0, 81); }, ErrorType.Parameter.invalid(), 'checkPostDifficulty rejects zero time difference');
+  t.throws(function() { head.checkPostDifficulty(10, 15); }, ErrorType.Difficulty.insufficient(), 'checkPostDifficulty rejects insufficient difficulty');
+  t.doesNotThrow(function() { head.checkPostDifficulty(10, 20)}, 'checkPostDifficulty accepts sufficient difficulty');
+  t.end();
+});
+
+t.test('Head.genesisPostChecks', function(t) {
+  let originalPost = common.validGenesisPost();
+  let config = new Config(originalPost);
+
+  let threadHash = new Uint8Array(32);
+  threadHash.fill(18, 0, 19);
+  let blockMap = new HashMap();
+
+  let head = new Head(config, blockMap, threadHash);
+
+  let regularPost = common.validPost();
+  t.throws(function() { head.genesisPostChecks(regularPost); }, ErrorType.Parameter.type(), 'genesisPostChecks rejects regular post');
+
+  new DataView(originalPost.header.data.buffer).setUint32(3, 0x5A7E6FBF);
+  t.throws(function() { head.genesisPostChecks(originalPost); }, ErrorType.Parameter.invalid(), 'genesisPostChecks rejects post timestamped before 0x5A7E6FC0');
+
+  new DataView(originalPost.header.data.buffer).setUint32(3, 0x5A7E6FFF);
+  t.doesNotThrow(function() { head.genesisPostChecks(originalPost); },'genesisPostChecks accepts valid post');
+  t.end();
+});
+
+t.test('Head.finalizePostInsertion', function(t) {
+  let originalPost = common.validGenesisPost();
+  let config = new Config(originalPost);
+  new DataView(originalPost.header.data.buffer).setUint32(3, 0xab);
+  let threadHash = new Uint8Array(32);
+  let blockMap = new HashMap();
+
+  let head = new Head(config, blockMap, threadHash);
+  head.height = 193;
+  head.unconfirmedPosts = 5;
+  head.finalizePostInsertion(originalPost, 97);
+  t.equal(head.blockMap.get(originalPost.hash), originalPost, 'finalizePostInsertion set block in blockMap');
+  t.strictSame(originalPost.thread, threadHash, 'finalizePostInsertion sets thread on inserted post');
+  t.strictSame(head.pointer, originalPost.hash, 'finalizePostInsertion sets pointer to post.hash');
+  t.equal(head.height, 194, 'finalizePostInsertion increments height');
+  t.equal(head.strictTimestamp, 0xab, 'finalizePostInsertion sets strict timestamp');
+  t.equal(head.unconfirmedPosts, 6, 'finalizePostInsertion increments unconfirmed post count');
+  t.equal(head.work.compare(Uint256.exp2(97)), 0, 'finalizePostInsertion adds work');
+  t.end();
+});
+
 t.test('Head.discardStage', function(t) {
   let originalPost = common.validGenesisPost();
   let config = new Config(originalPost);
@@ -133,13 +152,14 @@ t.test('Head.commitThread', function(t) {
   t.strictSame(head.pointer, threadHash, 'Head.commitThread sets pointer');
   t.equal(head.stage, undefined, 'Head.commitThread clears stage');
   t.equal(head.work.compare(Uint256.exp2(132)), 0, 'Head.commitThread adds work');
+  t.equal(head.strictTimestamp, 0, 'Head.commitThread does not modify strict timestamp');
   t.end();
 });
 
 t.test('Head.getBlockAtHead retrieves pointee block from map', function(t) {
   let originalPost = common.validGenesisPost();
   let config = new Config(originalPost);
-  
+
   let threadHash = new Uint8Array(32);
   threadHash.fill(0x0f, 16, 32); // thread hash difficulty = 132
   let blockMap = new HashMap();

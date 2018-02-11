@@ -204,21 +204,7 @@ module.exports = class Chain {
     // retrieve the associated head
     // don't need to check non-nil
     // all posts in the map guaranteed to have associated head
-    let head;
-    if (prevBlock instanceof Thread) {
-      // the previous block was a thread, so use its hash
-      head = this.getHead(prevBlock.hash);
-    } else if (prevBlock instanceof Post) {
-      // get the head referenced by the previous post's thread
-      head = this.getHead(prevBlock.thread);
-    } else if (!prevBlock) {
-      // the block doesn't exist
-      throw ErrorType.Chain.missingReference();
-    } else {
-      // the block exists but is not a thread or a post
-      // throw internal consistency exception
-      throw ErrorType.State.internalConsistency();
-    }
+    let head = this.getHead(prevBlock.thread);
 
     // head could be instanceof Head or of Fork
     // abstraction takes care of that for us here
