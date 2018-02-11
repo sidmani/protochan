@@ -43,7 +43,9 @@ var Board = class Board {
     try {
       this.chain.pushPost(post);
     } catch (error) {
-
+      // possible errors:
+      // - missing reference
+      // - internal consistency
     }
   }
 }

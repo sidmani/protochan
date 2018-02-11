@@ -63,5 +63,9 @@ t.test('Uint256', function(t) {
   let expected = new Uint8Array(32);
   expected[9] = 0b00100000;
   t.strictSame(exp2_77.array, expected, 'Uint256 correctly exponentiates 2');
+
+  t.equal(new Uint256(0xffcbffce).compare(new Uint256(0xffccffce)), -1, 'Uint256.compare (less than)');
+  t.equal(new Uint256(0xffcbffce).compare(new Uint256(0xffcbffce)), 0, 'Uint256.compare (equal)');
+  t.equal(new Uint256(0xffcbffce).compare(new Uint256(0xffcaffce)), 1, 'Uint256.compare (greater than)');
   t.end();
 });

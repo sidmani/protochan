@@ -21,31 +21,14 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-var Chain = require('../../js/chain/chain.js');
-var Config = require('../../js/board/config.js');
-var common = require('../testCommon.js');
-var t = require('tap');
 
-t.test('Chain constructor', function(t) {
-  let post = common.validGenesisPost();
-  let config = new Config(post);
-  let chain = new Chain(config);
+"use strict";
 
-  t.equal(chain.threadPointer, undefined, 'Chain sets thread pointer to undefined');
-  t.equal(chain.threadHeight, 0, 'Chain sets thread height to 0');
+class Fork {
+  constructor(heads, threadHash) {
+    this.heads = heads;
+    this.thread = threadHash;
+  }
 
-  t.end();
-});
-
-t.test('Chain convenience methods', function(t) {
-  let post = common.validGenesisPost();
-  let config = new Config(post);
-  let chain = new Chain(config);
-
-  chain.blockMap.setRaw(new Uint8Array([5, 4, 3]), 'foo');
-  t.equal(chain.getBlock(new Uint8Array([5, 4, 3])), 'foo', 'Chain.getBlock returns object from blockMap');
-
-  chain.headMap.setRaw(new Uint8Array([7, 2, 8]), 'foo');
-  t.equal(chain.getHead(new Uint8Array([7, 2, 8])), 'foo', 'Chain.getBlock returns object from blockMap');
-  t.end();
-});
+  pushPost(post) { }
+}

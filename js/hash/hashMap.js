@@ -47,6 +47,10 @@ module.exports = class HashMap {
     this.map.delete(HashMap.uint8ArrToHex(obj.hash));
   }
 
+  unsetRaw(hash) {
+    this.map.delete(HashMap.uint8ArrToHex(hash));
+  }
+
   get(hash) {
     return this.map.get(HashMap.uint8ArrToHex(hash));
   }

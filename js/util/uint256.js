@@ -32,8 +32,10 @@ module.exports = class Uint256 {
       this.array[29] = value >> 16;
       this.array[30] = value >> 8;
       this.array[31] = value;
-    } else if (value instanceof Uint8Array) {
+    } else if (value instanceof Uint8Array && value.byteLength == 32) {
       this.array = value;
+    } else {
+      this.array = new Uint8Array(32);
     }
   }
 
@@ -50,6 +52,19 @@ module.exports = class Uint256 {
     let newArr = new Uint8Array(32);
     newArr.set(this.array, 0);
     return new Uint256(newArr);
+  }
+
+  // returns 1 if this > other, -1 if this < other, and 0 if equal
+  compare(other) {
+    // compare from most to least significant byte
+    for (let i = 0; i < 32; i++) {
+      if (this.array[i] > other.array[i]) {
+        return 1;
+      } else if (this.array[i] < other.array[i]) {
+        return -1;
+      }
+    }
+    return 0;
   }
 
   static exp2(exponent) {

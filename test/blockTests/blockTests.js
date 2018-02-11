@@ -124,6 +124,7 @@ t.test('Block getters return correct values', function(t) {
   (new Uint8Array(buf)).fill(0x94, 5, 516);
 
   var header = common.validHeaderFromData(buf);
+  new DataView(header.data.buffer).setUint32(3, 85);
   var b = new Block(header, new Uint8Array(buf));
 
   t.strictSame(b.hash, common.hash(header.data),
@@ -132,12 +133,6 @@ t.test('Block getters return correct values', function(t) {
     'Block returns correct control length');
   t.equal(b.contentLength, 0x01FF,
     'Block returns correct content length');
-
-  // TODO: remove this
-  // let content = b.content();
-  // let expected_content = new Uint8Array(0x01FF);
-  // expected_content.fill(0x94, 0, 0x01FF);
-  // t.strictSame(content, expected_content,
-  //   'Block returns correct content');
+  t.equal(header.timestamp(), 85);
   t.end();
 });

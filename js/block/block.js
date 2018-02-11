@@ -66,7 +66,7 @@ module.exports = class Block {
 
   // XXX: untested
   timestamp() {
-    return header.timestamp();
+    return this.header.timestamp();
   }
 
   serialize() {

@@ -1,3 +1,4 @@
+
 // This file is a part of the protochan project.
 // https://github.com/sidmani/protochan
 // https://www.sidmani.com/?postid=3
@@ -56,5 +57,6 @@ module.exports.HashMap = {
 };
 
 module.exports.State = {
-  invalid: function() { return new Error('Invalid object state.'); }
+  invalid: function() { return new Error('Invalid object state.'); },
+  internalConsistency: function() { return new Error('Internal consistency exception.'); }
 };

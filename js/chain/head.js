@@ -27,8 +27,8 @@
 var Util = require('../util/util.js');
 var Post = require('../block/post.js');
 var Thread = require('../block/thread/thread.js');
-var HashMap = require('../hash/hashMap.js');
 var Difficulty = require('../hash/difficulty.js');
+var Uint256 = require('../util/uint256.js');
 var ErrorType = require('../error.js');
 var Config = require('../board/config.js');
 
@@ -39,9 +39,6 @@ var Config = require('../board/config.js');
 
 module.exports = class Head {
   constructor(config, blockMap, thread) {
-    if (!(config instanceof Config)) throw ErrorType.Parameter.type();
-    if (!(blockMap instanceof HashMap)) throw ErrorType.Parameter.type();
-
     // the board-wide config data
     this.config = config;
 
@@ -55,70 +52,24 @@ module.exports = class Head {
     this.pointer = undefined;
 
     // the height of the block referenced by this.pointer
-  //  this.height = 0;
+    this.height = 0;
 
     // the number of posts that are not yet under a thread block
     this.unconfirmedPosts = 0;
 
     // the timestamp of the latest *post* block
-    this.timestamp = 0;
-  }
+    this.strictTimestamp = 0;
 
-
-  // constructor(originalPost, threadHash, map, startingHeight) {
-  //   // base is the starting point of the chain
-  //   // if this is part of a fork, base is the first block on branch after the fork
-  //
-  //   //////////////////////////
-  //   // parameter assertions
-  //   if (!(originalPost instanceof Post &&
-  //         threadHash instanceof Uint8Array &&
-  //         map instanceof HashMap &&
-  //         typeof(startingHeight) === 'number'))
-  //     throw ErrorType.Parameter.type();
-  //
-  //   if (startingHeight < 0) throw ErrorType.Parameter.invalid();
-  //
-  //   //////////////////////////
-  //   // Set instance variables
-  //   // the starting height of originalPost
-  //   this.height = startingHeight;
-  //
-  //   // the associated thread
-  //   this.thread = threadHash;
-  //
-  //   // the underlying hashmap
-  //   this.map = map;
-  //
-  //   ///////////////////////////
-  //   // Insert the original post
-  //   // set the associated thread for the original post
-  //   originalPost.thread = this.thread;
-  //
-  //   // insert the post into the hashmap; this.pointer = post's hash
-  //   this.pointer = this.map.set(originalPost);
-  //
-  //   // set timestamp to post's timestamp
-  //   this.timestamp = originalPost.header.timestamp();
-  //
-  //   // this is the number of posts that have been inserted since the last thread block
-  //   // summing this value for all heads yields the numPosts used in thread difficulty calculations
-  //   this.unconfirmedPosts = 1;
-  // }
-  //
-
-  getBlockAtHead() {
-    return this.map.get(this.pointer);
+    // the total work done on this head
+    // work = estimated # of hash ops performed to mine a block
+    this.work = new Uint256();
   }
 
   pushPost(post) {
-    // NOTE: timestamp should be calculated based on last post block, not last any block
-
-    // any checks specific to just the post go here
+    let leadingZeroes = Difficulty.countLeadingZeroes(post.hash);
 
     if (this.pointer) {
       // this is not the first block
-
       // check that post's prevHash points to head
       if (!Util.arrayEquality(this.pointer, post.header.prevHash())) {
         // either invalid or a fork
@@ -126,7 +77,7 @@ module.exports = class Head {
         throw ErrorType.Chain.hashMismatch();
       }
 
-      let deltaT = post.header.timestamp() - this.timestamp;
+      let deltaT = post.timestamp() - this.timestamp();
 
       // timestamp is strictly increasing
       if (deltaT <= 0) throw ErrorType.Parameter.invalid();
@@ -139,7 +90,7 @@ module.exports = class Head {
       );
 
       // assert that the has meets the difficulty requirement
-      if (Difficulty.countLeadingZeroes(post.hash) < reqDiff) throw ErrorType.Difficulty.insufficient();
+      if (leadingZeroes < reqDiff) throw ErrorType.Difficulty.insufficient();
 
       // post is OK.
     } else {
@@ -156,74 +107,92 @@ module.exports = class Head {
     }
 
     // insertion into map automatically checks duplication
-    // duplication implies a hash collision or a code issue
-    this.map.set(post);
+    // duplication implies a hash collision or a bug
+    this.blockMap.set(post);
 
     // post is OK!
+    // set associated thread on post
     post.thread = this.thread;
+    // set pointer to the new post
     this.pointer = post.hash;
-    //this.height += 1;
-    // FIXME: check if this is OK
-    post.height = getBlockAtHead().height + 1;
-    
-    this.timestamp = post.header.timestamp();
+    // increment the height
+    this.height += 1;
+    // update the post-only timestamp
+    this.strictTimestamp = post.timestamp();
+    // increment number of unconfirmed posts
     this.unconfirmedPosts += 1;
+
+    // add to total work
+    this.work.add(Uint256.exp2(leadingZeroes));
   }
-  //
-  // // XXX: untested
-  // stageThread(thread, hash) {
-  //   // parameter validation
-  //   Util.assert(thread instanceof Thread);
-  //   Util.assert(hash instanceof Uint8Array);
-  //
-  //   // thread has already been checked and set in the map by caller
-  //   // this just runs other checks and sets head
-  //   // hash is thread.hash(), but don't waste processing
-  //   // power recomputing it every time
-  //
-  //   // get the latest post hash in this thread according to the
-  //   // passed in threadblock
-  //   let latestPost = thread.getPostForThread(this.thread);
-  //   if (latestPost) {
-  //     // assert latestPost hash is equal to head hash
-  //     Util.assertArrayEquality(latestPost, this.pointer);
-  //   } else {
-  //     // check if genesis case
-  //
-  //     // this head's thread hash must equal hash of thread block
-  //     Util.assertArrayEquality(hash, this.thread);
-  //
-  //     // post in thread block's genesis row equals this.head
-  //     Util.assertArrayEquality(thread.getPost(0), this.pointer);
-  //   }
-  //
-  //   // thread is OK!
-  //   this.stage = hash;
-  // }
-  //
-  // discardStage() {
-  //   this.stage = undefined;
-  // }
-  //
-  // commitThread() {
-  //   if (!(this.stage instanceof Uint8Array)) throw ErrorType.State.invalid();
-  //
-  //   this.pointer = this.stage;
-  //   this.height += 1;
-  //   // don't update the timestamp, since that depends only on posts
-  //   this.discardStage();
-  //
-  //   this.unconfirmedPosts = 0;
-  // }
-  //
-  // // XXX: untested
-  // pushThread(thread, hash) {
-  //   this.stageThread(thread, hash);
-  //   this.commitThread();
-  // }
-  //
-  // // XXX: untested
-  // sumWork() {
-  //   return this.work; // don't calculate it every time
-  // }
+
+  // XXX: untested
+  stageThread(thread) {
+    // thread has already been checked by caller
+    // this just runs other checks and sets head
+
+    // the pointer must exist
+    // either a post block is the first block
+    // or a fork sets the pointer automatically
+    if (!this.pointer) throw ErrorType.State.internalConsistency();
+
+    // get the latest post hash in this thread according to the
+    // passed in threadblock
+    let latestBlock = thread.getPostForThread(this.thread);
+
+    if (latestBlock) {
+      // thread is not the first thread in this head
+      // assert latestPost hash is equal to head hash
+      if (!Util.arrayEquality(latestBlock, this.pointer)) throw ErrorType.Chain.hashMismatch();
+      // again check fork
+    } else {
+      // thread is either invalid or the first thread in this head
+      // since the genesis post is paired with a 0-hash
+      // check if genesis case
+
+      // this head's thread hash must equal hash of thread block
+      if (!Util.arrayEquality(thread.hash, this.thread)) throw ErrorType.Chain.hashMismatch();
+
+      // post in thread block's genesis row equals this.head
+      if (!Util.arrayEquality(thread.getPost(0), this.pointer)) throw ErrorType.Chain.hashMismatch();
+    }
+
+    // thread is OK!
+    this.stage = thread.hash;
+  }
+
+  discardStage() {
+    this.stage = undefined;
+  }
+
+  commitThread() {
+    if (!(this.stage instanceof Uint8Array)) throw ErrorType.State.invalid();
+
+    this.pointer = this.stage;
+    this.height += 1;
+    // XXX: this runs the same calculation for every head.
+    // maybe get the chain to set the work from outside
+    this.work.add(
+      Uint256.exp2(Difficulty.countLeadingZeroes(this.stage))
+    );
+    // don't update strictTimestamp, since that depends on posts
+    this.discardStage();
+    this.unconfirmedPosts = 0;
+  }
+
+  // Convenience
+  getBlockAtHead() {
+    if (this.pointer) {
+      return this.blockMap.get(this.pointer);
+    }
+    return undefined;
+  }
+
+  timestamp() {
+    let latestBlock = this.getBlockAtHead();
+    if (latestBlock) {
+      return latestBlock.timestamp();
+    }
+    return 0;
+  }
 }
