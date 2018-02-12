@@ -73,7 +73,7 @@ class Header {
 
   /// Protocol version (uint16)
   protocolVersion() {
-    return (this.data[0] << 8) + this.data[1];
+    return ((this.data[0] << 8) + this.data[1]) >>> 0;
   }
 
   /// Block type (uint8)
@@ -112,7 +112,7 @@ class Header {
   }
 
   getUint32(index) {
-    return (this.data[index] << 24) + (this.data[index+1] << 16) + (this.data[index+2] << 8) + this.data[index+3];
+    return ((this.data[index] << 24) + (this.data[index+1] << 16) + (this.data[index+2] << 8) + this.data[index+3]) >>> 0;
   }
 
   static createFrom(protocolVersion, blockType, timestamp, nonce, prevHash, dataHash, board, reserved) {

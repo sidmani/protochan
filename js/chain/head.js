@@ -25,13 +25,10 @@
 "use strict";
 
 var Util = require('../util/util.js');
-var Post = require('../block/post.js');
 var GenesisPost = require('../block/genesisPost.js');
-var Thread = require('../block/thread/thread.js');
 var Difficulty = require('../hash/difficulty.js');
 var Uint256 = require('../util/uint256.js');
 var ErrorType = require('../error.js');
-var Config = require('../board/config.js');
 
 ///////////////////////
 // A head represents the top of a chain of blocks
@@ -139,7 +136,7 @@ module.exports = class Head {
     }
 
     this.checkPostDifficulty(
-      post.timestamp() - this.timestamp(),
+      post.timestamp() - this.strictTimestamp,
       leadingZeroes
     );
   }

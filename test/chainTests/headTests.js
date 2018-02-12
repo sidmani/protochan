@@ -26,7 +26,6 @@
 var common = require('../testCommon.js');
 var HashMap = require('../../js/hash/hashMap.js');
 var Head = require('../../js/chain/head.js');
-var Post = require('../../js/block/post.js');
 var Uint256 = require('../../js/util/uint256.js');
 var Config = require('../../js/board/config.js');
 var t = require('tap');
@@ -100,6 +99,38 @@ t.test('Head.genesisPostChecks', function(t) {
 
   new DataView(originalPost.header.data.buffer).setUint32(3, 0x5A7E6FFF);
   t.doesNotThrow(function() { head.genesisPostChecks(originalPost); },'genesisPostChecks accepts valid post');
+  t.end();
+});
+
+t.test('Head.postChecks', function(t) {
+  let originalPost = common.validGenesisPost();
+  let config = new Config(originalPost);
+  config.MIN_POST_DIFFICULTY = 10;
+  config.MAX_POST_DIFFICULTY = 20;
+  let threadHash = new Uint8Array(32);
+  let blockMap = new HashMap();
+
+  let head = new Head(config, blockMap, threadHash, 14);
+  let pointer = new Uint8Array(32);
+  pointer.fill(8, 0, 32);
+  head.pointer = pointer;
+
+  originalPost.header.data[3] = 170;
+  originalPost.hash = new Uint8Array(32);
+  originalPost.hash.fill(0xff, 2, 32);
+  for (let i = 11; i < 43; i++) {
+    originalPost.header.data[i] = 8;
+  }
+  originalPost.header.data[35] = 7;
+
+  t.throws(function() { head.postChecks(originalPost, 5); }, ErrorType.Chain.hashMismatch(), 'Head.postChecks compares pointer hash and prevHash');
+
+  originalPost.header.data[35] = 8;
+
+  t.throws(function() { head.postChecks(originalPost, 8); }, ErrorType.Difficulty.insufficient(), 'Head.postChecks checks difficulty');
+
+  t.doesNotThrow(function() { head.postChecks(originalPost, 17); }, 'Head.postChecks accepts valid post');
+
   t.end();
 });
 

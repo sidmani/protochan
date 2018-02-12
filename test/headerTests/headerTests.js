@@ -85,7 +85,7 @@ t.test('Header getter methods', function(t) {
   // block type
   view.setUint8(2, 0x07);
   // timestamp
-  view.setUint32(3, 274444555);
+  view.setUint32(3, 0xffffffff);
   // nonce
   view.setUint32(7, 777711889);
   // prevHash
@@ -105,7 +105,7 @@ t.test('Header getter methods', function(t) {
 
   t.equal(h.protocolVersion(), 12345, 'Header returns correct protocol version');
   t.equal(h.blockType(), 0x07, 'Header returns correct block type');
-  t.equal(h.timestamp(), 274444555, 'Header returns correct timestamp');
+  t.equal(h.timestamp(), 0xffffffff, 'Header returns correct timestamp');
   t.equal(h.nonce(), 777711889, 'Header returns correct nonce');
   t.strictSame(h.prevHash(), prev_hash_result, 'Header returns correct previous hash');
   t.strictSame(h.dataHash(), data_hash_result, 'Header returns correct data hash');
