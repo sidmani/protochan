@@ -27,11 +27,6 @@
 var ErrorType = require('../error.js');
 
 module.exports.verify = function(hash, leadingZeroes) {
-  if(!(hash instanceof Uint8Array)) throw ErrorType.Parameter.type();
-  if(hash.byteLength !== 32) throw ErrorType.Data.length();
-
-  if(typeof(leadingZeroes) !== 'number') throw ErrorType.Parameter.type();
-
   if(countLeadingZeroes(hash) < leadingZeroes) throw ErrorType.Difficulty.insufficient();
 }
 

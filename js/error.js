@@ -34,8 +34,15 @@ module.exports.Data = {
 
 module.exports.Chain = {
   wrongBoard: function() { return new Error('Board ID mismatch.'); },
-  missingReference: function() { return new Error('Referenced block does not exist.')},
-  hashMismatch: function() { return new Error('Hashes were not equal as expected.')}
+  missingReference: function() { return new Error('Referenced block does not exist.'); },
+  hashMismatch: function() { return new Error('Hashes were not equal as expected.'); },
+  missingThread: function() { return new Error('Thread was removed illegally.'); },
+  threadOrder: function() { return new Error('Order of threads in thread block is illegal.'); },
+  unknownThread: function() { return new Error('Thread record referenced nonexistent thread.'); }
+}
+
+module.exports.Head = {
+  resurrection: function() { return new Error('Attempt to resurrect a buried thread.'); }
 }
 
 module.exports.Block = {

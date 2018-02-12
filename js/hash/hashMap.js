@@ -76,6 +76,27 @@ module.exports = class HashMap {
     this.map.clear();
   }
 
+  contains(key) {
+    return this.map.has(HashMap.uint8ArrToHex(key));
+  }
+
+  containsStringifiedKey(keyStr) {
+    return this.map.has(keyStr);
+  }
+
+  difference(otherMap, filter) {
+    let keys = Array.from(this.map.keys());
+    let diff = new Array();
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+      if (!otherMap.containsStringifiedKey(key)) {
+        if (!filter || filter(key, this.map.get(key)))
+          diff.push(keys[i]);
+      }
+    }
+    return diff.map((strKey) => HashMap.hexToUint8Arr(strKey));
+  }
+
   static uint8ArrToHex(arr) {
     if (!(arr instanceof Uint8Array)) throw ErrorType.Parameter.type();
   	let str = '';
@@ -83,5 +104,13 @@ module.exports = class HashMap {
   			str += (arr[i]<16?'0':'') + arr[i].toString(16);
   	}
   	return str;
+  }
+
+  static hexToUint8Arr(str) {
+    if (!str) return new Uint8Array();
+    let arr = [];
+    for (let i = 0; i < str.length; i += 2)
+      arr.push(parseInt(str.substr(i, 2), 16));
+    return new Uint8Array(arr);
   }
 }

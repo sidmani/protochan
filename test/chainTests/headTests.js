@@ -40,16 +40,26 @@ t.test('Head constructor', function(t) {
   threadHash.fill(18, 0, 19);
   let blockMap = new HashMap();
 
-  let head = new Head(config, blockMap, threadHash);
+  let head = new Head(config, blockMap, threadHash, 11);
 
   t.strictSame(head.thread, threadHash, 'Head sets thread');
   t.equal(head.pointer, undefined, 'Head sets pointer to undefined');
+  t.equal(head.threadHeight, 11, 'Head sets thread height');
   t.equal(head.height, 0, 'Head sets height to 0');
   t.equal(head.unconfirmedPosts, 0, 'Head sets unconfirmed post count to 0');
   t.equal(head.strictTimestamp, 0, 'Head sets strict timestamp to 0');
   t.equal(head.work.compare(new Uint256(0)), 0, 'Head starts at 0 work');
+  t.equal(head.sealed, false, 'Head starts unsealed');
 
   t.equal(head.timestamp(), 0, 'Head.timestamp returns 0 when pointer is undefined');
+
+  head.seal();
+
+  t.equal(head.sealed, true, 'Head.seal works');
+  t.throws(function() { head.stageThread(); }, ErrorType.Head.resurrection(), 'Head.stageThread fails on sealed head');
+  t.throws(function() { head.pushPost(); }, ErrorType.Head.resurrection(), 'Head.pushPost fails on sealed head');
+
+  t.equal(Head.genesisScore(), 1, 'Head.genesisScore() is 1');
   t.end();
 });
 
@@ -61,7 +71,7 @@ t.test('Head.checkPostDifficulty', function(t) {
   threadHash.fill(18, 0, 19);
   let blockMap = new HashMap();
 
-  let head = new Head(config, blockMap, threadHash);
+  let head = new Head(config, blockMap, threadHash, 5);
   head.config.MIN_POST_DIFFICULTY = 10;
   head.config.MAX_POST_DIFFICULTY = 40;
 
@@ -80,7 +90,7 @@ t.test('Head.genesisPostChecks', function(t) {
   threadHash.fill(18, 0, 19);
   let blockMap = new HashMap();
 
-  let head = new Head(config, blockMap, threadHash);
+  let head = new Head(config, blockMap, threadHash, 7);
 
   let regularPost = common.validPost();
   t.throws(function() { head.genesisPostChecks(regularPost); }, ErrorType.Parameter.type(), 'genesisPostChecks rejects regular post');
@@ -100,7 +110,7 @@ t.test('Head.finalizePostInsertion', function(t) {
   let threadHash = new Uint8Array(32);
   let blockMap = new HashMap();
 
-  let head = new Head(config, blockMap, threadHash);
+  let head = new Head(config, blockMap, threadHash, 14);
   head.height = 193;
   head.unconfirmedPosts = 5;
   head.finalizePostInsertion(originalPost, 97);
@@ -122,7 +132,7 @@ t.test('Head.discardStage', function(t) {
   threadHash.fill(18, 0, 19);
   let blockMap = new HashMap();
 
-  let head = new Head(config, blockMap, threadHash);
+  let head = new Head(config, blockMap, threadHash, 21);
 
   head.stage = common.validThread(originalPost); // not undefined
   head.discardStage();
@@ -138,7 +148,7 @@ t.test('Head.commitThread', function(t) {
   threadHash.fill(0x0f, 16, 32); // thread hash difficulty = 132
   let blockMap = new HashMap();
 
-  let head = new Head(config, blockMap, threadHash);
+  let head = new Head(config, blockMap, threadHash, 19);
   head.height = 177;
   head.unconfirmedPosts = 5;
 
@@ -165,7 +175,7 @@ t.test('Head.getBlockAtHead retrieves pointee block from map', function(t) {
   let blockMap = new HashMap();
   blockMap.set(originalPost);
 
-  let head = new Head(config, blockMap, threadHash);
+  let head = new Head(config, blockMap, threadHash, 84);
   head.pointer = originalPost.hash;
   t.equal(head.getBlockAtHead(), originalPost);
   t.end();

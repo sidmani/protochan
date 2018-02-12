@@ -168,3 +168,37 @@ t.test('MerkleTree', function(t) {
   t.equal(tree.isPruned, true, 'Merkle tree sets isPruned');
   t.end();
 });
+
+t.test('Merkle Tree.difference', function(t) {
+  let data1 = new Uint8Array(192);
+  data1.fill(1, 0, 32);
+  data1.fill(2, 32, 64);
+  data1.fill(3, 64, 96);
+  data1.fill(4, 96, 128);
+  data1.fill(5, 128, 160);
+  data1.fill(6, 160, 192);
+  let tree1 = new MerkleTree(data1);
+
+  let data2 = new Uint8Array(192);
+  data2.fill(3, 0, 32);
+  data2.fill(2, 32, 64);
+  data2.fill(1, 64, 96);
+  data2.fill(7, 96, 128);
+  data2.fill(9, 128, 160);
+  data2.fill(4, 160, 192);
+  let tree2 = new MerkleTree(data2);
+
+  let expected = [
+    new Uint8Array(32),
+    new Uint8Array(32)
+  ];
+
+  expected[0].fill(5, 0, 32);
+  expected[1].fill(6, 0, 32);
+  t.strictSame(tree1.difference(tree2), expected, 'Merkle Tree.difference');
+  expected.pop(); // remove 6 array
+  t.strictSame(tree1.difference(tree2, function(key, index) {
+    return index % 2 === 0;
+  }), expected, 'Merkle Tree.difference with filter');
+  t.end();
+});

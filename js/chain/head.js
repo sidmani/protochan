@@ -39,7 +39,9 @@ var Config = require('../board/config.js');
 ///////////////////////
 
 module.exports = class Head {
-  constructor(config, blockMap, thread) {
+  constructor(config, blockMap, thread, threadHeight) {
+    // TEMP
+    if (!threadHeight) throw new Error('update parameters');
     // the board-wide config data
     this.config = config;
 
@@ -48,6 +50,9 @@ module.exports = class Head {
 
     // the hash of the associated thread
     this.thread = thread;
+
+    // the height in the thread chain of the genesis thread block
+    this.threadHeight = threadHeight;
 
     // pointer is initially undefined
     this.pointer = undefined;
@@ -64,12 +69,16 @@ module.exports = class Head {
     // the total work done on this head
     // work = estimated # of hash ops performed to mine a block
     this.work = new Uint256();
+
+    // this is false if a thread is alive and true otherwise
+    this.sealed = false;
   }
 
   ///////////////////////
   // Post insertion methods
   // only pushPost should be called from outside this class
   pushPost(post) {
+    if (this.sealed) throw ErrorType.Head.resurrection();
     let leadingZeroes = Difficulty.countLeadingZeroes(post.hash);
 
     if (this.pointer) {
@@ -115,17 +124,18 @@ module.exports = class Head {
     if (!Util.arrayEquality(this.pointer, post.header.prevHash())) {
       // either invalid or a fork
       // see analogous situation in Chain.pushThread
-
-      // get the referenced block
-      let referencedBlock = this.blockMap.get(post.header.prevHash());
-
-      if (referencedBlock) {
-        if (!Util.arrayEquality(referencedBlock.thread, this.thread)) throw ErrorType
-        // check if .hash (if thread) or .thread (if post)
-        // equals this.thread
-      } else {
-        throw ErrorType.Chain.hashMismatch();
-      }
+      // TODO: fork handling
+      throw ErrorType.Chain.hashMismatch();
+      // // get the referenced block
+      // let referencedBlock = this.blockMap.get(post.header.prevHash());
+      //
+      // if (referencedBlock) {
+      //   if (!Util.arrayEquality(referencedBlock.thread, this.thread)) throw ErrorType
+      //   // check if .hash (if thread) or .thread (if post)
+      //   // equals this.thread
+      // } else {
+      //   throw ErrorType.Chain.hashMismatch();
+      // }
     }
 
     this.checkPostDifficulty(
@@ -146,20 +156,19 @@ module.exports = class Head {
     this.pointer = post.hash;
     // increment the height
     this.height += 1;
-    // update the post-only timestamp
-    this.strictTimestamp = post.timestamp();
     // increment number of unconfirmed posts
     this.unconfirmedPosts += 1;
-
+    // update the post-only timestamp
+    this.strictTimestamp = post.timestamp();
     // add to total work
     this.work.add(Uint256.exp2(leadingZeroes));
   }
 
   /////////////////////
   // Thread insertion methods
-
   // XXX: untested
   stageThread(thread) {
+    if (this.sealed) throw ErrorType.Head.resurrection();
     // thread has already been checked by caller
     // this just runs other checks and sets head
 
@@ -176,7 +185,7 @@ module.exports = class Head {
       // thread is not the first thread in this head
       // assert latestPost hash is equal to head hash
       if (!Util.arrayEquality(latestBlock, this.pointer)) throw ErrorType.Chain.hashMismatch();
-      // again check fork
+      // TODO: check fork
     } else {
       // thread is either invalid or the first thread in this head
       // since the genesis post is paired with a 0-hash
@@ -205,6 +214,7 @@ module.exports = class Head {
     if (!(this.stage instanceof Uint8Array)) throw ErrorType.State.invalid();
 
     this.pointer = this.stage;
+    // XXX: should height include threads?
     this.height += 1;
     // XXX: this runs the same calculation for every head.
     // maybe get the chain to set the work from outside
@@ -232,5 +242,28 @@ module.exports = class Head {
       return latestBlock.timestamp();
     }
     return 0;
+  }
+
+  /////////////////////////
+  seal() {
+    this.sealed = true;
+  }
+
+  score(currentThreadHeight) {
+    // score depends on:
+    // total number of posts (+)
+    // depth of genesis thread block (-)
+    // activity (number of posts since last thread block) (+)
+
+    // genesis block must always have max score
+    // (max threads - depth) / max threads
+    let depth = currentThreadHeight - this.threadHeight;
+    return this.unconfirmedPosts / (this.height + 1) - depth / this.config.MAX_THREAD_COUNT;
+  }
+
+  static genesisScore() {
+    // has to be a number that is always > score(n)
+    // (# between 0 and 1) - (# between 0 and 1) <= 1
+    return 1;
   }
 }

@@ -77,15 +77,19 @@ module.exports = class MerkleTree {
     // intermediates.length must equal depth - 1
   }
 
-  verify(hash, intermediates, index) {
-    // let idxArr = idx.toString(2).split('').map(num => parseInt(num));
-    // while (idxArr.length < this.depth - 1) {
-    //   idxArr.unshift(0);
-    // }
-    // while (intermediates.length > 0) {
-    //     let concat = new Uint8Array(64);
-    //     concat.set()
-    // }
+  // verify(hash, intermediates, index) {
+  //   // let idxArr = idx.toString(2).split('').map(num => parseInt(num));
+  //   // while (idxArr.length < this.depth - 1) {
+  //   //   idxArr.unshift(0);
+  //   // }
+  //   // while (intermediates.length > 0) {
+  //   //     let concat = new Uint8Array(64);
+  //   //     concat.set()
+  //   // }
+  // }
+
+  difference(otherTree, filter) {
+    return this.indexMap.difference(otherTree.indexMap, filter);
   }
 
   index(idx) {
@@ -100,6 +104,10 @@ module.exports = class MerkleTree {
 
   indexOf(hash) {
     return this.indexMap.get(hash);
+  }
+
+  contains(hash) {
+    return this.indexMap.contains(hash);
   }
 
   prune() {

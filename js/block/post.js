@@ -49,14 +49,14 @@ module.exports = class Post extends Block {
   // XXX: untested
   serialize() {
     let data = super.serialize();
-    data.set(this.controlLength + 1, this.content);
+    data.set(this.content, this.controlLength + 1);
     return data;
   }
 
-  prune() {
-    // TODO: prune data
-    // what does pruning mean in this context?
-    this.isPruned = true;
-    this.content = undefined;
-  }
+  // prune() {
+  //   // TODO: prune data
+  //   // what does pruning mean in this context?
+  //   this.isPruned = true;
+  //   this.content = undefined;
+  // }
 }

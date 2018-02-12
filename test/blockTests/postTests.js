@@ -53,3 +53,20 @@ t.test('Post validates data hash', function(t) {
   t.throws(function() { new Post(header, arr); }, ErrorType.Data.hash());
   t.end();
 });
+
+t.test('Post serializes itself', function(t) {
+  let buf = new ArrayBuffer(10);
+  let view = new DataView(buf);
+  view.setUint32(0, 0x0300051D);
+  view.setUint8(9, 0x04);
+  let header = common.validHeaderFromData(buf);
+  let arr = new Uint8Array(buf);
+  header.data[2] = 0x01;
+
+  let post = new Post(header, arr);
+  let expected = new Uint8Array(90);
+  expected.set(header.data, 0);
+  expected.set(arr, 80);
+  t.strictSame(post.serialize(), expected, 'Post.serialize works');
+  t.end();
+});

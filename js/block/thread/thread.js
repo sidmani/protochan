@@ -84,6 +84,24 @@ module.exports = class ThreadBlock extends Block {
     }
   }
 
+  // find records that are in this block but not in otherThread
+  subtractThreadRecords(otherThread) {
+    // include keys where indices are even (just thread hashes)
+    return this.merkleTree.difference(otherThread.merkleTree, (key, value) => value % 2 == 0);
+  }
+
+  contains(hash) {
+    return this.merkleTree.contains(hash);
+  }
+
+  containsThread(hash) {
+    return this.contains(hash) && this.merkleTree.indexOf(hash) % 2 === 0;
+  }
+
+  containsPost(hash) {
+    return this.contains(hash) && this.merkleTree.indexOf(hash) % 2 === 1;
+  }
+
   prune() {
     this.merkleTree.prune();
   }

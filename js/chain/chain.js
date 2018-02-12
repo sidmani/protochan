@@ -52,14 +52,17 @@ module.exports = class Chain {
     this.threadHeight = 0;
   }
 
+  //////////////////////
+  // Thread insertion methods
   // Push a thread onto the chain
   pushThread(originalPost, thread) {
     this.pushThread_validateParameters(originalPost, thread);
 
+    let removedThread;
     if (this.threadPointer) {
       // not the first thread
       // run all checks
-      this.pushThread_runAllChecks(thread);
+      removedThread = this.pushThread_runAllChecks(thread);
     } else {
       // the first thread
       // run limited set of checks
@@ -71,15 +74,19 @@ module.exports = class Chain {
     let newHead = new Head(
       this.config,
       this.blockMap,
-      thread.hash
+      thread.hash,
+      this.threadHeight + 1
     );
+
     // push the post onto the head
     newHead.pushPost(post);
 
     // stage the thread on all heads (including new one)
     try {
-      // XXX: remove the lowest-ranked thread's head if
-      // height >= maxThreads
+      // if a thread was removed, delete it from the map
+      if (removedHead) {
+        this.headMap.unset(removedHead.thread);
+      }
       this.headMap.forEach((head) => head.stageThread(thread));
       newHead.stageThread(thread);
     } catch (error) {
@@ -92,24 +99,36 @@ module.exports = class Chain {
       blockMap.unset(post);
 
       // TODO: are there any other changes that need to be rolled back?
+      // re-insert removedHead
+      if (removedHead) {
+        this.headMap.set(removedHead.thread, removedHead);
+      }
 
       // propagate the error
       throw error;
     }
 
+
     // once the stage succeeds, thread validation is complete.
     // Only insert new head into headmap after stage succeed
     headMap.setRaw(thread.hash, newHead);
+
+    // seal the removed head
+    if (removedHead) {
+      removedHead.seal();
+    }
 
     // insert the thread into the block map
     blockMap.set(thread);
 
     // commit on all heads (including new one)
-    headMap.forEach((head) => head.commitThread())
+    headMap.forEach((head) => head.commitThread());
+
     // set this.timestamp?
     // set height on thread block?
     // increment height
     this.threadHeight += 1;
+
     // set pointer
     this.threadPointer = thread.hash;
   }
@@ -161,23 +180,73 @@ module.exports = class Chain {
       throw ErrorType.Parameter.invalid();
     }
 
-    let prevThread = this.getBlock(thread.header.prevHash());
 
-    // TODO: check that threads/posts present in the block are valid
     // have to successfully stage on every head
     // and be ordered according to the ranking algorithm
     // if height >= maxThreads, the removed thread record
     // must have a lower score than every included thread record
-    // at the timestamp of the thread block
+    let removedThread = this.checkThreadContinuity(thread);
 
     // get time diff between new thread and previous one
     let deltaT = thread.timestamp() - prevThread.timestamp();
 
+    // count all unconfirmed posts on all heads
+    let numPosts = this.headMap.enumerate().reduce((sum, head) => sum + head.unconfirmedPosts, 0);
+
+    this.checkThreadDifficulty(thread, deltaT, numPosts);
+    return removedThread;
+  }
+
+  checkThreadContinuity(thread) {
+    // the previous thread = pointee of threadPointer
+    let prevThread = this.getBlock(thread.header.prevHash());
+
+    // old - new = removed
+    let removedThreads = prevThread.subtractThreadRecords(thread);
+
+    if (this.threadHeight < config.MAX_THREAD_COUNT) {
+      // case 1: threadHeight < maxThreads
+      // the thread must contain every record in the previous block
+      if (removedThreads.length !== 0) throw ErrorType.Chain.missingThread();
+    } else {
+      // case 2: threadHeight >= maxThreads
+      // exactly one thread must be removed
+      if (removedThreads.length !== 1) throw ErrorType.Chain.missingThread();
+    }
+
+    // new - old = added
+    let addedThreads = thread.subtractThreadRecords(prevThread);
+
+    // exactly zero new hashes are added, since genesis is zeroes
+    if (addedThreads.length !== 0) throw ErrorType.Chain.unknownThread();
+
+    // check that threads are ordered by descending score
+    let lowestScore = this.checkThreadRecordOrdering();
+    // check that the removed thread score <= lowestScore
+    if (removedThreads.length === 1) {
+      let removedHead = this.getHead(removedThreads[0]);
+      if (removedHead.score(this.threadHeight + 1) > lowestScore) throw ErrorType.Chain.threadOrder();
+      return removedHead;
+    }
+  }
+
+  checkThreadRecordOrdering(thread) {
+    let prevScore = Head.genesisScore();
+    for (let i = 1; i < thread.numThreads; i++) {
+      let threadHash = thread.getThread(i);
+      let score = this
+        .getHead(threadHash)
+        .score(this.threadHeight + 1);
+
+      if (prevScore > newScore) throw ErrorType.Chain.threadOrder();
+      prevScore = newScore;
+    }
+    return prevScore;
+  }
+
+  checkThreadDifficulty(thread, deltaT, numPosts) {
     // the timestamp must be strictly increasing
     if (deltaT <= 0) throw ErrorType.Parameter.invalid();
-
-    // count all unconfirmed posts on all heads
-    let numPosts = headMap.enumerate().reduce((sum, head) => sum + head.unconfirmedPosts, 0);
 
     // calculate the minimum difficulty required
     let reqDiff = Difficulty.requiredThreadDifficulty(

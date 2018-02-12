@@ -84,12 +84,12 @@ module.exports = class Block {
     return new Block(header, data.subarray(80));
   }
 
-  static createFrom(header, control, content) {
-    let data = new Uint8Array(control.byteLength + content.byteLength + 2);
-    data.set(0, controlSector);
-    data[control.byteLength] = 0x1D;
-    data.set(control.byteLength + 1, content);
-    data[data.byteLength - 1] = 0x04;
-    return new Block(header, data);
-  }
+  // static createFrom(header, control, content) {
+  //   let data = new Uint8Array(control.byteLength + content.byteLength + 2);
+  //   data.set(0, controlSector);
+  //   data[control.byteLength] = 0x1D;
+  //   data.set(control.byteLength + 1, content);
+  //   data[data.byteLength - 1] = 0x04;
+  //   return new Block(header, data);
+  // }
 };

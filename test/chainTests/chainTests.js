@@ -37,6 +37,16 @@ t.test('Chain constructor', function(t) {
   t.end();
 });
 
+// t.test('Chain.finalizeThreadInsertion', function(t) {
+//   let post = common.validGenesisPost();
+//   let config = new Config(post);
+//   let chain = new Chain(config);
+//
+//   let thread = common.validThread(post);
+//
+//   chain.finalizeThreadInsertion(thread);
+// });
+
 t.test('Chain convenience methods', function(t) {
   let post = common.validGenesisPost();
   let config = new Config(post);

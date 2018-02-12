@@ -48,16 +48,6 @@ t.test('countLeadingZeroes returns 0 for empty array', function(t) {
   t.end();
 });
 
-t.test('verifyDifficulty rejects invalid hash', function(t) {
-  t.throws(function() { Difficulty.verify(undefined, 4); }, ErrorType.Parameter.type());
-  t.end();
-});
-
-t.test('verifyDifficulty rejects wrong length hash', function(t) {
-  t.throws(function() { Difficulty.verify(new Uint8Array(31), 4); }, ErrorType.Data.length());
-  t.end();
-});
-
 t.test('verifyDifficulty accepts zero array', function(t) {
   t.doesNotThrow(function() { Difficulty.verify(new Uint8Array(32), 4); });
   t.end();

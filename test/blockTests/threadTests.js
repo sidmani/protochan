@@ -88,7 +88,6 @@ t.test('Thread block functions', function(t) {
   let view = new DataView(buf);
   view.setUint32(0, 0x0300801D);
   view.setUint8(132, 0x04);
-  view.setUint8(75, 0x04);
   let arr = new Uint8Array(buf);
   arr.fill(17, 36, 68);
   arr.fill(7, 68, 100);
@@ -101,7 +100,6 @@ t.test('Thread block functions', function(t) {
   expected.fill(9, 0, 32);
   t.strictSame(thread.getPost(1), expected, 'Thread block returns correct post hash');
 
-  // TODO: fix
   let expectedThread = new Uint8Array(32);
   expectedThread.fill(7, 0, 32);
   t.strictSame(thread.getCorrespondingItem(expectedThread), expected, 'Thread retrieves post from thread hash');
@@ -115,6 +113,38 @@ t.test('Thread block functions', function(t) {
   expected.fill(9, 0, 32);
   t.strictSame(thread.getCorrespondingItem(expected), expectedThread, 'Thread block thread from post hash');
 
+  t.equal(thread.contains(expected), true, 'Thread.contains works');
+
+  t.equal(thread.containsPost(expected), true, 'Thread.containsPost returns true for a post');
+
+  t.equal(thread.containsThread(expected), false, 'Thread.containsThread returns false for a post');
+
+  expected.fill(7, 0, 32);
+  t.equal(thread.containsPost(expected), false, 'Thread.containsPost returns false for a thread');
+
+  t.equal(thread.containsThread(expected), true, 'Thread.containsThread returns true for a thread');
+
+  let buf2 = new ArrayBuffer(197);
+  let view2 = new DataView(buf2);
+  view2.setUint32(0, 0x0300C01D);
+  view2.setUint8(196, 0x04);
+  let arr2 = new Uint8Array(buf2);
+  arr2.fill(51, 36, 68);
+  arr2.fill(7, 68, 100);
+  arr2.fill(9, 100, 132);
+  arr2.fill(18, 132, 164);
+  arr2.fill(15, 164, 196);
+
+  // { 0, 51, 7, 9, 18, 15 } | idx % 2 === 0 => { 0, 7, 18 }
+  // { 0, 7, 18 } - { 0, 17, 7, 9 } = { 18 }
+
+  let header2 = common.validThreadHeaderFromData(buf2);
+
+  let thread2 = new Thread(header2, arr2);
+  let diff = thread2.subtractThreadRecords(thread);
+  let expectedDiff = new Uint8Array(32);
+  expectedDiff.fill(18, 0, 32);
+  t.strictSame(diff, [expectedDiff], 'Thread.subtractThreadRecords');
   thread.prune();
   t.equal(thread.merkleTree.isPruned, true, 'Thread prunes merkle tree');
   t.equal(thread.isPruned(), true, 'Thread gets pruning status');
