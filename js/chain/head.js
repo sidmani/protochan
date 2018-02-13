@@ -123,7 +123,7 @@ module.exports = class Head {
       // see analogous situation in Chain.pushThread
       // TODO: fork handling
       throw ErrorType.Chain.hashMismatch();
-      // // get the referenced block
+      // get the referenced block
       // let referencedBlock = this.blockMap.get(post.header.prevHash());
       //
       // if (referencedBlock) {
@@ -158,7 +158,7 @@ module.exports = class Head {
     // update the post-only timestamp
     this.strictTimestamp = post.timestamp();
     // add to total work
-    this.work.add(Uint256.exp2(leadingZeroes));
+    this.work.addExp2(leadingZeroes);
   }
 
   // Thread insertion methods
@@ -214,7 +214,7 @@ module.exports = class Head {
     this.height += 1;
     // XXX: this runs the same calculation for every head.
     // maybe get the chain to set the work from outside
-    this.work.add(Uint256.exp2(Difficulty.countLeadingZeroes(this.stage)));
+    this.work.addExp2(Difficulty.countLeadingZeroes(this.stage));
     // don't update strictTimestamp, since that depends on posts
     this.discardStage();
     this.unconfirmedPosts = 0;

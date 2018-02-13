@@ -21,28 +21,23 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-var common = require('../testCommon.js');
+
 var Configuration = require('../../js/board/config.js');
-var GenesisPost = require('../../js/block/genesisPost.js');
-var ErrorType = require('../../js/error.js');
 var t = require('tap');
 
 t.test('Configuration constructor', function(t) {
-  t.throws(function() { new Configuration(new Array(12)); }, ErrorType.Parameter.type());
-  let buf = new ArrayBuffer(46);
-  let arr = new Uint8Array(buf);
-  arr[0] = 0x08;
-  arr[2] = 0x24
-  arr[3] = 0xf5;
-  arr[4] = 0xf6;
-  arr[5] = 0xf7;
-  arr[6] = 0xf8;
-  arr[7] = 0xf9;
-  arr[8] = 0x1D;
-  arr[45] = 0x04;
-  let header = common.validPostHeaderFromData(buf);
-  new DataView(header.data.buffer).setUint32(75, 0x18f3e974);
-  let post = new GenesisPost(header, new Uint8Array(buf));
+  let post = {
+    minPostDifficulty: 0xf5,
+    maxPostDifficulty: 0xf6,
+    minThreadDifficulty: 0xf7,
+    maxThreadDifficulty: 0xf8,
+    maxThreads: 0xf9,
+    header: {
+      board() {
+        return 0x18f3e974;
+      }
+    }
+  }
 
   let config = new Configuration(post);
   t.equal(config.MIN_POST_DIFFICULTY, 0xf5, 'Configuration sets minimum post difficulty');

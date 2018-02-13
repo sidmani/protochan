@@ -30,9 +30,6 @@ const ErrorType = require('../error.js');
 
 module.exports = class Block {
   constructor(header, data) {
-    if (!(header instanceof Header)) throw ErrorType.Parameter.type();
-    if (!(data instanceof Uint8Array)) throw ErrorType.Parameter.type();
-
     // XXX: untested
     // Absolute max size of a block's databuffer is
     // 2^16-1 (uint16) - 80 (header) - 100 (any packet headers)  = 65355.

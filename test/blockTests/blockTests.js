@@ -22,40 +22,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var common = require('../testCommon.js');
 var Block = require('../../js/block/block.js');
 var ErrorType = require('../../js/error.js');
 var t = require('tap');
-
-t.test('Block validates header type', function(t) {
-  let buf = new ArrayBuffer(10);
-  let view = new DataView(buf);
-  view.setUint32(0, 0x0300051D);
-  view.setUint8(9, 0x04);
-  t.throws(function() { new Block(new Array(80), new Uint8Array(buf)); }, ErrorType.Parameter.type());
-  t.end();
-});
-
-t.test('Block validates data type', function(t) {
-  let buf = new ArrayBuffer(64);
-  let view = new DataView(buf);
-  view.setUint32(0, 0x04003A1D);
-  view.setUint8(4, 0x1D);
-  view.setUint8(63, 0x04);
-  let header = common.validHeaderFromData(buf);
-
-  t.throws(function() { new Block(header, buf); }, ErrorType.Parameter.type());
-  t.end();
-});
 
 t.test('Block validates data separator byte', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);
   view.setUint8(9, 0x04);
   view.setUint32(0, 0x0300051E);
-  let header = common.validHeaderFromData(buf);
+  let header = {
+    data: new Uint8Array(80)
+  };
   t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.delimiter());
-  t.end()
+  t.end();
 });
 
 t.test('Block validates number of control bytes', function(t) {
@@ -63,7 +43,9 @@ t.test('Block validates number of control bytes', function(t) {
   let view = new DataView(buf);
   view.setUint8(9, 0x04);
   view.setUint32(0, 0x02061D00);
-  let header = common.validHeaderFromData(buf);
+  let header = {
+    data: new Uint8Array(80)
+  };
   t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.controlLength());
   t.end();
 });
@@ -73,7 +55,9 @@ t.test('Block validates data length', function(t) {
   let view = new DataView(buf);
   view.setUint8(10, 0x04);
   view.setUint32(0, 0x0300051D);
-  let header = common.validHeaderFromData(buf);
+  let header = {
+    data: new Uint8Array(80)
+  };
   t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.length());
   t.end();
 });
@@ -83,8 +67,9 @@ t.test('Block validates data terminator byte', function(t) {
   let view = new DataView(buf);
   view.setUint8(9, 0x07);
   view.setUint32(0, 0x0300051D);
-
-  let header = common.validHeaderFromData(buf);
+  let header = {
+    data: new Uint8Array(80)
+  };
   t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.delimiter());
   t.end();
 });
@@ -94,7 +79,9 @@ t.test('Block accepts valid header and data', function (t) {
   let view = new DataView(buf);
   view.setUint32(0, 0x03007B1D);
   view.setUint8(127, 0x04);
-  let header = common.validHeaderFromData(buf);
+  let header = {
+    data: new Uint8Array(80)
+  };
   let b;
   t.doesNotThrow(function() { b = new Block(header, new Uint8Array(buf)); });
   t.assert(b instanceof Block);
@@ -106,11 +93,17 @@ t.test('Block serialization', function (t) {
   let view = new DataView(buf);
   view.setUint32(0, 0x03007B1D);
   view.setUint8(127, 0x04);
-  let header = common.validHeaderFromData(buf);
+  const header = {
+    data: new Uint8Array(80),
+    serialize() {
+      return this.data;
+    }
+  };
   let block = new Block(header, new Uint8Array(buf));
   let serialized = block.serialize();
   t.strictSame(serialized.subarray(80), new Uint8Array(buf), 'Block serializes data');
   let deserialized = Block.deserialize(serialized);
+  deserialized.header = header; // replace header with mock
   t.strictSame(block, deserialized, 'Block deserializes data');
   t.end();
 });
@@ -123,16 +116,22 @@ t.test('Block getters return correct values', function(t) {
   view.setUint8(516, 0x04);
   (new Uint8Array(buf)).fill(0x94, 5, 516);
 
-  var header = common.validHeaderFromData(buf);
-  new DataView(header.data.buffer).setUint32(3, 85);
-  var b = new Block(header, new Uint8Array(buf));
+  let header = {
+    data: new Uint8Array(80),
+    timestamp() { return 85; },
+  };
 
-  t.strictSame(b.hash, common.hash(header.data),
-    'Block returns correct hash');
-  t.equal(b.controlLength, 0x04,
-    'Block returns correct control length');
-  t.equal(b.contentLength, 0x01FF,
-    'Block returns correct content length');
+  var b = new Block(header, new Uint8Array(buf));
+  let expectedHash = new Uint8Array([
+    196, 253, 231, 106, 141, 104, 66, 44,
+    95, 186, 253, 226, 80, 244, 146, 16,
+    159, 178, 154, 198, 103, 83, 41, 46,
+    17, 83, 170, 17, 173, 174, 26, 58
+  ]);
+
+  t.strictSame(b.hash, expectedHash, 'Block returns correct hash');
+  t.equal(b.controlLength, 0x04, 'Block returns correct control length');
+  t.equal(b.contentLength, 0x01FF, 'Block returns correct content length');
   t.equal(b.timestamp(), 85);
   t.end();
 });

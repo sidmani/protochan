@@ -33,7 +33,7 @@ var ErrorType = require('../../js/error.js');
 t.test('MerkleLeaf', function(t) {
   let data = new Uint8Array(64);
   let leaf = new MerkleLeaf(data);
-  let hash = Hash.digest(data)
+  let hash = Hash.digest(data);
   t.strictSame(leaf.hash, hash, 'Leaf returns correct data hash');
   t.strictSame(leaf.path(), data, 'Leaf returns data for path');
   t.strictSame(leaf.index(), data, 'Leaf returns data for index');
@@ -158,7 +158,7 @@ t.test('MerkleTree', function(t) {
   let expectedArr = new Uint8Array(32);
   expectedArr.fill(3, 0, 32);
   t.strictSame(tree.index(2), expectedArr, 'Merkle tree gets object at index');
-  t.strictSame(tree.get([level1[0], level2[1], level3[2]]), expectedArr, 'Merkle tree gets object from intermediates path');
+  t.strictSame(tree.get([level1[0], level2[1], level3[2]]), expectedArr, 'Merkle tree gets object from intermediate path');
 
   t.equal(tree.indexOf(expectedArr), 2, 'Merkle tree gets index of object');
 

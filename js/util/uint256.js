@@ -67,6 +67,16 @@ module.exports = class Uint256 {
     return 0;
   }
 
+  addExp2(exponent) {
+    let carry = 1 << exponent % 8;
+    for (let i = Math.floor(exponent / 8); i >= 0; i -= 1) {
+      const sum = this.array[i] + carry;
+      this.array[i] = sum;
+      carry = Math.floor(sum / 256);
+      if (carry === 0) { return; }
+    }
+  }
+
   static exp2(exponent) {
     const array = new Uint8Array(32);
     const posInByte = exponent % 8;

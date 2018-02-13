@@ -23,12 +23,13 @@
 // SOFTWARE.
 
 var HashMap = require('../../js/hash/hashMap.js');
-var common = require('../testCommon.js');
-var t = require('tap');
 var ErrorType = require('../../js/error.js');
+var t = require('tap');
 
 t.test('HashMap functions', function(t) {
-  let block = common.validPost();
+  let block = {
+    hash: new Uint8Array([1, 2, 7])
+  };
   let map = new HashMap();
   t.equal(map.isEmpty(), true, 'HashMap.isEmpty is true after construction');
   let hash = map.set(block);
@@ -46,7 +47,9 @@ t.test('HashMap functions', function(t) {
 });
 
 t.test('HashMap.setRaw', function(t) {
-  let block = common.validPost();
+  let block = {
+    hash: new Uint8Array([1, 2, 7])
+  };
   let map = new HashMap();
   t.throws(function() { map.setRaw([5, 4, 1], block); }, ErrorType.Parameter.type(), 'HashMap.setRaw validates hash type');
   let hash = map.setRaw(new Uint8Array([5, 4, 3]), block);
@@ -58,15 +61,16 @@ t.test('HashMap.setRaw', function(t) {
 });
 
 t.test('HashMap set functions', function(t) {
-  let block1 = common.validPost();
-  let block2 = common.validPost();
-  let block3 = common.validPost();
+  let block1 = {
+    hash: new Uint8Array([1, 2, 7])
+  };
+  let block2 = {
+    hash: new Uint8Array([6, 3, 9])
+  };
+  let block3 = {
+    hash: new Uint8Array([4, 1, 5])
+  };
   let blocks = [block1, block2, block3];
-
-  // the blocks need to be different for the test to be useful
-  block1.header.data[5] = 0x07;
-  block2.header.data[5] = 0x08;
-  block3.header.data[5] = 0x09;
 
   let map = new HashMap();
   let hash1 = map.setRaw(new Uint8Array([5, 4, 3]), block1);

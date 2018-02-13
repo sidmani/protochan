@@ -50,17 +50,17 @@ module.exports = class Chain {
     this.threadHeight = 0;
   }
 
-  //////////////////////
   // Thread insertion methods
   // Push a thread onto the chain
   pushThread(originalPost, thread) {
     this.pushThread_validateParameters(originalPost, thread);
 
-    let removedThread;
+    let removedHead;
     if (this.threadPointer) {
       // not the first thread
       // run all checks
-      removedThread = this.pushThread_runAllChecks(thread);
+      const removedThread = this.pushThread_runAllChecks(thread);
+      removedHead = this.getHead(removedThread);
     } else {
       // the first thread
       // run limited set of checks
@@ -82,8 +82,8 @@ module.exports = class Chain {
     // stage the thread on all heads (including new one)
     try {
       // if a thread was removed, delete it from the map
-      if (removedThread) {
-        const removedHead = this.getHead(removedThread);
+      // XXX: removing it just deletes it completely
+      if (removedHead) {
         this.headMap.unset(removedHead.thread);
       }
       this.headMap.forEach(head => head.stageThread(thread));
@@ -106,7 +106,6 @@ module.exports = class Chain {
       // propagate the error
       throw error;
     }
-
 
     // once the stage succeeds, thread validation is complete.
     // Only insert new head into headmap after stage succeed
