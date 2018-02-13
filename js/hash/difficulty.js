@@ -22,17 +22,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var ErrorType = require('../error.js');
+const ErrorType = require('../error.js');
 
-module.exports.verify = function(hash, leadingZeroes) {
-  if(countLeadingZeroes(hash) < leadingZeroes) throw ErrorType.Difficulty.insufficient();
-}
-
-var countLeadingZeroes = function(arr) {
+const countLeadingZeroes = function (arr) {
   let zeroes = 0;
-  for (let i = 0; i < arr.byteLength; i++) {
+  for (let i = 0; i < arr.byteLength; i += 1) {
     if (arr[i] === 0) {
       zeroes += 8;
     } else {
@@ -42,12 +38,19 @@ var countLeadingZeroes = function(arr) {
         curr >>= 1;
         finalByteZeroes += 1;
       }
-      return zeroes + (8-finalByteZeroes);
+      return zeroes + (8 - finalByteZeroes);
     }
   }
   return zeroes;
 };
 module.exports.countLeadingZeroes = countLeadingZeroes;
+
+module.exports.verify = function (hash, leadingZeroes) {
+  if (countLeadingZeroes(hash) < leadingZeroes) {
+    throw ErrorType.Difficulty.insufficient();
+  }
+};
+
 
 // Posts use a simple exponential decay model over time for difficulty
 // a good GPU gets 1-3GH/s and 2^40 = 1099 GH, 2^20 = 0.001 GH
@@ -58,11 +61,13 @@ module.exports.countLeadingZeroes = countLeadingZeroes;
 // If someone wants to post every 5 seconds, they have to do about
 // 128 times as much work as someone who posts every 10 seconds.
 
-module.exports.requiredPostDifficulty = function(deltaT, minDiff, maxDiff) {
-  let interval = maxDiff - minDiff;
-  let k = Math.log((maxDiff/2-minDiff)/interval) / -10;
-  return Math.round(minDiff + (interval) * Math.exp(-k * deltaT));
-}
+module.exports.requiredPostDifficulty = function (deltaT, config) {
+  const minDiff = config.MIN_POST_DIFFICULTY;
+  const maxDiff = config.MAX_POST_DIFFICULTY;
+  const interval = maxDiff - minDiff;
+  const k = Math.log(((maxDiff / 2) - minDiff) / interval) / -10;
+  return Math.round(minDiff + (interval * Math.exp(-k * deltaT)));
+};
 
 // Threads use a combination of time decay and # of posts
 // If there have been very few posts since the last thread was
@@ -77,13 +82,17 @@ module.exports.requiredPostDifficulty = function(deltaT, minDiff, maxDiff) {
 // f(300, maxThreads) = max_t/2
 // f(∞, ∞) = min_t
 
-module.exports.requiredThreadDifficulty = function(deltaT, numPosts, maxThreads, minDiff, maxDiff) {
-  let interval = maxDiff - minDiff;
-  let c = Math.log(3/(2*interval)) / -300;
-  let d = Math.log(3/(2*interval)) / -maxThreads;
+module.exports.requiredThreadDifficulty = function (deltaT, numPosts, config) {
+  const maxThreads = config.MAX_THREAD_COUNT;
+  const minDiff = config.MIN_THREAD_DIFFICULTY;
+  const maxDiff = config.MAX_THREAD_DIFFICULTY;
 
-  return Math.round(minDiff + interval/2*(Math.exp(-c*deltaT) + Math.exp(-d*numPosts)));
-}
+  const interval = maxDiff - minDiff;
+  const c = Math.log(3 / (2 * interval)) / -300;
+  const d = Math.log(3 / (2 * interval)) / -maxThreads;
+
+  return Math.round(minDiff + ((interval / 2) * (Math.exp(-c * deltaT) + Math.exp(-d * numPosts))));
+};
 
 // since difficulties are on a log scale,
 // they have to be added logarithmically

@@ -22,23 +22,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Config = require('./config.js');
-var Chain = require('../chain/chain.js');
-var ErrorType = require('../error.js');
+const Config = require('./config.js');
+const Chain = require('../chain/chain.js');
+const ErrorType = require('../error.js');
 
-var Board = class Board {
+const Board = class Board {
   constructor(originalPost) {
-      this.config = new Config(originalPost);
-      this.chain = new Chain(this.config);
-
+    this.config = new Config(originalPost);
+    this.chain = new Chain(this.config);
   }
 
   pushPost(post) {
     // check board id
-    if (post.header.board() !== this.config.BOARD_ID)
+    if (post.header.board() !== this.config.BOARD_ID) {
       throw ErrorType.Chain.wrongBoard();
+    }
 
     try {
       this.chain.pushPost(post);
@@ -48,6 +48,6 @@ var Board = class Board {
       // - internal consistency
     }
   }
-}
+};
 
 module.exports = Board;

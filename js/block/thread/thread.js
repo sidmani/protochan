@@ -22,15 +22,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
 const THREAD_BLOCK_ID = 0x00;
 
-var Block = require('../block.js');
-var Difficulty = require('../../hash/difficulty.js');
-var MerkleTree = require('../../hash/merkleTree/merkleTree.js');
-var ErrorType = require('../../error.js');
-var Util = require('../../util/util.js');
+const Block = require('../block.js');
+const Difficulty = require('../../hash/difficulty.js');
+const MerkleTree = require('../../hash/merkleTree/merkleTree.js');
+const ErrorType = require('../../error.js');
+const Util = require('../../util/util.js');
 
 module.exports = class ThreadBlock extends Block {
   constructor(header, data) {
@@ -38,7 +38,7 @@ module.exports = class ThreadBlock extends Block {
     if (header.blockType() !== THREAD_BLOCK_ID) throw ErrorType.Block.type();
 
     // thread data comes in sets of 64 bytes (32 thread, 32 post)
-    let threadDataLength = data.byteLength
+    const threadDataLength = data.byteLength
     - this.controlLength
     - 2; // separator and terminator
 
@@ -50,10 +50,13 @@ module.exports = class ThreadBlock extends Block {
     Difficulty.verify(data.subarray(this.controlLength + 1, this.controlLength + 1 + 32), 256);
 
     // merkle tree does not allow duplicates since it has a one-to-one index map
-    this.merkleTree = new MerkleTree(data.subarray(this.controlLength + 1, this.controlLength + 1 + this.contentLength));
+    const content = data.subarray(this.controlLength + 1, data.length - 1);
+    this.merkleTree = new MerkleTree(content);
 
     // check that the merkle root equals the header's dataHash
-    if (!Util.arrayEquality(this.merkleTree.root.hash, header.dataHash())) throw ErrorType.Data.hash();
+    if (!Util.arrayEquality(this.merkleTree.root.hash, header.dataHash())) {
+      throw ErrorType.Data.hash();
+    }
 
     // XXX: untested
     // so that we don't need to check if block is post or thread
@@ -64,30 +67,29 @@ module.exports = class ThreadBlock extends Block {
   // { thread hash + post hash }
   // genesis row is { 0, post hash }
   getThread(index) {
-    return this.merkleTree.index(index*2);
+    return this.merkleTree.index(index * 2);
   }
 
   getPost(index) {
-    return this.merkleTree.index(index*2+1);
+    return this.merkleTree.index((index * 2) + 1);
   }
 
   // get the post associated with a particular thread
   getCorrespondingItem(hash) {
-    let idx = this.merkleTree.indexOf(hash);
+    const idx = this.merkleTree.indexOf(hash);
     if (idx === undefined) { return undefined; }
     if (idx % 2 === 0) {
       // get post for thread
       return this.merkleTree.index(idx + 1);
-    } else {
-      // get thread for post
-      return this.merkleTree.index(idx - 1);
     }
+    // get thread for post
+    return this.merkleTree.index(idx - 1);
   }
 
   // find records that are in this block but not in otherThread
   subtractThreadRecords(otherThread) {
     // include keys where indices are even (just thread hashes)
-    return this.merkleTree.difference(otherThread.merkleTree, (key, value) => value % 2 == 0);
+    return this.merkleTree.difference(otherThread.merkleTree, (key, value) => value % 2 === 0);
   }
 
   contains(hash) {

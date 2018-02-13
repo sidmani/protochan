@@ -27,40 +27,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
-
-// Little-endian byte access.
-// Expects a Uint8Array and an index
-// Returns the little-endian uint32 at v[i..i+3]
-function B2S_GET32 (v, i) {
-  return v[i] ^ (v[i + 1] << 8) ^ (v[i + 2] << 16) ^ (v[i + 3] << 24);
-}
-
-// Mixing function G.
-function B2S_G (a, b, c, d, x, y) {
-  v[a] = v[a] + v[b] + x;
-  v[d] = ROTR32(v[d] ^ v[a], 16);
-  v[c] = v[c] + v[d];
-  v[b] = ROTR32(v[b] ^ v[c], 12);
-  v[a] = v[a] + v[b] + y;
-  v[d] = ROTR32(v[d] ^ v[a], 8);
-  v[c] = v[c] + v[d];
-  v[b] = ROTR32(v[b] ^ v[c], 7);
-}
-
-// 32-bit right rotation
-// x should be a uint32
-// y must be between 1 and 31, inclusive
-function ROTR32 (x, y) {
-  return (x >>> y) ^ (x << (32 - y));
-}
+'use strict';
 
 // Initialization Vector.
-var BLAKE2S_IV = new Uint32Array([
+const BLAKE2S_IV = new Uint32Array([
   0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
   0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19]);
 
-var SIGMA = new Uint8Array([
+const SIGMA = new Uint8Array([
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
   14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3,
   11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4,
@@ -73,10 +47,37 @@ var SIGMA = new Uint8Array([
   10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0]);
 
 // Compression function. "last" flag indicates last block
-var v = new Uint32Array(16);
-var m = new Uint32Array(16);
-function blake2sCompress (ctx, last) {
-  var i = 0;
+const v = new Uint32Array(16);
+const m = new Uint32Array(16);
+
+// 32-bit right rotation
+// x should be a uint32
+// y must be between 1 and 31, inclusive
+function ROTR32(x, y) {
+  return (x >>> y) ^ (x << (32 - y));
+}
+
+// Little-endian byte access.
+// Expects a Uint8Array and an index
+// Returns the little-endian uint32 at v[i..i+3]
+function B2S_GET32(v, i) {
+  return v[i] ^ (v[i + 1] << 8) ^ (v[i + 2] << 16) ^ (v[i + 3] << 24);
+}
+
+// Mixing function G.
+function B2S_G(a, b, c, d, x, y) {
+  v[a] = v[a] + v[b] + x;
+  v[d] = ROTR32(v[d] ^ v[a], 16);
+  v[c] = v[c] + v[d];
+  v[b] = ROTR32(v[b] ^ v[c], 12);
+  v[a] = v[a] + v[b] + y;
+  v[d] = ROTR32(v[d] ^ v[a], 8);
+  v[c] = v[c] + v[d];
+  v[b] = ROTR32(v[b] ^ v[c], 7);
+}
+
+function blake2sCompress(ctx, last) {
+  let i = 0;
   for (i = 0; i < 8; i++) { // init work variables
     v[i] = ctx.h[i];
     v[i + 8] = BLAKE2S_IV[i];
@@ -110,8 +111,8 @@ function blake2sCompress (ctx, last) {
 }
 
 // Creates a BLAKE2s hashing context
-function blake2sInit () {
-  var ctx = {
+function blake2sInit() {
+  const ctx = {
     h: new Uint32Array(BLAKE2S_IV), // hash state
     b: new Uint32Array(64), // input block
     c: 0, // pointer within block
@@ -123,8 +124,8 @@ function blake2sInit () {
 
 // Updates a BLAKE2s streaming hash
 // Requires hash context and Uint8Array (byte array)
-function blake2sUpdate (ctx, input) {
-  for (var i = 0; i < input.length; i++) {
+function blake2sUpdate(ctx, input) {
+  for (let i = 0; i < input.length; i++) {
     if (ctx.c === 64) { // buffer full ?
       ctx.t += ctx.c; // add counters
       blake2sCompress(ctx, false); // compress (not last)
@@ -136,7 +137,7 @@ function blake2sUpdate (ctx, input) {
 
 // Completes a BLAKE2s streaming hash
 // Returns a Uint8Array containing the message digest
-function blake2sFinal (ctx) {
+function blake2sFinal(ctx) {
   ctx.t += ctx.c; // mark last block offset
   while (ctx.c < 64) { // fill up with zeros
     ctx.b[ctx.c++] = 0;
@@ -144,8 +145,8 @@ function blake2sFinal (ctx) {
   blake2sCompress(ctx, true); // final block flag = 1
 
   // little endian convert and store
-  var out = new Uint8Array(32);
-  for (var i = 0; i < 32; i++) {
+  const out = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) {
     out[i] = (ctx.h[i >> 2] >> (8 * (i & 3))) & 0xFF;
   }
   return out;
@@ -158,7 +159,7 @@ function blake2sFinal (ctx) {
 // Parameters:
 // - input - the input bytes, as a Uint8Array
 module.exports.digest = function blake2s(input) {
-  var ctx = blake2sInit()
-  blake2sUpdate(ctx, input)
-  return blake2sFinal(ctx)
+  const ctx = blake2sInit();
+  blake2sUpdate(ctx, input);
+  return blake2sFinal(ctx);
 };

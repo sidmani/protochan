@@ -22,12 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Block = require('./block.js');
-var ErrorType = require('../error.js');
-var Util = require('../util/util.js');
-var Hash = require('../hash/blake2s.js');
+const Block = require('./block.js');
+const ErrorType = require('../error.js');
+const Util = require('../util/util.js');
+const Hash = require('../hash/blake2s.js');
 
 const POST_BLOCK_ID = 0x01;
 
@@ -42,13 +42,13 @@ module.exports = class Post extends Block {
     // XXX: untested
     this.content = data.subarray(
       this.controlLength + 1,
-      this.controlLength + 1 + this.contentLength
+      this.controlLength + 1 + this.contentLength,
     );
   }
 
   // XXX: untested
   serialize() {
-    let data = super.serialize();
+    const data = super.serialize();
     data.set(this.content, this.controlLength + 1);
     return data;
   }
@@ -59,4 +59,4 @@ module.exports = class Post extends Block {
   //   this.isPruned = true;
   //   this.content = undefined;
   // }
-}
+};

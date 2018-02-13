@@ -22,14 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var GenesisPost = require('../block/genesisPost.js');
-var ErrorType = require('../error.js');
+const GenesisPost = require('../block/genesisPost.js');
+const ErrorType = require('../error.js');
 
 module.exports = class Configuration {
   constructor(originalPost) {
-    if(!(originalPost instanceof GenesisPost)) throw ErrorType.Parameter.type();
+    if (!(originalPost instanceof GenesisPost)) {
+      throw ErrorType.Parameter.type();
+    }
     this.MIN_POST_DIFFICULTY = originalPost.minPostDifficulty;
     this.MAX_POST_DIFFICULTY = originalPost.maxPostDifficulty;
     this.MIN_THREAD_DIFFICULTY = originalPost.minThreadDifficulty;
@@ -37,4 +39,4 @@ module.exports = class Configuration {
     this.MAX_THREAD_COUNT = originalPost.maxThreads;
     this.BOARD_ID = originalPost.header.board();
   }
-}
+};

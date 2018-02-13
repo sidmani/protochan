@@ -89,19 +89,28 @@ t.test('verifyDifficulty accepts enough leading zeroes (multiple bytes)', functi
 });
 
 t.test('Post difficulty function works', function(t) {
-  t.equal(Difficulty.requiredPostDifficulty(0, 10, 40), 40,
+  let config = {
+    MIN_POST_DIFFICULTY: 10,
+    MAX_POST_DIFFICULTY: 40
+  }
+  t.equal(Difficulty.requiredPostDifficulty(0, config), 40,
   'Post difficulty f(0) = max difficulty');
-  t.equal(Difficulty.requiredPostDifficulty(10, 10, 40), 20,
+  t.equal(Difficulty.requiredPostDifficulty(10, config), 20,
   'Post difficulty f(10) = max difficulty / 2');
-  t.equal(Difficulty.requiredPostDifficulty(999999999,  10, 40), 10, 'Post difficulty = 10 when delta-t increases');
+  t.equal(Difficulty.requiredPostDifficulty(999999999, config), 10, 'Post difficulty = 10 when delta-t increases');
   t.end();
 });
 
 t.test('Thread difficulty function works', function(t) {
-  t.equal(Difficulty.requiredThreadDifficulty(0, 0, 255, 24, 64), 64, 'Thread difficulty f(0 sec, 0 posts) = max difficulty');
-  t.equal(Difficulty.requiredThreadDifficulty(300, 0, 255, 24, 64), 45, 'Thread difficulty f(300 sec, 0 posts) = 0.5*difficulty interval + minimum difficulty + 1');
-  t.equal(Difficulty.requiredThreadDifficulty(0, 255, 255, 24, 64), 45, 'Thread difficulty f(0 sec, maxThread posts) = 0.5*difficulty interval + minimum difficulty + 1');
-  t.equal(Difficulty.requiredThreadDifficulty(300, 255, 255, 24, 64), 26, 'Thread difficulty f(300 sec, maxThread posts) = minimum difficulty + 2');
-  t.equal(Difficulty.requiredThreadDifficulty(99999999, 99999999, 255, 24, 64), 24, 'Thread difficulty equals minimum difficulty as inputs increase');
+  let config = {
+    MIN_THREAD_DIFFICULTY: 24,
+    MAX_THREAD_DIFFICULTY: 64,
+    MAX_THREAD_COUNT: 255
+  }
+  t.equal(Difficulty.requiredThreadDifficulty(0, 0, config), 64, 'Thread difficulty f(0 sec, 0 posts) = max difficulty');
+  t.equal(Difficulty.requiredThreadDifficulty(300, 0, config), 45, 'Thread difficulty f(300 sec, 0 posts) = 0.5*difficulty interval + minimum difficulty + 1');
+  t.equal(Difficulty.requiredThreadDifficulty(0, 255, config), 45, 'Thread difficulty f(0 sec, maxThread posts) = 0.5*difficulty interval + minimum difficulty + 1');
+  t.equal(Difficulty.requiredThreadDifficulty(300, 255, config), 26, 'Thread difficulty f(300 sec, maxThread posts) = minimum difficulty + 2');
+  t.equal(Difficulty.requiredThreadDifficulty(99999999, 99999999, config), 24, 'Thread difficulty equals minimum difficulty as inputs increase');
   t.end();
 });

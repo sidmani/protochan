@@ -22,18 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Util = require('../util/util.js');
-var GenesisPost = require('../block/genesisPost.js');
-var Difficulty = require('../hash/difficulty.js');
-var Uint256 = require('../util/uint256.js');
-var ErrorType = require('../error.js');
+const Util = require('../util/util.js');
+const GenesisPost = require('../block/genesisPost.js');
+const Difficulty = require('../hash/difficulty.js');
+const Uint256 = require('../util/uint256.js');
+const ErrorType = require('../error.js');
 
-///////////////////////
 // A head represents the top of a chain of blocks
 // Every head is guaranteed to be the top of a continuous chain to the genesis block
-///////////////////////
 
 module.exports = class Head {
   constructor(config, blockMap, thread, threadHeight) {
@@ -71,12 +69,11 @@ module.exports = class Head {
     this.sealed = false;
   }
 
-  ///////////////////////
   // Post insertion methods
   // only pushPost should be called from outside this class
   pushPost(post) {
     if (this.sealed) throw ErrorType.Head.resurrection();
-    let leadingZeroes = Difficulty.countLeadingZeroes(post.hash);
+    const leadingZeroes = Difficulty.countLeadingZeroes(post.hash);
 
     if (this.pointer) {
       // this is not the first block
@@ -96,10 +93,9 @@ module.exports = class Head {
     if (deltaT <= 0) throw ErrorType.Parameter.invalid();
 
     // calculate the required difficulty of this post
-    let reqDiff = Difficulty.requiredPostDifficulty(
+    const reqDiff = Difficulty.requiredPostDifficulty(
       deltaT,
-      this.config.MIN_POST_DIFFICULTY,
-      this.config.MAX_POST_DIFFICULTY
+      this.config,
     );
 
     // assert that the has meets the difficulty requirement
@@ -108,12 +104,16 @@ module.exports = class Head {
 
   genesisPostChecks(post) {
     // make sure this is a valid genesis post
-    if (!(post instanceof GenesisPost)) throw ErrorType.Parameter.type();
+    if (!(post instanceof GenesisPost)) {
+      throw ErrorType.Parameter.type();
+    }
 
     // sanity check
     // the block can't be older than this code
     // 0x5A7E6FC0 = Friday, Feb. 9, 2018 8:06:24 PM PST
-    if (post.timestamp() < 0x5A7E6FC0) throw ErrorType.Parameter.invalid();
+    if (post.timestamp() < 0x5A7E6FC0) {
+      throw ErrorType.Parameter.invalid();
+    }
   }
 
   postChecks(post, leadingZeroes) {
@@ -137,7 +137,7 @@ module.exports = class Head {
 
     this.checkPostDifficulty(
       post.timestamp() - this.strictTimestamp,
-      leadingZeroes
+      leadingZeroes,
     );
   }
 
@@ -161,7 +161,6 @@ module.exports = class Head {
     this.work.add(Uint256.exp2(leadingZeroes));
   }
 
-  /////////////////////
   // Thread insertion methods
   // XXX: untested
   stageThread(thread) {
@@ -176,7 +175,7 @@ module.exports = class Head {
 
     // get the latest post hash in this thread according to the
     // passed in threadblock
-    let latestBlock = thread.getPostForThread(this.thread);
+    const latestBlock = thread.getPostForThread(this.thread);
 
     if (latestBlock) {
       // thread is not the first thread in this head
@@ -192,20 +191,20 @@ module.exports = class Head {
       if (!Util.arrayEquality(thread.hash, this.thread)) throw ErrorType.Chain.hashMismatch();
 
       // post in thread block's genesis row equals this.head
-      if (!Util.arrayEquality(thread.getPost(0), this.pointer)) throw ErrorType.Chain.hashMismatch();
+      if (!Util.arrayEquality(thread.getPost(0), this.pointer)) {
+        throw ErrorType.Chain.hashMismatch();
+      }
     }
 
     // thread is OK!
     this.stage = thread.hash;
   }
 
-  /////////////////////////
   // discard the staged thread
   discardStage() {
     this.stage = undefined;
   }
 
-  /////////////////////////
   // commit a staged thread and update all necessary fields
   commitThread() {
     if (!(this.stage instanceof Uint8Array)) throw ErrorType.State.invalid();
@@ -215,15 +214,12 @@ module.exports = class Head {
     this.height += 1;
     // XXX: this runs the same calculation for every head.
     // maybe get the chain to set the work from outside
-    this.work.add(
-      Uint256.exp2(Difficulty.countLeadingZeroes(this.stage))
-    );
+    this.work.add(Uint256.exp2(Difficulty.countLeadingZeroes(this.stage)));
     // don't update strictTimestamp, since that depends on posts
     this.discardStage();
     this.unconfirmedPosts = 0;
   }
 
-  /////////////////////////
   // Convenience methods
   getBlockAtHead() {
     if (this.pointer) {
@@ -232,16 +228,14 @@ module.exports = class Head {
     return undefined;
   }
 
-  /////////////////////////
   timestamp() {
-    let latestBlock = this.getBlockAtHead();
+    const latestBlock = this.getBlockAtHead();
     if (latestBlock) {
       return latestBlock.timestamp();
     }
     return 0;
   }
 
-  /////////////////////////
   seal() {
     this.sealed = true;
   }
@@ -254,8 +248,8 @@ module.exports = class Head {
 
     // genesis block must always have max score
     // (max threads - depth) / max threads
-    let depth = currentThreadHeight - this.threadHeight;
-    return this.unconfirmedPosts / (this.height + 1) - depth / this.config.MAX_THREAD_COUNT;
+    const depth = currentThreadHeight - this.threadHeight;
+    return (this.unconfirmedPosts / (this.height + 1)) - (depth / this.config.MAX_THREAD_COUNT);
   }
 
   static genesisScore() {
@@ -263,4 +257,4 @@ module.exports = class Head {
     // (# between 0 and 1) - (# between 0 and 1) <= 1
     return 1;
   }
-}
+};

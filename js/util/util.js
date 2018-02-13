@@ -22,18 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var mode = 'debug';
-
-module.exports.arrayEquality = function(arr1, arr2) {
+module.exports.arrayEquality = function (arr1, arr2) {
   if (arr1.byteLength !== arr2.byteLength) return false;
-  for (let i = 0; i < arr1.byteLength; i++) {
+  for (let i = 0; i < arr1.byteLength; i += 1) {
     if (arr1[i] !== arr2[i]) return false;
   }
   return true;
-}
+};
 
-module.exports.time = function() {
+module.exports.time = function () {
   return Math.round(new Date().getTime() / 1000);
-}
+};

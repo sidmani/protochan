@@ -22,9 +22,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var ErrorType = require('../error.js');
+const ErrorType = require('../error.js');
 
 /**
  * The block header.
@@ -71,12 +71,12 @@ class Header {
     }
   }
 
-  /// Protocol version (uint16)
+  // Protocol version (uint16)
   protocolVersion() {
-    return ((this.data[0] << 8) + this.data[1]) >>> 0;
+    return ((this.data[0] << 8) ^ this.data[1]) >>> 0;
   }
 
-  /// Block type (uint8)
+  // Block type (uint8)
   blockType() {
     return this.data[2];
   }
@@ -112,21 +112,24 @@ class Header {
   }
 
   getUint32(index) {
-    return ((this.data[index] << 24) + (this.data[index+1] << 16) + (this.data[index+2] << 8) + this.data[index+3]) >>> 0;
+    return ((this.data[index] << 24)
+    ^ (this.data[index + 1] << 16)
+    ^ (this.data[index + 2] << 8)
+    ^ this.data[index + 3]) >>> 0;
   }
 
   static createFrom(protocolVersion, blockType, timestamp, nonce, prevHash, dataHash, board, reserved) {
-    let buffer = new ArrayBuffer(80);
-    let data = new DataView(buffer);
+    const buffer = new ArrayBuffer(80);
+    const data = new DataView(buffer);
     data.setUint16(0, protocolVersion);
     data.setUint8(2, blockType);
     data.setUint32(3, timestamp);
     data.setUint32(7, nonce);
-    for (let i = 11; i < 43; i++) {
-      data.setUint8(i, prevHash[i-11]);
+    for (let i = 11; i < 43; i += 1) {
+      data.setUint8(i, prevHash[i - 11]);
     }
-    for (let i = 43; i < 75; i++) {
-      data.setUint8(i, dataHash[i-43]);
+    for (let i = 43; i < 75; i += 1) {
+      data.setUint8(i, dataHash[i - 43]);
     }
     data.setUint32(75, board);
     data.setUint8(79, reserved);

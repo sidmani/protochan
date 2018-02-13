@@ -22,16 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Difficulty = require('../hash/difficulty.js');
-var Header = require('../block/header.js');
-var Hash = require('../hash/blake2s.js');
-var ErrorType = require('../error.js');
+const Difficulty = require('../hash/difficulty.js');
+const Header = require('../block/header.js');
+const Hash = require('../hash/blake2s.js');
+const ErrorType = require('../error.js');
 
 module.exports = class Miner {
   constructor(header) {
-    if(!(header instanceof Header)) throw ErrorType.Parameter.type();
+    if (!(header instanceof Header)) {
+      throw ErrorType.Parameter.type();
+    }
     this.header = header;
   }
 
@@ -39,7 +41,7 @@ module.exports = class Miner {
     fromNonce = fromNonce ? fromNonce : 0x00000000;
     toNonce = toNonce ? toNonce : 0xffffffff;
     this.header.setNonce(fromNonce);
-    for (let i = fromNonce; i <= toNonce; i++) {
+    for (let i = fromNonce; i <= toNonce; i += 1) {
       if (Difficulty.countLeadingZeroes(Hash.digest(this.header.data)) >= reqDiff) { return; }
       this.header.incrNonce();
     }
@@ -47,4 +49,4 @@ module.exports = class Miner {
     // should exit with an error.
     // the caller will adjust the timestamp or something and retry.
   }
-}
+};

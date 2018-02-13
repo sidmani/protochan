@@ -22,9 +22,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var ErrorType = require('../error.js');
+const ErrorType = require('../error.js');
 
 module.exports = class HashMap {
   constructor() {
@@ -38,7 +38,7 @@ module.exports = class HashMap {
   }
 
   setRaw(hash, obj, overwrite) {
-    let str = HashMap.uint8ArrToHex(hash);
+    const str = HashMap.uint8ArrToHex(hash);
     if (this.map.has(str) && !overwrite) throw ErrorType.HashMap.duplicate();
     this.map.set(str, obj);
   }
@@ -85,32 +85,34 @@ module.exports = class HashMap {
   }
 
   difference(otherMap, filter) {
-    let keys = Array.from(this.map.keys());
-    let diff = new Array();
-    for (let i = 0; i < keys.length; i++) {
-      let key = keys[i];
+    const keys = Array.from(this.map.keys());
+    const diff = [];
+    for (let i = 0; i < keys.length; i += 1) {
+      const key = keys[i];
       if (!otherMap.containsStringifiedKey(key)) {
-        if (!filter || filter(key, this.map.get(key)))
+        if (!filter || filter(key, this.map.get(key))) {
           diff.push(keys[i]);
+        }
       }
     }
-    return diff.map((strKey) => HashMap.hexToUint8Arr(strKey));
+    return diff.map(strKey => HashMap.hexToUint8Arr(strKey));
   }
 
   static uint8ArrToHex(arr) {
     if (!(arr instanceof Uint8Array)) throw ErrorType.Parameter.type();
-  	let str = '';
-  	for (let i = 0; i < arr.byteLength; i++) {
-  			str += (arr[i]<16?'0':'') + arr[i].toString(16);
-  	}
-  	return str;
+    let str = '';
+    for (let i = 0; i < arr.byteLength; i += 1) {
+      str += (arr[i] < 16 ? '0' : '') + arr[i].toString(16);
+    }
+    return str;
   }
 
   static hexToUint8Arr(str) {
     if (!str) return new Uint8Array();
-    let arr = [];
-    for (let i = 0; i < str.length; i += 2)
+    const arr = [];
+    for (let i = 0; i < str.length; i += 2) {
       arr.push(parseInt(str.substr(i, 2), 16));
+    }
     return new Uint8Array(arr);
   }
-}
+};

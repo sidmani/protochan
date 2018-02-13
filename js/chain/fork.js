@@ -22,13 +22,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-class Fork {
-  constructor(heads, threadHash) {
-    this.heads = heads;
-    this.thread = threadHash;
-  }
-
-  pushPost(post) { }
-}
+// class Fork {
+//   constructor(heads, threadHash) {
+//     this.heads = heads;
+//     this.thread = threadHash;
+//   }
+//
+//   pushPost(post) { }
+// }

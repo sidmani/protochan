@@ -22,13 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var ErrorType = require('../../error.js');
-var HashMap = require('../hashMap.js');
-var Node = require('./merkleNode.js');
-var Leaf = require('./merkleLeaf.js');
-var Hash = require('../blake2s.js');
+const ErrorType = require('../../error.js');
+const HashMap = require('../hashMap.js');
+const Node = require('./merkleNode.js');
+const Leaf = require('./merkleLeaf.js');
 
 module.exports = class MerkleTree {
   constructor(data) {
@@ -37,30 +36,30 @@ module.exports = class MerkleTree {
     if (data.byteLength % 64 !== 0 || data.byteLength === 0) throw ErrorType.Data.length();
 
     // total count of items
-    let count = data.byteLength / 32;
+    const count = data.byteLength / 32;
 
     // array of uint8arrays
-    let builtArray = new Array();
+    let builtArray = [];
 
     // maps hashes to their index in the tree for fast lookup
     this.indexMap = new HashMap();
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < count; i += 1) {
       // each post and thread is an item
-      let item = data.subarray(i*32, i*32 + 32);
+      const item = data.subarray(i * 32, (i + 1) * 32);
       this.indexMap.setRaw(item, i);
       builtArray.push(new Leaf(item));
     }
 
     this.depth = 1;
     do {
-      let newArray = new Array();
-      for (let i = 0; i < builtArray.length/2; i++) {
+      const newArray = [];
+      for (let i = 0; i < builtArray.length / 2; i += 1) {
         // pair the 2i and 2i+1 indices
         // if builtArray.length is odd, length/2 will have a 0.5
         // so the last index i*2+1 will be undefined
         // this is not a problem, since the MerkleNode handles that
         // case and duplicates the hash
-        newArray.push(new Node(builtArray[i*2], builtArray[i*2+1]));
+        newArray.push(new Node(builtArray[i * 2], builtArray[(i * 2) + 1]));
       }
 
       // builtArray now represents the next level of the tree
@@ -93,7 +92,7 @@ module.exports = class MerkleTree {
   }
 
   index(idx) {
-    let idxArr = idx.toString(2).split('').map(num => parseInt(num));
+    const idxArr = idx.toString(2).split('').map(num => parseInt(num, 10));
     while (idxArr.length < this.depth - 1) {
       idxArr.unshift(0);
     }
@@ -115,4 +114,4 @@ module.exports = class MerkleTree {
     this.indexMap.clear();
     this.isPruned = true;
   }
-}
+};

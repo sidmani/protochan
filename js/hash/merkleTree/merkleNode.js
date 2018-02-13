@@ -22,10 +22,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Hash = require('../blake2s.js');
-var HashMap = require('../hashMap.js');
+const Hash = require('../blake2s.js');
+const HashMap = require('../hashMap.js');
 
 module.exports = class Node {
   constructor(childA, childB) {
@@ -33,7 +33,7 @@ module.exports = class Node {
 
     this.map.set(childA);
 
-    let concat = new Uint8Array(64);
+    const concat = new Uint8Array(64);
     concat.set(childA.hash, 0);
 
     if (childB) {
@@ -55,7 +55,7 @@ module.exports = class Node {
   path(intermediates) {
     // retrieve a key by its intermediate hashes
     if (intermediates.length === 0) { return undefined; }
-    let nextNode = this.map.get(intermediates[0]);
+    const nextNode = this.map.get(intermediates[0]);
     return nextNode.path(intermediates.slice(1));
   }
 
@@ -65,11 +65,10 @@ module.exports = class Node {
 
   // idx as bit array
   index(idx) {
-    let nextNode = this.map.enumerate()[idx[0]];
+    const nextNode = this.map.enumerate()[idx[0]];
     if (nextNode) {
       return nextNode.index(idx.slice(1));
-    } else {
-      return undefined;
     }
+    return undefined;
   }
 };

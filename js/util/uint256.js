@@ -22,17 +22,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
 module.exports = class Uint256 {
   constructor(value) {
-    if (typeof(value) === 'number') {
+    if (typeof value === 'number') {
       this.array = new Uint8Array(32);
       this.array[28] = value >> 24;
       this.array[29] = value >> 16;
       this.array[30] = value >> 8;
       this.array[31] = value;
-    } else if (value instanceof Uint8Array && value.byteLength == 32) {
+    } else if (value instanceof Uint8Array && value.byteLength === 32) {
       this.array = value;
     } else {
       this.array = new Uint8Array(32);
@@ -41,15 +41,15 @@ module.exports = class Uint256 {
 
   add(other) {
     let carry = 0;
-    for (let i = 31; i >= 0; i--) {
-      let sum = this.array[i] + other.array[i] + carry;
+    for (let i = 31; i >= 0; i -= 1) {
+      const sum = this.array[i] + other.array[i] + carry;
       this.array[i] = sum;
       carry = Math.floor(sum / 256);
     }
   }
 
   copy() {
-    let newArr = new Uint8Array(32);
+    const newArr = new Uint8Array(32);
     newArr.set(this.array, 0);
     return new Uint256(newArr);
   }
@@ -57,7 +57,7 @@ module.exports = class Uint256 {
   // returns 1 if this > other, -1 if this < other, and 0 if equal
   compare(other) {
     // compare from most to least significant byte
-    for (let i = 0; i < 32; i++) {
+    for (let i = 0; i < 32; i += 1) {
       if (this.array[i] > other.array[i]) {
         return 1;
       } else if (this.array[i] < other.array[i]) {
@@ -68,9 +68,9 @@ module.exports = class Uint256 {
   }
 
   static exp2(exponent) {
-    let array = new Uint8Array(32);
-    let posInByte = exponent % 8;
+    const array = new Uint8Array(32);
+    const posInByte = exponent % 8;
     array[Math.floor(exponent / 8)] = 1 << posInByte;
     return new Uint256(array);
   }
-}
+};

@@ -23,47 +23,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
 module.exports.Data = {
-  length: function() { return new Error('Length of data is incorrect.'); },
-  hash: function() { return new Error('Data hash does not match expected value.'); },
-  controlLength: function() { return new Error('Invalid control byte length.'); },
-  delimiter: function() { return new Error('Malformed delimiter byte.'); }
+  length() { return new Error('Length of data is incorrect.'); },
+  hash() { return new Error('Data hash does not match expected value.'); },
+  controlLength() { return new Error('Invalid control byte length.'); },
+  delimiter() { return new Error('Malformed delimiter byte.'); },
 };
 
 module.exports.Chain = {
-  wrongBoard: function() { return new Error('Board ID mismatch.'); },
-  missingReference: function() { return new Error('Referenced block does not exist.'); },
-  hashMismatch: function() { return new Error('Hashes were not equal as expected.'); },
-  missingThread: function() { return new Error('Thread was removed illegally.'); },
-  threadOrder: function() { return new Error('Order of threads in thread block is illegal.'); },
-  unknownThread: function() { return new Error('Thread record referenced nonexistent thread.'); }
-}
+  wrongBoard() { return new Error('Board ID mismatch.'); },
+  missingReference() { return new Error('Referenced block does not exist.'); },
+  hashMismatch() { return new Error('Hashes were not equal as expected.'); },
+  missingThread() { return new Error('Thread was removed illegally.'); },
+  threadOrder() { return new Error('Order of threads in thread block is illegal.'); },
+  unknownThread() { return new Error('Thread record referenced nonexistent thread.'); },
+};
 
 module.exports.Head = {
-  resurrection: function() { return new Error('Attempt to resurrect a buried thread.'); }
-}
+  resurrection() { return new Error('Attempt to resurrect a buried thread.'); },
+};
 
 module.exports.Block = {
-  type: function() { return new Error('Block type is incorrect.'); },
-  illegalControlValues: function() { return new Error('Control bytes contain illegal values.'); }
+  type() { return new Error('Block type is incorrect.'); },
+  illegalControlValues() { return new Error('Control bytes contain illegal values.'); },
 };
 
 module.exports.Parameter = {
-  type: function() { return new Error('Parameter type is incorrect.'); },
-  invalid: function() { return new Error('Parameter value is invalid.'); }
+  type() { return new Error('Parameter type is incorrect.'); },
+  invalid() { return new Error('Parameter value is invalid.'); },
 };
 
 module.exports.Difficulty = {
-  insufficient: function() { return new Error('Data does not meet difficulty threshold.'); }
+  insufficient() { return new Error('Data does not meet difficulty threshold.'); },
 };
 
 module.exports.HashMap = {
-  duplicate: function() { return new Error('Value is already set for that key.'); }
+  duplicate() { return new Error('Value is already set for that key.'); },
 };
 
 module.exports.State = {
-  invalid: function() { return new Error('Invalid object state.'); },
-  internalConsistency: function() { return new Error('Internal consistency exception.'); }
+  invalid() { return new Error('Invalid object state.'); },
+  internalConsistency() { return new Error('Internal consistency exception.'); },
 };

@@ -22,9 +22,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Hash = require('./blake2s.js');
+const Hash = require('./blake2s.js');
 
 // on 2chan and 4chan, a tripcode is the hash of a secret password
 // the server replaces the password with the hash, allowing a user
@@ -54,23 +54,23 @@ var Hash = require('./blake2s.js');
 // To prevent abuse of the system, we will require a difficulty
 // on the resulting hash (?)
 
-//TODO: implementation
+// TODO: implementation
 
 const MAX_TRIPCODE_USES = 16;
 
-var ErrorType = require('../error.js');
+const ErrorType = require('../error.js');
 
-module.exports = class Tripcode {
-  constructor(pwd) {
-    // parameter validation
-    if (typeof(pwd) !== 'string') throw ErrorType.Parameter.type();
-    // encode the string into a uint8array
-    let arr = ;
-
-    // hash it 16 times
-    this.hash = arr;
-    for (let i = 0; i < 16; i++) {
-      this.hash = Hash.digest(this.hash);
-    }
-  }
-}
+// module.exports = class Tripcode {
+//   constructor(pwd) {
+//     // parameter validation
+//     if (typeof(pwd) !== 'string') throw ErrorType.Parameter.type();
+//     // encode the string into a uint8array
+//   //  let arr = ;
+//
+//     // hash it 16 times
+//     this.hash = arr;
+//     for (let i = 0; i < 16; i++) {
+//       this.hash = Hash.digest(this.hash);
+//     }
+//   }
+// }

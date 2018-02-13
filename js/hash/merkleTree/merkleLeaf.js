@@ -22,9 +22,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Hash = require('../blake2s.js');
+const Hash = require('../blake2s.js');
 
 module.exports = class Leaf {
   constructor(data) {
@@ -44,4 +44,4 @@ module.exports = class Leaf {
   prune() {
     this.data = true;
   }
-}
+};

@@ -22,11 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Thread = require('./thread.js');
-var Difficulty = require('../../hash/difficulty.js');
-var ErrorType = require('../../error.js');
+const Thread = require('./thread.js');
+const Difficulty = require('../../hash/difficulty.js');
+const ErrorType = require('../../error.js');
 
 module.exports = class Genesis extends Thread {
   constructor(header, data) {
@@ -40,4 +40,4 @@ module.exports = class Genesis extends Thread {
     // 32 + 32 + 5 = 69
     if (data.byteLength !== 69) throw ErrorType.Data.length();
   }
-}
+};

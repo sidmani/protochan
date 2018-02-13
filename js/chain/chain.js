@@ -22,18 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Util = require('../util/util.js');
-var Post = require('../block/post.js');
-var Thread = require('../block/thread/thread.js');
-var Genesis = require('../block/thread/genesis.js');
-var GenesisPost = require('../block/genesisPost.js');
-var HashMap = require('../hash/hashMap.js');
-var Difficulty = require('../hash/difficulty.js');
-var Head = require('./head.js');
-var Config = require('../board/config.js');
-var ErrorType = require('../error.js');
+const Util = require('../util/util.js');
+const Genesis = require('../block/thread/genesis.js');
+const GenesisPost = require('../block/genesisPost.js');
+const HashMap = require('../hash/hashMap.js');
+const Difficulty = require('../hash/difficulty.js');
+const Head = require('./head.js');
+const Config = require('../board/config.js');
+const ErrorType = require('../error.js');
 
 module.exports = class Chain {
   constructor(config) {
@@ -71,32 +69,33 @@ module.exports = class Chain {
 
     // once we've asserted the thread is superficially OK:
     // create a new head
-    let newHead = new Head(
+    const newHead = new Head(
       this.config,
       this.blockMap,
       thread.hash,
-      this.threadHeight + 1
+      this.threadHeight + 1,
     );
 
     // push the post onto the head
-    newHead.pushPost(post);
+    newHead.pushPost(originalPost);
 
     // stage the thread on all heads (including new one)
     try {
       // if a thread was removed, delete it from the map
-      if (removedHead) {
+      if (removedThread) {
+        const removedHead = this.getHead(removedThread);
         this.headMap.unset(removedHead.thread);
       }
-      this.headMap.forEach((head) => head.stageThread(thread));
+      this.headMap.forEach(head => head.stageThread(thread));
       newHead.stageThread(thread);
     } catch (error) {
       // the stage failed on some head
       // rollback all changes
-      this.headMap.forEach((head) => head.discardStage());
+      this.headMap.forEach(head => head.discardStage());
 
       // delete the post from the blockmap
       // newHead.pushPost inserted it
-      blockMap.unset(post);
+      this.blockMap.unset(originalPost);
 
       // TODO: are there any other changes that need to be rolled back?
       // re-insert removedHead
@@ -111,7 +110,7 @@ module.exports = class Chain {
 
     // once the stage succeeds, thread validation is complete.
     // Only insert new head into headmap after stage succeed
-    headMap.setRaw(thread.hash, newHead);
+    this.headMap.setRaw(thread.hash, newHead);
 
     // seal the removed head
     if (removedHead) {
@@ -119,10 +118,10 @@ module.exports = class Chain {
     }
 
     // insert the thread into the block map
-    blockMap.set(thread);
+    this.blockMap.set(thread);
 
     // commit on all heads (including new one)
-    headMap.forEach((head) => head.commitThread());
+    this.headMap.forEach(head => head.commitThread());
 
     // set this.timestamp?
     // set height on thread block?
@@ -138,17 +137,21 @@ module.exports = class Chain {
     if (!(originalPost instanceof GenesisPost)) throw ErrorType.Parameter.invalid();
 
     // check thread genesis row points to post
-    if (!Util.arrayEquality(thread.getPost(0), originalPost.hash)) throw ErrorType.Chain.hashMismatch();
+    if (!Util.arrayEquality(thread.getPost(0), originalPost.hash)) {
+      throw ErrorType.Chain.hashMismatch();
+    }
 
     // check that thread timestamp > post timestamp
     // since the hash chain implies the order of creation
-    if(originalPost.timestamp() >= thread.timestamp()) throw ErrorType.Parameter.invalid();
+    if (originalPost.timestamp() >= thread.timestamp()) {
+      throw ErrorType.Parameter.invalid();
+    }
 
     // check that the number of thread records contained is:
     // min(height + 1, maxThreads)
     // for example, genesis block has min(0 + 1, MAX_THREAD_COUNT)
     // = 1 (since MAX_THREAD_COUNT >= 1)
-    let expectedThreadCount = Math.min(this.threadHeight + 1, this.config.MAX_THREAD_COUNT);
+    const expectedThreadCount = Math.min(this.threadHeight + 1, this.config.MAX_THREAD_COUNT);
     if (thread.numThreads !== expectedThreadCount) throw ErrorType.Parameter.invalid();
   }
 
@@ -185,13 +188,13 @@ module.exports = class Chain {
     // and be ordered according to the ranking algorithm
     // if height >= maxThreads, the removed thread record
     // must have a lower score than every included thread record
-    let removedThread = this.checkThreadContinuity(thread);
+    const removedThread = this.checkThreadContinuity(thread);
 
     // get time diff between new thread and previous one
-    let deltaT = thread.timestamp() - prevThread.timestamp();
+    const deltaT = thread.timestamp() - prevThread.timestamp();
 
     // count all unconfirmed posts on all heads
-    let numPosts = this.headMap.enumerate().reduce((sum, head) => sum + head.unconfirmedPosts, 0);
+    const numPosts = this.headMap.enumerate().reduce((sum, head) => sum + head.unconfirmedPosts, 0);
 
     this.checkThreadDifficulty(thread, deltaT, numPosts);
     return removedThread;
@@ -199,12 +202,12 @@ module.exports = class Chain {
 
   checkThreadContinuity(thread) {
     // the previous thread = pointee of threadPointer
-    let prevThread = this.getBlock(thread.header.prevHash());
+    const prevThread = this.getBlock(thread.header.prevHash());
 
     // old - new = removed
-    let removedThreads = prevThread.subtractThreadRecords(thread);
+    const removedThreads = prevThread.subtractThreadRecords(thread);
 
-    if (this.threadHeight < config.MAX_THREAD_COUNT) {
+    if (this.threadHeight < this.config.MAX_THREAD_COUNT) {
       // case 1: threadHeight < maxThreads
       // the thread must contain every record in the previous block
       if (removedThreads.length !== 0) throw ErrorType.Chain.missingThread();
@@ -215,31 +218,33 @@ module.exports = class Chain {
     }
 
     // new - old = added
-    let addedThreads = thread.subtractThreadRecords(prevThread);
+    const addedThreads = thread.subtractThreadRecords(prevThread);
 
     // exactly zero new hashes are added, since genesis is zeroes
     if (addedThreads.length !== 0) throw ErrorType.Chain.unknownThread();
 
     // check that threads are ordered by descending score
-    let lowestScore = this.checkThreadRecordOrdering();
+    const lowestScore = this.checkThreadRecordOrdering();
     // check that the removed thread score <= lowestScore
     if (removedThreads.length === 1) {
-      let removedHead = this.getHead(removedThreads[0]);
-      if (removedHead.score(this.threadHeight + 1) > lowestScore) throw ErrorType.Chain.threadOrder();
+      const removedHead = this.getHead(removedThreads[0]);
+      if (removedHead.score(this.threadHeight + 1) > lowestScore) {
+        throw ErrorType.Chain.threadOrder();
+      }
       return removedHead;
     }
   }
 
   checkThreadRecordOrdering(thread) {
     let prevScore = Head.genesisScore();
-    for (let i = 1; i < thread.numThreads; i++) {
-      let threadHash = thread.getThread(i);
-      let score = this
+    for (let i = 1; i < thread.numThreads; i += 1) {
+      const threadHash = thread.getThread(i);
+      const score = this
         .getHead(threadHash)
         .score(this.threadHeight + 1);
 
-      if (prevScore > newScore) throw ErrorType.Chain.threadOrder();
-      prevScore = newScore;
+      if (prevScore > score) throw ErrorType.Chain.threadOrder();
+      prevScore = score;
     }
     return prevScore;
   }
@@ -249,22 +254,23 @@ module.exports = class Chain {
     if (deltaT <= 0) throw ErrorType.Parameter.invalid();
 
     // calculate the minimum difficulty required
-    let reqDiff = Difficulty.requiredThreadDifficulty(
+    const reqDiff = Difficulty.requiredThreadDifficulty(
       deltaT,
       numPosts,
-      this.config.MAX_THREAD_COUNT,
-      this.config.MIN_THREAD_DIFFICULTY,
-      this.config.MAX_THREAD_DIFFICULTY);
+      this.config,
+    );
 
     // check that the hash meets the requirement
-    if (Difficulty.countLeadingZeroes(thread.hash) < reqDiff) throw ErrorType.Difficulty.insufficient();
+    if (Difficulty.countLeadingZeroes(thread.hash) < reqDiff) {
+      throw ErrorType.Difficulty.insufficient();
+    }
   }
 
   pushPost(post) {
     // the board (the callee) is responsible for checking board ID
 
     // retrieve block pointed to by prevHash
-    let prevBlock = this.blockMap.get(post.header.prevHash());
+    const prevBlock = this.blockMap.get(post.header.prevHash());
 
     // this function doesn't need to handle a genesis case
     // there is no way a post can be inserted without
@@ -273,7 +279,7 @@ module.exports = class Chain {
     // retrieve the associated head
     // don't need to check non-nil
     // all posts in the map guaranteed to have associated head
-    let head = this.getHead(prevBlock.thread);
+    const head = this.getHead(prevBlock.thread);
 
     // head could be instanceof Head or of Fork
     // abstraction takes care of that for us here
@@ -297,4 +303,4 @@ module.exports = class Chain {
   getHead(threadHash) {
     return this.headMap.get(threadHash);
   }
-}
+};

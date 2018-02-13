@@ -133,6 +133,6 @@ t.test('Block getters return correct values', function(t) {
     'Block returns correct control length');
   t.equal(b.contentLength, 0x01FF,
     'Block returns correct content length');
-  t.equal(header.timestamp(), 85);
+  t.equal(b.timestamp(), 85);
   t.end();
 });

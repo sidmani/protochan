@@ -22,11 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-"use strict";
+'use strict';
 
-var Header = require('./header.js');
-var Hash = require('../hash/blake2s.js');
-var ErrorType = require('../error.js');
+const Header = require('./header.js');
+const Hash = require('../hash/blake2s.js');
+const ErrorType = require('../error.js');
 
 module.exports = class Block {
   constructor(header, data) {
@@ -64,13 +64,12 @@ module.exports = class Block {
     if (data[data.byteLength - 1] !== 0x04) throw ErrorType.Data.delimiter();
   }
 
-  // XXX: untested
   timestamp() {
     return this.header.timestamp();
   }
 
   serialize() {
-    let data = new Uint8Array(80 + this.contentLength + this.controlLength + 2);
+    const data = new Uint8Array(80 + this.contentLength + this.controlLength + 2);
     data.set(this.header.serialize(), 0);
     data.set(this.controlSector, 80);
     data[80 + this.controlLength] = 0x1D;
@@ -80,7 +79,7 @@ module.exports = class Block {
   }
 
   static deserialize(data) {
-    let header = Header.deserialize(data);
+    const header = Header.deserialize(data);
     return new Block(header, data.subarray(80));
   }
 
