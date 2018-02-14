@@ -37,9 +37,7 @@ module.exports = class Miner {
     this.header = header;
   }
 
-  mine(reqDiff, fromNonce, toNonce) {
-    fromNonce = fromNonce ? fromNonce : 0x00000000;
-    toNonce = toNonce ? toNonce : 0xffffffff;
+  mine(reqDiff, fromNonce = 0, toNonce = 0xffffffff) {
     this.header.setNonce(fromNonce);
     for (let i = fromNonce; i <= toNonce; i += 1) {
       if (Difficulty.countLeadingZeroes(Hash.digest(this.header.data)) >= reqDiff) { return; }

@@ -57,8 +57,6 @@ t.test('MerkleNode (2 children)', function(t) {
   concat.set(hashA, 0);
   concat.set(hashB, 32);
 
-  t.equal(childA.sibling, childB, 'Node sets sibling on childA');
-  t.equal(childB.sibling, childA, 'Node sets sibling on childB');
   t.strictSame(node.hash, Hash.digest(concat), 'Node returns correct hash');
   t.strictSame(node.path([hashB]), dataB, 'Node returns correct data for path');
   t.equal(node.path([]), undefined, 'Node returns undefined for empty path');
@@ -82,7 +80,6 @@ t.test('MerkleNode (1 child)', function(t) {
   concat.set(hashA, 32);
   let node = new MerkleNode(childA);
 
-  t.equal(childA.sibling, undefined, 'Node does not set sibling for childA');
   t.strictSame(node.hash, Hash.digest(concat), 'Node returns  hash of duplicated child hash');
   t.strictSame(node.path([hashA]), dataA, 'Node returns correct data for path');
   t.strictSame(node.index([0]), dataA, 'Node returns childA for 0 index');

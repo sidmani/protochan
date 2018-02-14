@@ -92,13 +92,14 @@ module.exports = class MerkleTree {
   }
 
   index(idx) {
-    const idxArr = idx.toString(2).split('').map(num => parseInt(num, 10));
-    while (idxArr.length < this.depth - 1) {
-      idxArr.unshift(0);
-    }
-    return this.root.index(idxArr);
-    // split index into binary array
-    // traverse tree
+    const idxArr = idx
+      .toString(2)
+      .split('')
+      .map(num => parseInt(num, 10));
+
+    return this.root.index(new Array(this.depth - 1 - idxArr.length)
+      .fill(0)
+      .concat(idxArr));
   }
 
   indexOf(hash) {

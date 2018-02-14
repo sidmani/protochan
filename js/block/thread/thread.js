@@ -78,12 +78,9 @@ module.exports = class ThreadBlock extends Block {
   getCorrespondingItem(hash) {
     const idx = this.merkleTree.indexOf(hash);
     if (idx === undefined) { return undefined; }
-    if (idx % 2 === 0) {
-      // get post for thread
-      return this.merkleTree.index(idx + 1);
-    }
-    // get thread for post
-    return this.merkleTree.index(idx - 1);
+    // return idx + 1 if getting post from thread
+    // return idx - 1 if getting thread from post
+    return this.merkleTree.index(idx + (1 - (2 * (idx % 2))));
   }
 
   // find records that are in this block but not in otherThread

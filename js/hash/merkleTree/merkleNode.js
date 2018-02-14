@@ -28,26 +28,17 @@ const Hash = require('../blake2s.js');
 const HashMap = require('../hashMap.js');
 
 module.exports = class Node {
-  constructor(childA, childB) {
+  constructor(childA, childB = childA) {
     this.map = new HashMap();
 
     this.map.set(childA);
+    // set childB with overwrite allowed since b = a if b undef
+    this.map.setRaw(childB.hash, childB, true);
 
     const concat = new Uint8Array(64);
+
     concat.set(childA.hash, 0);
-
-    if (childB) {
-      this.map.set(childB);
-
-      childA.sibling = childB;
-      childB.sibling = childA;
-      concat.set(childB.hash, 32);
-    } else {
-      // this node is on the right edge of the tree
-      // second child does not exist
-      // duplicate first child hash
-      concat.set(childA.hash, 32);
-    }
+    concat.set(childB.hash, 32);
 
     this.hash = Hash.digest(concat);
   }

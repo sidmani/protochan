@@ -133,6 +133,8 @@ module.exports = class Chain {
 
   pushThread_validateParameters(originalPost, thread) {
     // assert post is instanceof GenesisPost
+    // XXX: why does it need to be a genesis post?
+    // a regular post is valid for all but the gen thread
     if (!(originalPost instanceof GenesisPost)) throw ErrorType.Parameter.invalid();
 
     // check thread genesis row points to post

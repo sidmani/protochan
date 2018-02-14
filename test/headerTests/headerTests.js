@@ -42,6 +42,8 @@ t.test('Header nonce methods', function(t) {
   h.incrNonce();
   t.equal(h.nonce(), 0x5f4f4000, 'Header increments nonce');
 
+  // 85, 255, 255, 255
+  //
   h.setNonce(0x55ffffff);
   h.incrNonce();
   t.equal(h.nonce(), 0x56000000, 'Header increments nonce');

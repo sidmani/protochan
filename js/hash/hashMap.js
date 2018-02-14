@@ -33,7 +33,7 @@ module.exports = class HashMap {
 
   set(obj) {
     this.setRaw(obj.hash, obj, false);
-    // todo: remove this
+    // TODO: remove this
     return obj.hash;
   }
 
@@ -84,18 +84,11 @@ module.exports = class HashMap {
     return this.map.has(keyStr);
   }
 
-  difference(otherMap, filter) {
-    const keys = Array.from(this.map.keys());
-    const diff = [];
-    for (let i = 0; i < keys.length; i += 1) {
-      const key = keys[i];
-      if (!otherMap.containsStringifiedKey(key)) {
-        if (!filter || filter(key, this.map.get(key))) {
-          diff.push(keys[i]);
-        }
-      }
-    }
-    return diff.map(strKey => HashMap.hexToUint8Arr(strKey));
+  difference(otherMap, filter = () => true) {
+    return Array.from(this.map.keys())
+      .filter(key => !otherMap.containsStringifiedKey(key))
+      .filter(key => filter(key, this.map.get(key)))
+      .map(strKey => HashMap.hexToUint8Arr(strKey));
   }
 
   static uint8ArrToHex(arr) {

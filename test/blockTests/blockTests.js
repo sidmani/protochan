@@ -29,11 +29,9 @@ var t = require('tap');
 t.test('Block validates data separator byte', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);
-  view.setUint8(9, 0x04);
   view.setUint32(0, 0x0300051E);
-  let header = {
-    data: new Uint8Array(80)
-  };
+  view.setUint8(9, 0x04);
+  let header = { data: new Uint8Array(80) };
   t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.delimiter());
   t.end();
 });
@@ -41,11 +39,9 @@ t.test('Block validates data separator byte', function(t) {
 t.test('Block validates number of control bytes', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);
-  view.setUint8(9, 0x04);
   view.setUint32(0, 0x02061D00);
-  let header = {
-    data: new Uint8Array(80)
-  };
+  view.setUint8(9, 0x04);
+  let header = { data: new Uint8Array(80) };
   t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.controlLength());
   t.end();
 });
@@ -53,11 +49,9 @@ t.test('Block validates number of control bytes', function(t) {
 t.test('Block validates data length', function(t) {
   let buf = new ArrayBuffer(11);
   let view = new DataView(buf);
-  view.setUint8(10, 0x04);
   view.setUint32(0, 0x0300051D);
-  let header = {
-    data: new Uint8Array(80)
-  };
+  view.setUint8(10, 0x04);
+  let header = { data: new Uint8Array(80) };
   t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.length());
   t.end();
 });
@@ -65,11 +59,9 @@ t.test('Block validates data length', function(t) {
 t.test('Block validates data terminator byte', function(t) {
   let buf = new ArrayBuffer(10);
   let view = new DataView(buf);
-  view.setUint8(9, 0x07);
   view.setUint32(0, 0x0300051D);
-  let header = {
-    data: new Uint8Array(80)
-  };
+  view.setUint8(9, 0x07);
+  let header = { data: new Uint8Array(80) };
   t.throws(function() { new Block(header, new Uint8Array(buf)); }, ErrorType.Data.delimiter());
   t.end();
 });
@@ -79,9 +71,7 @@ t.test('Block accepts valid header and data', function (t) {
   let view = new DataView(buf);
   view.setUint32(0, 0x03007B1D);
   view.setUint8(127, 0x04);
-  let header = {
-    data: new Uint8Array(80)
-  };
+  let header = { data: new Uint8Array(80) };
   let b;
   t.doesNotThrow(function() { b = new Block(header, new Uint8Array(buf)); });
   t.assert(b instanceof Block);
@@ -114,7 +104,6 @@ t.test('Block getters return correct values', function(t) {
   view.setUint32(0, 0x0401FFEF);
   view.setUint32(4, 0x1D000000)
   view.setUint8(516, 0x04);
-  (new Uint8Array(buf)).fill(0x94, 5, 516);
 
   let header = {
     data: new Uint8Array(80),

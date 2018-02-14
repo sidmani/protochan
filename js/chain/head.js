@@ -49,8 +49,8 @@ module.exports = class Head {
     // the height in the thread chain of the genesis thread block
     this.threadHeight = threadHeight;
 
-    // pointer is initially undefined
-    this.pointer = undefined;
+    // pointer is initially zero array so that OP points to it
+    this.pointer = new Uint8Array(32);
 
     // the height of the block referenced by this.pointer
     this.height = 0;
@@ -58,8 +58,10 @@ module.exports = class Head {
     // the number of posts that are not yet under a thread block
     this.unconfirmedPosts = 0;
 
-    // the timestamp of the latest *post* block
-    this.strictTimestamp = 0;
+    // the timestamp of the latest post
+    // start at 0x5A7E6FC0 so no OP can be earlier than that
+    // 0x5A7E6FC0 = Friday, Feb. 9, 2018 8:06:24 PM PST
+    this.strictTimestamp = 0x5A7E6FC0;
 
     // the total work done on this head
     // work = estimated # of hash ops performed to mine a block
@@ -75,14 +77,7 @@ module.exports = class Head {
     if (this.sealed) throw ErrorType.Head.resurrection();
     const leadingZeroes = Difficulty.countLeadingZeroes(post.hash);
 
-    if (this.pointer) {
-      // this is not the first block
-      this.postChecks(post, leadingZeroes);
-      // post is OK.
-    } else {
-      // this is the first block
-      this.genesisPostChecks(post);
-    }
+    this.postChecks(post, leadingZeroes);
 
     // post is OK.
     this.finalizePostInsertion(post, leadingZeroes);
@@ -100,20 +95,6 @@ module.exports = class Head {
 
     // assert that the has meets the difficulty requirement
     if (leadingZeroes < reqDiff) throw ErrorType.Difficulty.insufficient();
-  }
-
-  genesisPostChecks(post) {
-    // make sure this is a valid genesis post
-    if (!(post instanceof GenesisPost)) {
-      throw ErrorType.Parameter.type();
-    }
-
-    // sanity check
-    // the block can't be older than this code
-    // 0x5A7E6FC0 = Friday, Feb. 9, 2018 8:06:24 PM PST
-    if (post.timestamp() < 0x5A7E6FC0) {
-      throw ErrorType.Parameter.invalid();
-    }
   }
 
   postChecks(post, leadingZeroes) {
@@ -179,6 +160,7 @@ module.exports = class Head {
 
     if (latestBlock) {
       // thread is not the first thread in this head
+
       // assert latestPost hash is equal to head hash
       if (!Util.arrayEquality(latestBlock, this.pointer)) throw ErrorType.Chain.hashMismatch();
       // TODO: check fork
