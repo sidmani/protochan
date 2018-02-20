@@ -25,45 +25,32 @@
 'use strict';
 
 const ErrorType = require('../error.js');
-const HashMap = require('./hashMap.js');
 const Hash = require('./blake2s.js');
 
 module.exports = class MerkleTree {
-  constructor(data, offset = 0, len = data.byteLength) {
-    // must be pairs of 32-byte hashes
-    if (len % 64 !== 0 || len === 0) throw ErrorType.Data.length();
-
-    // total count of items
-    const count = len / 32;
-
+  constructor(dataArr) {
     // array of uint8arrays
-    let builtArray = [];
+    let builtArray = dataArr;
 
-    // maps hashes to their index in the tree for fast lookup
-    this.indexMap = new HashMap();
-    for (let i = 0; i < count; i += 1) {
-      // each post and thread is an item
-      const item = data.subarray(offset + (i * 32), offset + ((i + 1) * 32));
-      this.indexMap.setRaw(item, i);
-      builtArray.push(Hash.digest(item));
-    }
+    if (dataArr.length === 0) throw ErrorType.Data.length();
 
     this.depth = 1;
+
     do {
       const newArray = [];
       for (let i = 0; i < builtArray.length / 2; i += 1) {
         // pair the 2i and 2i+1 indices
         // if builtArray.length is odd, length/2 will have a 0.5
         // so the last index i*2+1 will be undefined
-        // this is not a problem, since the MerkleNode handles that
-        // case and duplicates the hash
-        const hash1 = builtArray[i * 2];
-        const hash2 = builtArray[(i * 2) + 1] || hash1;
+        // in that case, duplicate the previous index
+        // TODO: optimize so it doesn't hash the same thing twice
+        const item1 = Hash.digest(builtArray[i * 2]);
+        const item2 = Hash.digest(builtArray[(i * 2) + 1] || builtArray[(i * 2)]);
         const concat = new Uint8Array(64);
-        concat.set(hash1, 0);
-        concat.set(hash2, 32);
+        concat.set(item1, 0);
+        concat.set(item2, 32);
 
-        newArray.push(Hash.digest(concat));
+        newArray.push(concat);
       }
 
       // builtArray now represents the next level of the tree
@@ -71,16 +58,15 @@ module.exports = class MerkleTree {
       this.depth += 1;
     } while (builtArray.length > 1);
 
-    this.root = builtArray[0];
-    this.data = data;
-    this.offset = offset;
+    this.root = Hash.digest(builtArray[0]);
   }
 
+  // TODO: verify thread using intermediates and index
   // Verify that a thread or post is contained in this tree
-  get(intermediates) {
-    return this.root.path(intermediates);
-    // intermediates.length must equal depth - 1
-  }
+  // get(intermediates) {
+  //   return this.root.path(intermediates);
+  //   // intermediates.length must equal depth - 1
+  // }
 
   // verify(hash, intermediates, index) {
   //   // let idxArr = idx.toString(2).split('').map(num => parseInt(num));
@@ -92,39 +78,4 @@ module.exports = class MerkleTree {
   //   //     concat.set()
   //   // }
   // }
-
-  difference(otherTree, filter) {
-    return this.indexMap.difference(otherTree.indexMap, filter);
-  }
-
-  index(idx) {
-    // return this.data.subarray(
-    //   this.offset + (idx * 32),
-    //   this.offset + ((idx + 1) * 32),
-    // );
-    const idxArr = idx
-      .toString(2)
-      .split('')
-      .map(num => parseInt(num, 10));
-
-    const paddedArr = new Array(this.depth - 1 - idxArr.length)
-      .fill(0)
-      .concat(idxArr);
-
-    return this.root.index(paddedArr);
-  }
-
-  indexOf(hash) {
-    return this.indexMap.get(hash);
-  }
-
-  contains(hash) {
-    return this.indexMap.contains(hash);
-  }
-
-  prune() {
-    this.root.prune();
-    this.indexMap.clear();
-    this.isPruned = true;
-  }
 };
