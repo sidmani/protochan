@@ -37,17 +37,23 @@ t.test('Miner produces a leading zero byte for 8 difficulty', function(t) {
   t.equal(hash[0], 0);
   t.end();
 });
-//
-// module.exports = [
-//   { description: "Miner produces a leading zero byte for 8 difficulty",
-//     fn: function() {
-//       let data = new ArrayBuffer(64);
-//       let header = common.validHeaderFromData(data);
-//
-//       let miner = new Miner(header);
-//       miner.mine(8);
-//       let hash = Hash.digest(header.data);
-//       common.assert(hash[0] === 0);
-//     }
-//   }
-// ];
+
+t.test('Header nonce methods', function(t) {
+  let h = common.validHeaderFromData(new ArrayBuffer(64));
+  let m = new Miner(h);
+  m.setNonce(0x5f4f3f2f);
+  t.equal(h.nonce(), 0x5f4f3f2f, 'Miner sets nonce');
+  m.setNonce(0x5f4f3fff);
+  m.incrNonce();
+  t.equal(h.nonce(), 0x5f4f4000, 'Miner increments nonce');
+
+  m.setNonce(0x55ffffff);
+  m.incrNonce();
+  t.equal(h.nonce(), 0x56000000, 'Miner increments nonce');
+
+  m.setNonce(0x579effff);
+  m.incrNonce();
+  t.equal(h.nonce(), 0x579f0000, 'Miner increments nonce');
+
+  t.end();
+});

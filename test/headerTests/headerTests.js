@@ -23,35 +23,22 @@
 // SOFTWARE.
 
 var Header = require('../../js/block/header.js');
-var t = require('tap');
 var ErrorType = require('../../js/error.js')
 
+var t = require('tap');
+
 t.test('Header constructor tests', function(t) {
-  t.throws(function() { new Header(undefined); }, ErrorType.Parameter.type(), 'Header rejects undefined data');
-  t.throws(function() { new Header(new ArrayBuffer(80)); }, ErrorType.Parameter.type(), 'Header rejects data of wrong type');
-  t.throws(function() { new Header(new Uint8Array(81)); }, ErrorType.Data.length(), 'Header rejects data of wrong length');
+  let h;
+  t.throws(function() { new Header(new Uint8Array(56))}, ErrorType.Data.length(), 'Header rejects data length < 80');
   t.doesNotThrow(function() { h = new Header(new Uint8Array(80))}, 'Header accepts valid data');
-  t.end();
-});
 
-t.test('Header nonce methods', function(t) {
-  let h = new Header(new Uint8Array(80));
-  h.setNonce(0x5f4f3f2f);
-  t.equal(h.nonce(), 0x5f4f3f2f, 'Header sets nonce');
-  h.setNonce(0x5f4f3fff);
-  h.incrNonce();
-  t.equal(h.nonce(), 0x5f4f4000, 'Header increments nonce');
-
-  // 85, 255, 255, 255
-  //
-  h.setNonce(0x55ffffff);
-  h.incrNonce();
-  t.equal(h.nonce(), 0x56000000, 'Header increments nonce');
-
-  h.setNonce(0x579effff);
-  h.incrNonce();
-  t.equal(h.nonce(), 0x579f0000, 'Header increments nonce');
-
+  t.strictSame(h.hash, new Uint8Array([
+    196, 253, 231, 106, 141, 104, 66, 44,
+    95, 186, 253, 226, 80, 244, 146, 16,
+    159, 178, 154, 198, 103, 83, 41, 46,
+    17, 83, 170, 17, 173, 174, 26, 58
+  ]))
+  t.equal(h.difficulty, 0);
   t.end();
 });
 
@@ -102,8 +89,8 @@ t.test('Header getter methods', function(t) {
   view.setUint32(75, 0x4e5be7e9);
   // reserved
   view.setUint8(79, 0x7c);
-
-  let h = new Header(new Uint8Array(validBuffer));
+  let arr = new Uint8Array(validBuffer);
+  let h = new Header(arr);
 
   t.equal(h.protocolVersion(), 12345, 'Header returns correct protocol version');
   t.equal(h.blockType(), 0x07, 'Header returns correct block type');
@@ -115,7 +102,7 @@ t.test('Header getter methods', function(t) {
   t.equal(h.reserved(), 0x7c, 'Header returns correct reserved data');
 
   let serialized = h.serialize();
-  t.strictSame(serialized, new Uint8Array(validBuffer), 'Header serializes data');
+  t.strictSame(serialized, arr, 'Header serializes data');
   let deserialized = Header.deserialize(serialized);
   t.strictSame(h, deserialized, 'Header deserializes data')
   t.end();

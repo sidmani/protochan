@@ -24,6 +24,8 @@
 
 'use strict';
 
+const Hash = require('../hash/blake2s.js');
+const Difficulty = require('../hash/difficulty.js');
 const ErrorType = require('../error.js');
 
 /**
@@ -35,60 +37,14 @@ class Header {
    * @param {ArrayBuffer} buffer - The source buffer.
    */
   constructor(data) {
-    // parameter validation
-    if (!(data instanceof Uint8Array)) throw ErrorType.Parameter.type();
-
-    // Assert that the array is exactly 80 bytes long
-    if (data.byteLength !== 80) throw ErrorType.Data.length();
+    // check length is at least 80 bytes
+    if (data.byteLength < 80) {
+      throw ErrorType.Data.length();
+    }
 
     this.data = data;
-  }
-
-  // For mining
-  setNonce(value) {
-    this.data[7] = value >> 24;
-    this.data[8] = value >> 16;
-    this.data[9] = value >> 8;
-    this.data[10] = value;
-  }
-
-  // fastest way to increment a uint32 that's split by bytes (?)
-  incrNonce() {
-    // let sum = this.data[10] + 1;
-    // console.log('sum: ' + sum);
-    // this.data[10] = sum;
-    // let sum2 = this.data[9] + Math.floor(sum / 256);
-    // console.log('sum2: ' + sum2);
-    // this.data[9] = sum2;
-    // let sum3 = this.data[8] + Math.floor(sum2 / 256);
-    // this.data[8] = sum3;
-    // console.log('sum3: ' + sum3);
-    // this.data[9] += Math.floor(sum3 / 256);
-    // console.log('data9 ' + this.data[9]);
-    // 235, 255, 255, 255
-    // expect 236, 0, 0, 0
-    // sum = 256
-    // data[10] = 0
-    // sum2 = 255 + 256/256 = 256
-    // data[9] = 0
-    // sum3 = 255 + 256/256 = 256
-    // data[8] = 0
-    // data[9] = 256/256 + 235 = 236
-    if (this.data[10] < 0xff) {
-      this.data[10] += 1;
-    } else if (this.data[9] < 0xff) {
-      this.data[9] += 1;
-      this.data[10] = 0x00;
-    } else if (this.data[8] < 0xff) {
-      this.data[8] += 1;
-      this.data[9] = 0x00;
-      this.data[10] = 0x00;
-    } else {
-      this.data[7] += 1;
-      this.data[8] = 0x00;
-      this.data[9] = 0x00;
-      this.data[10] = 0x00;
-    }
+    this.hash = Hash.digest(data);
+    this.difficulty = Difficulty.countLeadingZeroes(this.hash);
   }
 
   // Protocol version (uint16)
@@ -138,7 +94,16 @@ class Header {
     ^ this.data[index + 3]) >>> 0;
   }
 
-  static createFrom(protocolVersion, blockType, timestamp, nonce, prevHash, dataHash, board, reserved) {
+  static createFrom(
+    protocolVersion,
+    blockType,
+    timestamp,
+    nonce,
+    prevHash,
+    dataHash,
+    board,
+    reserved,
+  ) {
     const buffer = new ArrayBuffer(80);
     const data = new DataView(buffer);
     data.setUint16(0, protocolVersion);
@@ -159,7 +124,7 @@ class Header {
   }
 
   static deserialize(data) {
-    return new Header(data.subarray(0, 80));
+    return new Header(data);
   }
 }
 
