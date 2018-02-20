@@ -22,73 +22,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var MerkleTree = require('../../js/hash/merkleTree/merkleTree.js');
-var MerkleLeaf = require('../../js/hash/merkleTree/merkleLeaf.js');
-var MerkleNode = require('../../js/hash/merkleTree/merkleNode.js');
+var MerkleTree = require('../../js/hash/merkleTree.js');
+// var MerkleLeaf = require('../../js/hash/merkleTree/merkleLeaf.js');
+// var MerkleNode = require('../../js/hash/merkleTree/merkleNode.js');
 var Hash = require('../../js/hash/blake2s.js');
 
 var t = require('tap');
 var ErrorType = require('../../js/error.js');
-
-t.test('MerkleLeaf', function(t) {
-  let data = new Uint8Array(64);
-  let leaf = new MerkleLeaf(data);
-  let hash = Hash.digest(data);
-  t.strictSame(leaf.hash, hash, 'Leaf returns correct data hash');
-  t.strictSame(leaf.path(), data, 'Leaf returns data for path');
-  t.strictSame(leaf.index(), data, 'Leaf returns data for index');
-  leaf.prune();
-  t.equal(leaf.data, true, 'Leaf clears data on prune');
-  t.end();
-});
-
-t.test('MerkleNode (2 children)', function(t) {
-  let dataA = new Uint8Array(64);
-  dataA.fill(1, 0, 64);
-  let childA = new MerkleLeaf(dataA);
-  let dataB = new Uint8Array(64);
-  dataB.fill(2, 0, 64);
-  let childB = new MerkleLeaf(dataB);
-  let node = new MerkleNode(childA, childB);
-
-  let concat = new Uint8Array(64);
-  let hashA = Hash.digest(dataA);
-  let hashB = Hash.digest(dataB);
-  concat.set(hashA, 0);
-  concat.set(hashB, 32);
-
-  t.strictSame(node.hash, Hash.digest(concat), 'Node returns correct hash');
-  t.strictSame(node.path([hashB]), dataB, 'Node returns correct data for path');
-  t.equal(node.path([]), undefined, 'Node returns undefined for empty path');
-  t.strictSame(node.index([0, 0]), dataA, 'Node returns childA for 0 index');
-  t.strictSame(node.index([1, 0]), dataB, 'Node returns childB for 1 index');
-  node.prune();
-  t.equal(childA.data, true, 'Node prunes childA');
-  t.equal(childB.data, true, 'Node prunes childB');
-
-  t.end();
-});
-
-t.test('MerkleNode (1 child)', function(t) {
-  let dataA = new Uint8Array(64);
-  dataA.fill(1, 0, 64);
-  let childA = new MerkleLeaf(dataA);
-
-  let concat = new Uint8Array(64);
-  let hashA = Hash.digest(dataA);
-  concat.set(hashA, 0);
-  concat.set(hashA, 32);
-  let node = new MerkleNode(childA);
-
-  t.strictSame(node.hash, Hash.digest(concat), 'Node returns  hash of duplicated child hash');
-  t.strictSame(node.path([hashA]), dataA, 'Node returns correct data for path');
-  t.strictSame(node.index([0]), dataA, 'Node returns childA for 0 index');
-  t.equal(node.index([1, 0]), undefined, 'Node returns undefined for 1 index');
-  node.prune();
-  t.equal(childA.data, true, 'Node prunes childA');
-
-  t.end();
-});
 
 t.test('MerkleTree', function(t) {
   t.throws(function() { new MerkleTree(new Uint8Array(65)); }, ErrorType.Data.length(), 'Merkle tree rejects wrong data length');
@@ -151,18 +91,18 @@ t.test('MerkleTree', function(t) {
 
   let tree = new MerkleTree(data);
 
-  t.strictSame(tree.root.hash, expectedRoot, 'Merkle tree sets root correctly');
-  let expectedArr = new Uint8Array(32);
-  expectedArr.fill(3, 0, 32);
-  t.strictSame(tree.index(2), expectedArr, 'Merkle tree gets object at index');
-  t.strictSame(tree.get([level1[0], level2[1], level3[2]]), expectedArr, 'Merkle tree gets object from intermediate path');
-
-  t.equal(tree.indexOf(expectedArr), 2, 'Merkle tree gets index of object');
-
-  t.equal(tree.depth, 4);
-  tree.prune();
-  t.equal(tree.index(2), true, 'Merkle tree prunes data');
-  t.equal(tree.isPruned, true, 'Merkle tree sets isPruned');
+  t.strictSame(tree.root, expectedRoot, 'Merkle tree sets root correctly');
+  // let expectedArr = new Uint8Array(32);
+  // expectedArr.fill(3, 0, 32);
+  // t.strictSame(tree.index(2), expectedArr, 'Merkle tree gets object at index');
+  // t.strictSame(tree.get([level1[0], level2[1], level3[2]]), expectedArr, 'Merkle tree gets object from intermediate path');
+  //
+  // t.equal(tree.indexOf(expectedArr), 2, 'Merkle tree gets index of object');
+  //
+  // t.equal(tree.depth, 4);
+  // tree.prune();
+  // t.equal(tree.index(2), true, 'Merkle tree prunes data');
+  // t.equal(tree.isPruned, true, 'Merkle tree sets isPruned');
   t.end();
 });
 

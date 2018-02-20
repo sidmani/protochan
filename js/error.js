@@ -33,6 +33,7 @@ module.exports.Data = {
 };
 
 module.exports.Chain = {
+  illegalType() { return new Error('Block of specified type cannot be inserted'); },
   wrongBoard() { return new Error('Board ID mismatch.'); },
   missingReference() { return new Error('Referenced block does not exist.'); },
   hashMismatch() { return new Error('Hashes were not equal as expected.'); },

@@ -24,19 +24,17 @@
 
 'use strict';
 
-const ErrorType = require('../../error.js');
-const HashMap = require('../hashMap.js');
-const Node = require('./merkleNode.js');
-const Leaf = require('./merkleLeaf.js');
+const ErrorType = require('../error.js');
+const HashMap = require('./hashMap.js');
+const Hash = require('./blake2s.js');
 
 module.exports = class MerkleTree {
-  constructor(data) {
-    // pass in thread.content()
+  constructor(data, offset = 0, len = data.byteLength) {
     // must be pairs of 32-byte hashes
-    if (data.byteLength % 64 !== 0 || data.byteLength === 0) throw ErrorType.Data.length();
+    if (len % 64 !== 0 || len === 0) throw ErrorType.Data.length();
 
     // total count of items
-    const count = data.byteLength / 32;
+    const count = len / 32;
 
     // array of uint8arrays
     let builtArray = [];
@@ -45,9 +43,9 @@ module.exports = class MerkleTree {
     this.indexMap = new HashMap();
     for (let i = 0; i < count; i += 1) {
       // each post and thread is an item
-      const item = data.subarray(i * 32, (i + 1) * 32);
+      const item = data.subarray(offset + (i * 32), offset + ((i + 1) * 32));
       this.indexMap.setRaw(item, i);
-      builtArray.push(new Leaf(item));
+      builtArray.push(Hash.digest(item));
     }
 
     this.depth = 1;
@@ -59,7 +57,13 @@ module.exports = class MerkleTree {
         // so the last index i*2+1 will be undefined
         // this is not a problem, since the MerkleNode handles that
         // case and duplicates the hash
-        newArray.push(new Node(builtArray[i * 2], builtArray[(i * 2) + 1]));
+        const hash1 = builtArray[i * 2];
+        const hash2 = builtArray[(i * 2) + 1] || hash1;
+        const concat = new Uint8Array(64);
+        concat.set(hash1, 0);
+        concat.set(hash2, 32);
+
+        newArray.push(Hash.digest(concat));
       }
 
       // builtArray now represents the next level of the tree
@@ -68,6 +72,8 @@ module.exports = class MerkleTree {
     } while (builtArray.length > 1);
 
     this.root = builtArray[0];
+    this.data = data;
+    this.offset = offset;
   }
 
   // Verify that a thread or post is contained in this tree
@@ -92,14 +98,20 @@ module.exports = class MerkleTree {
   }
 
   index(idx) {
+    // return this.data.subarray(
+    //   this.offset + (idx * 32),
+    //   this.offset + ((idx + 1) * 32),
+    // );
     const idxArr = idx
       .toString(2)
       .split('')
       .map(num => parseInt(num, 10));
 
-    return this.root.index(new Array(this.depth - 1 - idxArr.length)
+    const paddedArr = new Array(this.depth - 1 - idxArr.length)
       .fill(0)
-      .concat(idxArr));
+      .concat(idxArr);
+
+    return this.root.index(paddedArr);
   }
 
   indexOf(hash) {
