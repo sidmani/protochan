@@ -46,6 +46,7 @@ module.exports = class Uint256 {
       this.array[i] = sum;
       carry = Math.floor(sum / 256);
     }
+    return this;
   }
 
   copy() {
@@ -73,8 +74,9 @@ module.exports = class Uint256 {
       const sum = this.array[i] + carry;
       this.array[i] = sum;
       carry = Math.floor(sum / 256);
-      if (carry === 0) { return; }
+      if (carry === 0) { return this; }
     }
+    return this;
   }
 
   static exp2(exponent) {

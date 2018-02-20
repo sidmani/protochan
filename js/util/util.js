@@ -35,3 +35,10 @@ module.exports.arrayEquality = function (arr1, arr2) {
 module.exports.time = function () {
   return Math.round(new Date().getTime() / 1000);
 };
+
+module.exports.concat = function (arr1, arr2) {
+  const newArr = new Uint8Array(arr1.byteLength + arr2.byteLength);
+  newArr.set(arr1, 0);
+  newArr.set(arr2, arr1.byteLength);
+  return newArr;
+};
