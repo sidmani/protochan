@@ -24,39 +24,14 @@
 
 'use strict';
 
-const Block = require('./block.js');
-const ErrorType = require('../error.js');
-const Util = require('../util/util.js');
-const Hash = require('../hash/blake2s.js');
+const DataParser = require('./dataParser.js');
+const Hash = require('../../hash/blake2s.js');
 
-const POST_BLOCK_ID = 0x01;
+module.exports = class OriginalPostDataParser extends DataParser {
+  constructor(data, offset = 0) {
+    super(data, offset);
+    this.hash = Hash.digest(this.data);
 
-module.exports = class Post extends Block {
-  constructor(header, data) {
-    super(header, data);
-    if (header.blockType() !== POST_BLOCK_ID) throw ErrorType.Block.type();
-
-    // Assert that the hash of the data is equal to the hash stored in the header
-    if (!Util.arrayEquality(Hash.digest(data), header.dataHash())) throw ErrorType.Data.hash();
-
-    // XXX: untested
-    this.content = data.subarray(
-      this.controlLength + 1,
-      this.controlLength + 1 + this.contentLength,
-    );
+    // Parse thread options here
   }
-
-  // XXX: untested
-  serialize() {
-    const data = super.serialize();
-    data.set(this.content, this.controlLength + 1);
-    return data;
-  }
-
-  // prune() {
-  //   // TODO: prune data
-  //   // what does pruning mean in this context?
-  //   this.isPruned = true;
-  //   this.content = undefined;
-  // }
 };

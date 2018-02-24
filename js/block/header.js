@@ -1,3 +1,4 @@
+
 // This file is a part of the protochan project.
 // https://github.com/sidmani/protochan
 // https://www.sidmani.com/?postid=3
@@ -27,6 +28,7 @@
 const Hash = require('../hash/blake2s.js');
 const Difficulty = require('../hash/difficulty.js');
 const ErrorType = require('../error.js');
+// const HashMap = require('../hash/hashMap.js');
 
 /**
  * The block header.
@@ -45,6 +47,7 @@ class Header {
     this.data = data;
     this.hash = Hash.digest(data);
     this.difficulty = Difficulty.countLeadingZeroes(this.hash);
+    // this.stringHash = HashMap.uint8ArrayToHex(this.hash);
   }
 
   // Protocol version (uint16)

@@ -24,37 +24,19 @@
 
 'use strict';
 
-module.exports.arrayEquality = function (arr1, arr2) {
-  if (arr1.byteLength !== arr2.byteLength) return false;
-  for (let i = 0; i < arr1.byteLength; i += 1) {
-    if (arr1[i] !== arr2[i]) return false;
-  }
-  return true;
+const ThreadDataParser = require('./threadDataParser.js');
+const PostDataParser = require('./postDataParser.js');
+const GenesisDataParser = require('./genesisDataParser.js');
+const OriginalPostDataParser = require('./originalPostDataParser.js');
+const BlockType = require('../type.js');
+
+const DataParserTypeMap = {
+  [BlockType.THREAD]: ThreadDataParser,
+  [BlockType.POST]: PostDataParser,
+  [BlockType.GENESIS]: GenesisDataParser,
+  [BlockType.ORIGINAL_POST]: OriginalPostDataParser,
 };
 
-module.exports.time = function () {
-  return Math.round(new Date().getTime() / 1000);
-};
-
-module.exports.concat = function (arr1, arr2) {
-  const newArr = new Uint8Array(arr1.byteLength + arr2.byteLength);
-  newArr.set(arr1, 0);
-  newArr.set(arr2, arr1.byteLength);
-  return newArr;
-};
-
-module.exports.split = function (arr, len, offset, forEach = () => {}) {
-  const newArr = [];
-  const count = Math.floor(arr.byteLength / len);
-
-  for (let i = 0; i < count; i += 1) {
-    // each post and thread is an item
-    const subarr = arr.subarray(
-      offset + (i * len),
-      offset + ((i + 1) * len),
-    );
-    newArr.push(subarr);
-    forEach(subarr, i);
-  }
-  return newArr;
+module.exports.create = function (type, data, offset = 0) {
+  return new DataParserTypeMap[type](data, offset);
 };

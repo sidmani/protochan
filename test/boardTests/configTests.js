@@ -26,25 +26,19 @@ var Configuration = require('../../js/board/config.js');
 var t = require('tap');
 
 t.test('Configuration constructor', function(t) {
-  let post = {
+  let data = {
     minPostDifficulty: 0xf5,
     maxPostDifficulty: 0xf6,
     minThreadDifficulty: 0xf7,
     maxThreadDifficulty: 0xf8,
     maxThreads: 0xf9,
-    header: {
-      board() {
-        return 0x18f3e974;
-      }
-    }
-  }
+  };
 
-  let config = new Configuration(post);
+  let config = new Configuration(data);
   t.equal(config.MIN_POST_DIFFICULTY, 0xf5, 'Configuration sets minimum post difficulty');
   t.equal(config.MAX_POST_DIFFICULTY, 0xf6, 'Configuration sets maximum post difficulty');
   t.equal(config.MIN_THREAD_DIFFICULTY, 0xf7, 'Configuration sets min thread difficulty');
   t.equal(config.MAX_THREAD_DIFFICULTY, 0xf8, 'Configuration sets max thread difficulty');
   t.equal(config.MAX_THREAD_COUNT, 0xf9, 'Configuration sets max thread count');
-  t.equal(config.BOARD_ID, 0x18f3e974, 'Configuration sets board ID');
   t.end();
 });

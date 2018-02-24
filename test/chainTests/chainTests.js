@@ -25,37 +25,37 @@ var Chain = require('../../js/chain/chain.js');
 var Config = require('../../js/board/config.js');
 var common = require('../testCommon.js');
 var t = require('tap');
-
-t.test('Chain constructor', function(t) {
-  let post = common.validGenesisPost();
-  let config = new Config(post);
-  let chain = new Chain(config);
-
-  t.equal(chain.threadPointer, undefined, 'Chain sets thread pointer to undefined');
-  t.equal(chain.threadHeight, 0, 'Chain sets thread height to 0');
-
-  t.end();
-});
-
-// t.test('Chain.finalizeThreadInsertion', function(t) {
+// 
+// t.test('Chain constructor', function(t) {
 //   let post = common.validGenesisPost();
 //   let config = new Config(post);
 //   let chain = new Chain(config);
 //
-//   let thread = common.validThread(post);
+//   t.equal(chain.threadPointer, undefined, 'Chain sets thread pointer to undefined');
+//   t.equal(chain.threadHeight, 0, 'Chain sets thread height to 0');
 //
-//   chain.finalizeThreadInsertion(thread);
+//   t.end();
 // });
-
-t.test('Chain convenience methods', function(t) {
-  let post = common.validGenesisPost();
-  let config = new Config(post);
-  let chain = new Chain(config);
-
-  chain.blockMap.setRaw(new Uint8Array([5, 4, 3]), 'foo');
-  t.equal(chain.getBlock(new Uint8Array([5, 4, 3])), 'foo', 'Chain.getBlock returns object from blockMap');
-
-  chain.headMap.setRaw(new Uint8Array([7, 2, 8]), 'foo');
-  t.equal(chain.getHead(new Uint8Array([7, 2, 8])), 'foo', 'Chain.getBlock returns object from blockMap');
-  t.end();
-});
+//
+// // t.test('Chain.finalizeThreadInsertion', function(t) {
+// //   let post = common.validGenesisPost();
+// //   let config = new Config(post);
+// //   let chain = new Chain(config);
+// //
+// //   let thread = common.validThread(post);
+// //
+// //   chain.finalizeThreadInsertion(thread);
+// // });
+//
+// t.test('Chain convenience methods', function(t) {
+//   let post = common.validGenesisPost();
+//   let config = new Config(post);
+//   let chain = new Chain(config);
+//
+//   chain.blockMap.setRaw(new Uint8Array([5, 4, 3]), 'foo');
+//   t.equal(chain.getBlock(new Uint8Array([5, 4, 3])), 'foo', 'Chain.getBlock returns object from blockMap');
+//
+//   chain.headMap.setRaw(new Uint8Array([7, 2, 8]), 'foo');
+//   t.equal(chain.getHead(new Uint8Array([7, 2, 8])), 'foo', 'Chain.getBlock returns object from blockMap');
+//   t.end();
+// });

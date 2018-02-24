@@ -53,11 +53,6 @@ module.exports.verify = function (hash, leadingZeroes) {
 
 
 // Posts use a simple exponential decay model over time for difficulty
-// a good GPU gets 1-3GH/s and 2^40 = 1099 GH, 2^20 = 0.001 GH
-
-// required post difficulty decays exponentially in time
-// after each post. This vastly increases the difficulty of
-// spamming.
 // If someone wants to post every 5 seconds, they have to do about
 // 128 times as much work as someone who posts every 10 seconds.
 

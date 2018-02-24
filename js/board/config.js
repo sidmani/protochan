@@ -25,12 +25,11 @@
 'use strict';
 
 module.exports = class Configuration {
-  constructor(originalPost) {
-    this.MIN_POST_DIFFICULTY = originalPost.minPostDifficulty;
-    this.MAX_POST_DIFFICULTY = originalPost.maxPostDifficulty;
-    this.MIN_THREAD_DIFFICULTY = originalPost.minThreadDifficulty;
-    this.MAX_THREAD_DIFFICULTY = originalPost.maxThreadDifficulty;
-    this.MAX_THREAD_COUNT = originalPost.maxThreads;
-    this.BOARD_ID = originalPost.header.board();
+  constructor(data) {
+    this.MIN_POST_DIFFICULTY = data.minPostDifficulty;
+    this.MAX_POST_DIFFICULTY = data.maxPostDifficulty;
+    this.MIN_THREAD_DIFFICULTY = data.minThreadDifficulty;
+    this.MAX_THREAD_DIFFICULTY = data.maxThreadDifficulty;
+    this.MAX_THREAD_COUNT = data.maxThreads;
   }
 };

@@ -24,20 +24,27 @@
 
 'use strict';
 
-const Thread = require('./thread.js');
-const Difficulty = require('../../hash/difficulty.js');
+const DataParser = require('./dataParser.js');
 const ErrorType = require('../../error.js');
+const Hash = require('../../hash/blake2s.js');
 
-module.exports = class Genesis extends Thread {
-  constructor(header, data) {
-    super(header, data);
+module.exports = class GenesisDataParser extends DataParser {
+  constructor(data, offset = 0) {
+    super(data, offset);
+    // 1 byte control length, 2b content length, 5b genesis options
+    if (this.controlLength < 8) throw ErrorType.Data.controlLength();
 
-    // Assert that prevHash is all zeroes (max difficulty)
-    Difficulty.verify(this.header.prevHash(), 256);
+    // instead of min/max, use min + range so no illegal values
+    this.minPostDifficulty = this.data[offset + 3];
+    this.maxPostDifficulty = this.minPostDifficulty + this.data[offset + 4];
+    this.minThreadDifficulty = this.data[offset + 5];
+    this.maxThreadDifficulty = this.minThreadDifficulty + this.data[offset + 6];
 
-    // Assert that data is 69 (lol) bytes, since the genesis block
-    // can only have one thread/post pair associated with it
-    // 32 + 32 + 5 = 69
-    if (data.byteLength !== 69) throw ErrorType.Data.length();
+    this.maxThreads = this.data[offset + 7] + 1; // 1 to 256 max threads
+    // XXX: should the min thread count be 1?
+    // to extend the protocol with board options, store additional
+    // bytes in the post block's data and parse them here
+
+    this.hash = Hash.digest(this.data);
   }
 };

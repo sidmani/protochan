@@ -24,37 +24,31 @@
 
 'use strict';
 
-module.exports.arrayEquality = function (arr1, arr2) {
-  if (arr1.byteLength !== arr2.byteLength) return false;
-  for (let i = 0; i < arr1.byteLength; i += 1) {
-    if (arr1[i] !== arr2[i]) return false;
+const ErrorType = require('../../../error.js');
+const Util = require('../../../util/util.js');
+const DataParser = require('../../../block/dataParser/dataParserTypeMap.js');
+const HashMap = require('../../../hash/hashMap.js');
+
+module.exports = class BlockNode {
+  constructor(header, data, config) {
+    this.header = header;
+    this.data = DataParser.create(header.blockType(), data);
+    this.config = config;
+
+    if (!Util.arrayEquality(this.data.hash, header.dataHash())) {
+      throw ErrorType.Data.hash();
+    }
+
+    this.hash = header.hash;
+    this.children = new HashMap();
   }
-  return true;
-};
 
-module.exports.time = function () {
-  return Math.round(new Date().getTime() / 1000);
-};
-
-module.exports.concat = function (arr1, arr2) {
-  const newArr = new Uint8Array(arr1.byteLength + arr2.byteLength);
-  newArr.set(arr1, 0);
-  newArr.set(arr2, arr1.byteLength);
-  return newArr;
-};
-
-module.exports.split = function (arr, len, offset, forEach = () => {}) {
-  const newArr = [];
-  const count = Math.floor(arr.byteLength / len);
-
-  for (let i = 0; i < count; i += 1) {
-    // each post and thread is an item
-    const subarr = arr.subarray(
-      offset + (i * len),
-      offset + ((i + 1) * len),
-    );
-    newArr.push(subarr);
-    forEach(subarr, i);
+  // convenience
+  type() {
+    return this.header.type();
   }
-  return newArr;
+
+  timestamp() {
+    return this.header.timestamp();
+  }
 };

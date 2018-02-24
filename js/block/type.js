@@ -24,37 +24,10 @@
 
 'use strict';
 
-module.exports.arrayEquality = function (arr1, arr2) {
-  if (arr1.byteLength !== arr2.byteLength) return false;
-  for (let i = 0; i < arr1.byteLength; i += 1) {
-    if (arr1[i] !== arr2[i]) return false;
-  }
-  return true;
-};
-
-module.exports.time = function () {
-  return Math.round(new Date().getTime() / 1000);
-};
-
-module.exports.concat = function (arr1, arr2) {
-  const newArr = new Uint8Array(arr1.byteLength + arr2.byteLength);
-  newArr.set(arr1, 0);
-  newArr.set(arr2, arr1.byteLength);
-  return newArr;
-};
-
-module.exports.split = function (arr, len, offset, forEach = () => {}) {
-  const newArr = [];
-  const count = Math.floor(arr.byteLength / len);
-
-  for (let i = 0; i < count; i += 1) {
-    // each post and thread is an item
-    const subarr = arr.subarray(
-      offset + (i * len),
-      offset + ((i + 1) * len),
-    );
-    newArr.push(subarr);
-    forEach(subarr, i);
-  }
-  return newArr;
+// Block type values
+module.exports = {
+  GENESIS: 0x00,
+  THREAD: 0x01,
+  ORIGINAL_POST: 0x02,
+  POST: 0x03,
 };

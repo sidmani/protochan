@@ -21,21 +21,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-var Post = require('../js/block/post.js');
+// var Post = require('../js/block/post.js');
 var Header = require('../js/block/header.js');
-var Block = require('../js/block/block.js');
-var Genesis = require('../js/block/thread/genesis.js');
-var Thread = require('../js/block/thread/thread.js');
-var GenesisPost = require('../js/block/genesisPost.js');
 var Hash = require('../js/hash/blake2s.js');
-var MerkleTree = require('../js/hash/merkleTree/merkleTree.js');
+var MerkleTree = require('../js/hash/merkleTree.js');
 
 module.exports.hash = function(data) {
   return Hash.digest(data);
 }
 
 module.exports.validThread = function(post) {
-  if (!(post instanceof Post)) { throw new Error(); }
   let d_buf = new ArrayBuffer(69);
   let arr = new Uint8Array(d_buf);
 
@@ -54,7 +49,7 @@ module.exports.validThread = function(post) {
 
   let header = validThreadHeaderFromData(d_buf);
 
-  return new Thread(header, arr);
+  return new Block(header, arr);
 }
 
 module.exports.validPost = function() {

@@ -40,6 +40,7 @@ module.exports.Chain = {
   missingThread() { return new Error('Thread was removed illegally.'); },
   threadOrder() { return new Error('Order of threads in thread block is illegal.'); },
   unknownThread() { return new Error('Thread record referenced nonexistent thread.'); },
+  timeTravel() { return new Error('Timestamp order is illegal.'); },
 };
 
 module.exports.Head = {

@@ -24,39 +24,22 @@
 
 'use strict';
 
-const Post = require('./post.js');
-const Difficulty = require('../hash/difficulty.js');
-const ErrorType = require('../error.js');
+const HashMap = require('../../hash/hashMap.js');
+const GenesisNode = require('./node/genesisNode.js');
+const Config = require('../../board/config.js');
 
-module.exports = class GenesisPost extends Post {
-  constructor(header, data) {
-    super(header, data);
+module.exports = class BlockTree {
+  constructor(originalNode) {
+    this.nodeMap = new HashMap();
+    this.root = new GenesisNode(originalPost);
+    this.nodeMap.set(this.root);
+  }
 
-    // Assert that prevHash has maximum difficulty
-    Difficulty.verify(header.prevHash(), 256);
+  getNode(blockHash) {
+    return this.nodeMap.get(blockHash);
+  }
 
-    // 1 byte control length, 2b content length, 5b genesis options
-    if (this.controlLength < 8) throw ErrorType.Data.controlLength();
-
-    // set instance fields
-    this.minPostDifficulty = data[3];
-    this.maxPostDifficulty = data[4];
-    this.minThreadDifficulty = data[5];
-    this.maxThreadDifficulty = data[6];
-    this.maxThreads = data[7];
-    // to extend the protocol with options, store additional
-    // bytes in the post block's data and parse them here
-
-    // max >= min difficulty
-    if (this.maxPostDifficulty < this.minPostDifficulty) {
-      throw ErrorType.Block.illegalControlValues();
-    }
-
-    if (this.maxThreadDifficulty < this.minThreadDifficulty) {
-      throw ErrorType.Block.illegalControlValues();
-    }
-
-    // nonzero max threads
-    if (this.maxThreads === 0) throw ErrorType.Block.illegalControlValues();
+  getBlock(blockHash) {
+    return this.getNode(blockHash).block;
   }
 };
