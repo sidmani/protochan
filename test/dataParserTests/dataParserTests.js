@@ -24,22 +24,23 @@
 
 'use strict';
 
-const HashMap = require('../../hash/hashMap.js');
-const GenesisNode = require('./node/genesisNode.js');
-const Config = require('../../board/config.js');
+const t = require('tap');
+const DataParser = require('../../js/block/dataParser/dataParser.js');
+const ErrorType = require('../../js/error.js');
 
-module.exports = class BlockTree {
-  constructor(originalNode) {
-    this.nodeMap = new HashMap();
-    this.root = new GenesisNode(originalPost);
-    this.nodeMap.set(this.root);
-  }
+t.test('DataParser', function(t) {
+  const data = new Uint8Array(32);
+  data[5] = 0x1C;
 
-  getNode(blockHash) {
-    return this.nodeMap.get(blockHash);
-  }
+  t.throws(() => { new DataParser(data, 5); }, ErrorType.Data.controlLength(), 'Parser throws on control length too long');
 
-  getBlock(blockHash) {
-    return this.getNode(blockHash).block;
-  }
-};
+  data[5] = 0x1A;
+
+  let parser;
+  t.doesNotThrow(() => { parser = new DataParser(data, 5); }, 'Parser accepts valid control length');
+  t.equal(parser.controlLength, 0x1A, 'Parser sets correct control length');
+  t.equal(parser.contentLength, 0x01, 'Parser sets correct content length');
+  t.equal(parser.offset, 0x05, 'Parser sets correct offset');
+  t.equal(parser.data, data, 'Parser sets data');
+  t.end();
+});

@@ -24,64 +24,53 @@
 
 'use strict';
 
-const BlockType = require('../../../block/type.js');
-const Util = require('../../../util/util.js');
-const ErrorType = require('../../../error.js');
+const BlockType = require('../../block/type.js');
+const ErrorType = require('../../error.js');
 const BlockNode = require('./blockNode.js');
-const Difficulty = require('../../../hash/difficulty.js');
-const PostNode = require('./postNode.js');
 
-module.exports = class ThreadNode extends BlockNode {
-  addChild(header, data) {
-    if (!Util.arrayEquality(
-      header.prevHash(),
-      this.hash,
-    )) {
-      throw ErrorType.Chain.hashMismatch();
-    }
+module.exports = class PostNode extends BlockNode {
+  setSegmentHeight(height) {
+    this.segmentHeight = height;
+  }
 
-    switch (header.blockType()) {
+  setHeight(height) {
+    this.height = height;
+  }
+
+  setThread(thread) {
+    this.thread = thread;
+  }
+
+  addChild(node) {
+    switch (node.type()) {
       case BlockType.POST: {
-        const node = new PostNode(header, data, this.config, 1);
-        this.insertChildPost(node);
+        this.checkPost(node);
+        node.setSegmentHeight(this.segmentHeight + 1);
+        node.setHeight(this.height + 1);
+        node.setThread(this.thread);
         break;
       }
       case BlockType.THREAD: {
-        const node = new ThreadNode(header, data, this.config);
-        this.insertChildThread(node);
+        this.checkThread(node);
         break;
       }
       default: throw ErrorType.Chain.illegalType();
     }
+
+    super.addChild(node);
   }
 
-  insertChildPost(post) {
-    // check difficulty
-    // should this be w.r.t. previous post or this thread?
-    const deltaT = post.timestamp() - this.timestamp();
-    if (deltaT <= 0) throw ErrorType.Chain.timeTravel();
+  checkPost(post) {
+    this.checkPrevHash(post);
 
-    const reqDiff = Difficulty.requiredPostDifficulty(
-      deltaT,
-      this.config,
-    );
-
-    if (post.header.difficulty < reqDiff) {
-      throw ErrorType.Difficulty.insufficient();
-    }
-
-    // check that post reserved byte points to valid index
-    if (post.header.reserved() >= this.numRecords) {
-      throw ErrorType.Chain.unknownThread();
-    }
-
-    this.children.set(post);
+    // verify difficulty and timestamps
+    this.checkPostDifficulty(post);
   }
 
-  insertChildThread(thread) {
-    // count # of posts since last thread block
-    // count # of
-    // check difficulty
-
+  checkThread(thread) {
+    // TODO: do we need to check hash here?
+    if (this.timestamp() >= thread.timestamp()) {
+      throw ErrorType.Chain.timeTravel();
+    }
   }
 };

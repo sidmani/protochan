@@ -24,8 +24,6 @@
 
 'use strict';
 
-const ErrorType = require('../error.js');
-
 const countLeadingZeroes = function (arr) {
   let zeroes = 0;
   for (let i = 0; i < arr.byteLength; i += 1) {
@@ -44,13 +42,6 @@ const countLeadingZeroes = function (arr) {
   return zeroes;
 };
 module.exports.countLeadingZeroes = countLeadingZeroes;
-
-module.exports.verify = function (hash, leadingZeroes) {
-  if (countLeadingZeroes(hash) < leadingZeroes) {
-    throw ErrorType.Difficulty.insufficient();
-  }
-};
-
 
 // Posts use a simple exponential decay model over time for difficulty
 // If someone wants to post every 5 seconds, they have to do about
@@ -88,31 +79,3 @@ module.exports.requiredThreadDifficulty = function (deltaT, numPosts, config) {
 
   return Math.round(minDiff + ((interval / 2) * (Math.exp(-c * deltaT) + Math.exp(-d * numPosts))));
 };
-
-// since difficulties are on a log scale,
-// they have to be added logarithmically
-// here we use the identity log2(x + y) = log2(x) + log2(1 + y/x)
-// therefore the sum of two difficulties a and b =
-// a + log2(1 + 2^(b-a))
-// of course, we can't exponentiate 2 to a power over 31
-// so to make life easier, if b-a > 31, we
-// approximate log2(1 + 2^(b-a)) ~= b-a
-// module.exports.sumDifficulties(a, b) {
-//   // if we're summing 8 and 8, difficulty is 9
-//   // since 2^8 + 2^8 = 2^9
-//   if (a === b) {
-//     return a + 1;
-//   }
-//
-//   // otherwise a must be less than b
-//   if (a > b) {
-//     let temp = a;
-//     a = b;
-//     b = temp;
-//   }
-//
-//   // the difference is so great that a doesn't really matter
-//   if (b-a > 31) {
-//     return b;
-//   }
-// }

@@ -24,30 +24,27 @@
 
 'use strict';
 
-const BlockType = require('../../../block/type.js');
+const BlockType = require('../../block/type.js');
 const BlockNode = require('./blockNode.js');
-const ErrorType = require('../../../error.js');
-const ThreadNode = require('./threadNode.js');
-const Util = require('../../../util/util.js');
+const ErrorType = require('../../error.js');
+const Util = require('../../util/util.js');
 
 module.exports = class OriginalPostNode extends BlockNode {
-  addChild(header, data) {
-    switch (header.blockType()) {
+  // XXX: this requires that a thread has already been inserted
+  // before all checks complete
+  addChild(node) {
+    switch (node.type()) {
       case BlockType.THREAD: {
-        const node = new ThreadNode(header, data, this.config);
-        this.insertChildThread(node);
+        this.checkThread(node);
         break;
       }
       default: throw ErrorType.Chain.illegalType();
     }
+
+    super.addChild(node);
   }
 
-  insertChildThread(thread) {
-    this.checkChildThread(thread);
-    this.rawInsertChildThread(thread);
-  }
-
-  checkChildThread(thread) {
+  checkThread(thread) {
     // TODO: is hash check actually necessary?
     if (!Util.arrayEquality(thread.data.getPost(0), this.hash)) {
       throw ErrorType.Chain.hashMismatch();
@@ -56,9 +53,5 @@ module.exports = class OriginalPostNode extends BlockNode {
     if (this.timestamp() >= thread.timestamp()) {
       throw ErrorType.Chain.timeTravel();
     }
-  }
-
-  rawInsertChildThread(thread) {
-    this.children.set(thread);
   }
 };

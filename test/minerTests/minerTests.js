@@ -22,38 +22,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var common = require('../testCommon.js');
-var Miner = require('../../js/miner/miner.js');
-var Hash = require('../../js/hash/blake2s.js');
-var t = require('tap');
+const Miner = require('../../js/miner/miner.js');
+const Hash = require('../../js/hash/blake2s.js');
+const t = require('tap');
 
 t.test('Miner produces a leading zero byte for 8 difficulty', function(t) {
-  let data = new ArrayBuffer(64);
-  let header = common.validHeaderFromData(data);
+  const data = new Uint8Array(80);
 
-  let miner = new Miner(header);
+  const miner = new Miner(data);
   miner.mine(8);
-  let hash = Hash.digest(header.data);
+  const hash = Hash.digest(data);
   t.equal(hash[0], 0);
   t.end();
 });
 
 t.test('Header nonce methods', function(t) {
-  let h = common.validHeaderFromData(new ArrayBuffer(64));
-  let m = new Miner(h);
+  const data = new Uint8Array(80);
+  const m = new Miner(data);
+
+  function getNonce(d) {
+    return ((d[7] << 24)
+    ^ (d[8] << 16)
+    ^ (d[9] << 8)
+    ^ d[10]) >>> 0;
+  }
+
   m.setNonce(0x5f4f3f2f);
-  t.equal(h.nonce(), 0x5f4f3f2f, 'Miner sets nonce');
+  t.equal(getNonce(data), 0x5f4f3f2f, 'Miner sets nonce');
   m.setNonce(0x5f4f3fff);
   m.incrNonce();
-  t.equal(h.nonce(), 0x5f4f4000, 'Miner increments nonce');
+  t.equal(getNonce(data), 0x5f4f4000, 'Miner increments nonce');
 
   m.setNonce(0x55ffffff);
   m.incrNonce();
-  t.equal(h.nonce(), 0x56000000, 'Miner increments nonce');
+  t.equal(getNonce(data), 0x56000000, 'Miner increments nonce');
 
   m.setNonce(0x579effff);
   m.incrNonce();
-  t.equal(h.nonce(), 0x579f0000, 'Miner increments nonce');
+  t.equal(getNonce(data), 0x579f0000, 'Miner increments nonce');
 
   t.end();
 });

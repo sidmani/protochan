@@ -31,7 +31,7 @@ module.exports = class DataParser {
     this.controlLength = data[offset + 0];
     // TODO: is there a way to avoid this check?
     // pad with zeroes?
-    if (this.controlLength > data.byteLength) {
+    if ((this.controlLength + offset) > data.byteLength) {
       throw ErrorType.Data.controlLength();
     }
 

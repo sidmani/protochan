@@ -31,7 +31,6 @@ module.exports = class OriginalPostDataParser extends DataParser {
   constructor(data, offset = 0) {
     super(data, offset);
     this.hash = Hash.digest(this.data);
-
     // Parse thread options here
   }
 };

@@ -46,7 +46,7 @@ t.test('Header getter methods', function(t) {
   let validBuffer = new ArrayBuffer(80);
   let view = new DataView(validBuffer);
   // prevHash
-  let prev_hash_result = new Uint8Array([ // random integers
+  let prev_hash_result = new Uint8Array([
     0xea, 0x38, 0xad, 0x19,
     0xea, 0x38, 0xad, 0x19,
     0xea, 0x38, 0xad, 0x19,

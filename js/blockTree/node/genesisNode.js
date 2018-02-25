@@ -24,61 +24,51 @@
 
 'use strict';
 
-const BlockType = require('../../../block/type.js');
-const Util = require('../../../util/util.js');
-const ErrorType = require('../../../error.js');
+const BlockType = require('../../block/type.js');
+const ErrorType = require('../../error.js');
 const BlockNode = require('./blockNode.js');
-const Difficulty = require('../../../hash/difficulty.js');
-const Config = require('../../../board/config.js');
-const ThreadNode = require('./threadNode.js');
-const OriginalPostNode = require('./originalPostNode.js');
+const Difficulty = require('../../hash/difficulty.js');
+const Config = require('../../board/config.js');
 
 module.exports = class GenesisNode extends BlockNode {
   constructor(header, data) {
-    super(header, data, new Config(data));
+    super(header, data);
+    this.config = new Config(data);
   }
 
-  addChild(header, data) {
-    if (!Util.arrayEquality(
-      header.prevHash(),
-      this.hash,
-    )) {
-      throw ErrorType.Chain.hashMismatch();
-    }
+  addChild(node) {
+    this.checkPrevHash(node);
 
-    switch (header.blockType()) {
+    switch (node.type()) {
       case BlockType.THREAD: {
-        const node = new ThreadNode(header, data, this.config);
-        this.insertChildThread(node);
+        this.checkThread(node);
+        node.setHeight(1);
+        // in order to guarantee that the tree is never
+        // invalid and has no side effects, this insertion
+        // must be after checkChildThread() returns
+        // TODO: make this not repeat the get operation
+        const op = this.children.get(node.data.getThread(0));
+        op.children.set(node);
         break;
       }
       case BlockType.ORIGINAL_POST: {
-        const node = new OriginalPostNode(header, data, this.config);
-        this.insertChildOriginalPost(node);
+        this.checkOriginalPost(node);
         break;
       }
       default: throw ErrorType.Chain.illegalType();
     }
+
+    super.addChild(node);
   }
 
-  insertChildThread(thread) {
+  checkThread(thread) {
+    // the first thread block must contain exactly 1 record
     if (thread.data.numRecords !== 1) {
       throw ErrorType.Chain.unknownThread();
     }
 
     // check difficulty of thread hash
-    const deltaT = thread.timestamp() - this.timestamp();
-    if (deltaT <= 0) throw ErrorType.Chain.timeTravel();
-
-    const reqDiff = Difficulty.requiredThreadDifficulty(
-      deltaT,
-      0,
-      this.config,
-    );
-
-    if (thread.header.difficulty < reqDiff) {
-      throw ErrorType.Difficulty.insufficient();
-    }
+    Difficulty.verifyThreads(this, thread, this.config, 0);
 
     // check that the thread's original post hash points to
     // a valid child of this node
@@ -87,30 +77,10 @@ module.exports = class GenesisNode extends BlockNode {
       throw ErrorType.Chain.missingReference();
     }
 
-    op.checkChildThread(thread);
-    op.rawInsertChildThread(thread);
-
-    this.children.set(thread);
+    op.checkThread(thread);
   }
 
-  insertChildOriginalPost(op) {
-    // get the time difference
-    const deltaT = op.timestamp() - this.timestamp();
-
-    // if new block is older than the previous block, error
-    if (deltaT <= 0) throw ErrorType.Chain.timeTravel();
-
-    // get required difficulty
-    const reqDiff = Difficulty.requiredPostDifficulty(
-      deltaT,
-      this.config,
-    );
-
-    // if new block doesn't have the required difficulty, error
-    if (op.header.difficulty < reqDiff) {
-      throw ErrorType.Difficulty.insufficient();
-    }
-
-    this.children.set(op);
+  checkOriginalPost(op) {
+    this.checkPostDifficulty(op);
   }
 };

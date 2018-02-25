@@ -25,47 +25,46 @@
 'use strict';
 
 const Difficulty = require('../hash/difficulty.js');
-const Header = require('../block/header.js');
 const Hash = require('../hash/blake2s.js');
 const ErrorType = require('../error.js');
 
 module.exports = class Miner {
-  constructor(header) {
-    if (!(header instanceof Header)) {
+  constructor(data) {
+    if (!(data instanceof Uint8Array)) {
       throw ErrorType.Parameter.type();
     }
-    this.header = header;
+    this.data = data;
   }
 
   setNonce(value) {
-    this.header.data[7] = value >> 24;
-    this.header.data[8] = value >> 16;
-    this.header.data[9] = value >> 8;
-    this.header.data[10] = value;
+    this.data[7] = value >> 24;
+    this.data[8] = value >> 16;
+    this.data[9] = value >> 8;
+    this.data[10] = value;
   }
 
   incrNonce() {
-    if (this.header.data[10] < 0xff) {
-      this.header.data[10] += 1;
-    } else if (this.header.data[9] < 0xff) {
-      this.header.data[9] += 1;
-      this.header.data[10] = 0x00;
-    } else if (this.header.data[8] < 0xff) {
-      this.header.data[8] += 1;
-      this.header.data[9] = 0x00;
-      this.header.data[10] = 0x00;
+    if (this.data[10] < 0xff) {
+      this.data[10] += 1;
+    } else if (this.data[9] < 0xff) {
+      this.data[9] += 1;
+      this.data[10] = 0x00;
+    } else if (this.data[8] < 0xff) {
+      this.data[8] += 1;
+      this.data[9] = 0x00;
+      this.data[10] = 0x00;
     } else {
-      this.header.data[7] += 1;
-      this.header.data[8] = 0x00;
-      this.header.data[9] = 0x00;
-      this.header.data[10] = 0x00;
+      this.data[7] += 1;
+      this.data[8] = 0x00;
+      this.data[9] = 0x00;
+      this.data[10] = 0x00;
     }
   }
 
   mine(reqDiff, fromNonce = 0, toNonce = 0xffffffff) {
     this.setNonce(fromNonce);
     for (let i = fromNonce; i <= toNonce; i += 1) {
-      if (Difficulty.countLeadingZeroes(Hash.digest(this.header.data)) >= reqDiff) { return; }
+      if (Difficulty.countLeadingZeroes(Hash.digest(this.data)) >= reqDiff) { return; }
       this.incrNonce();
     }
     // TODO: error, no nonce value yielded the required difficulty.

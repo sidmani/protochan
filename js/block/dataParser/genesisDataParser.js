@@ -31,17 +31,16 @@ const Hash = require('../../hash/blake2s.js');
 module.exports = class GenesisDataParser extends DataParser {
   constructor(data, offset = 0) {
     super(data, offset);
-    // 1 byte control length, 2b content length, 5b genesis options
-    if (this.controlLength < 8) throw ErrorType.Data.controlLength();
+    // 1 byte control length, 5b genesis options
+    if (this.controlLength < 6) throw ErrorType.Data.controlLength();
 
     // instead of min/max, use min + range so no illegal values
-    this.minPostDifficulty = this.data[offset + 3];
-    this.maxPostDifficulty = this.minPostDifficulty + this.data[offset + 4];
-    this.minThreadDifficulty = this.data[offset + 5];
-    this.maxThreadDifficulty = this.minThreadDifficulty + this.data[offset + 6];
+    this.minPostDifficulty = this.data[offset + 1];
+    this.maxPostDifficulty = this.minPostDifficulty + this.data[offset + 2];
+    this.minThreadDifficulty = this.data[offset + 3];
+    this.maxThreadDifficulty = this.minThreadDifficulty + this.data[offset + 4];
 
-    this.maxThreads = this.data[offset + 7] + 1; // 1 to 256 max threads
-    // XXX: should the min thread count be 1?
+    this.maxThreads = this.data[offset + 5] + 1; // 1 to 256 max threads
     // to extend the protocol with board options, store additional
     // bytes in the post block's data and parse them here
 

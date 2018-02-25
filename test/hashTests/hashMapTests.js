@@ -31,16 +31,15 @@ t.test('HashMap functions', function(t) {
     hash: new Uint8Array([1, 2, 7])
   };
   let map = new HashMap();
-  t.equal(map.isEmpty(), true, 'HashMap.isEmpty is true after construction');
-  let hash = map.set(block);
-  t.equal(map.get(hash), block, 'HashMap sets and gets block');
+  map.set(block);
+  t.equal(map.get(block.hash), block, 'HashMap sets and gets block');
   t.throws(function() { map.set(block); }, ErrorType.HashMap.duplicate(), 'HashMap refuses to set same object twice');
   map.unset(block);
-  t.equal(map.get(hash), undefined, 'HashMap.unset removes object');
+  t.equal(map.get(block.hash), undefined, 'HashMap.unset removes object');
 
   map.set(block);
-  map.unsetRaw(hash);
-  t.equal(map.get(hash), undefined, 'HashMap.unset removes object');
+  map.unsetRaw(block.hash);
+  t.equal(map.get(block.hash), undefined, 'HashMap.unset removes object');
 
   t.strictSame(HashMap.hexToUint8Arr(''), new Uint8Array());
   t.end();
@@ -107,6 +106,6 @@ t.test('HashMap set functions', function(t) {
 
   t.equal(map.size(), 3, 'HashMap returns correct size');
   map.clear();
-  t.assert(map.isEmpty(), 'HashMap.clear empties contents');
+  t.equal(map.size(), 0, 'HashMap.clear empties contents');
   t.end();
 });

@@ -48,46 +48,6 @@ t.test('countLeadingZeroes returns 0 for empty array', function(t) {
   t.end();
 });
 
-t.test('verifyDifficulty accepts zero array', function(t) {
-  t.doesNotThrow(function() { Difficulty.verify(new Uint8Array(32), 4); });
-  t.end();
-});
-
-t.test('verifyDifficulty rejects too few leading zeroes (single byte)', function(t) {
-  let arr = new Uint8Array(32);
-  arr[0] = 0b00011011; // 3 leading zeroes
-
-  t.throws(function() { Difficulty.verify(arr, 4); }, ErrorType.Difficulty.insufficient());
-  t.end()
-});
-
-t.test('verifyDifficulty rejects too few leading zeroes (multiple bytes)', function(t) {
-  let arr = new Uint8Array(32);
-  arr[0] = 0;
-  arr[1] = 0;
-  arr[2] = 0b00011001; // 19 leading zeroes
-  t.throws(function() { Difficulty.verify(arr, 20); }, ErrorType.Difficulty.insufficient());
-  t.end();
-});
-
-t.test('verifyDifficulty accepts enough leading zeroes (single byte)', function(t) {
-  var arr = new Uint8Array(32);
-  arr[0] = 0b00000110; // 5 leading zeroes
-  t.doesNotThrow(function() { Difficulty.verify(arr, 3); });
-  t.end()
-});
-
-t.test('verifyDifficulty accepts enough leading zeroes (multiple bytes)', function(t) {
-  var arr = new Uint8Array(32);
-  arr[0] = 0;
-  arr[1] = 0;
-  arr[2] = 0;
-  arr[3] = 0;
-  arr[4] = 0b00000110; // 37 leading zeroes
-  t.doesNotThrow(function() { Difficulty.verify(arr, 37); });
-  t.end()
-});
-
 t.test('Post difficulty function works', function(t) {
   let config = {
     MIN_POST_DIFFICULTY: 10,

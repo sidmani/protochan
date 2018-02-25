@@ -24,47 +24,35 @@
 
 'use strict';
 
-const BlockType = require('../../../block/type.js');
-const Util = require('../../../util/util.js');
-const ErrorType = require('../../../error.js');
-const BlockNode = require('./blockNode.js');
-const Difficulty = require('../../../hash/difficulty.js');
-const ThreadNode = require('./threadNode.js');
+const ErrorType = require('../../error.js');
+const Util = require('../../util/util.js');
+const DataParser = require('../../block/dataParser/dataParserTypeMap.js');
+const HashMap = require('../../hash/hashMap.js');
+const Difficulty = require('../../hash/difficulty.js');
 
-module.exports = class PostNode extends BlockNode {
-  constructor(header, data, config, segmentHeight) {
-    super(header, data, config);
-    this.segmentHeight = segmentHeight;
-  }
+module.exports = class BlockNode {
+  constructor(header, data) {
+    this.header = header;
+    this.data = DataParser.create(header.blockType(), data);
 
-  addChild(header, data) {
-    switch (header.blockType()) {
-      case BlockType.POST: {
-        const node = new PostNode(
-          header,
-          data,
-          this.config,
-          this.segmentHeight + 1,
-        );
-        this.insertChildPost(node);
-        break;
-      }
-      case BlockType.THREAD: {
-        const node = new ThreadNode(header, data, this.config);
-        this.insertChildThread(node);
-        break;
-      }
-      default: throw ErrorType.Chain.illegalType();
+    if (!Util.arrayEquality(this.data.hash, header.dataHash())) {
+      throw ErrorType.Data.hash();
     }
+
+    this.hash = header.hash;
+    this.children = new HashMap();
   }
 
-  insertChildPost(post) {
+  checkPrevHash(node) {
     if (!Util.arrayEquality(
-      post.header.prevHash(),
+      node.header.prevHash(),
       this.hash,
     )) {
       throw ErrorType.Chain.hashMismatch();
     }
+  }
+
+  checkPostDifficulty(post) {
     // get the time difference
     const deltaT = post.timestamp() - this.timestamp();
 
@@ -72,7 +60,6 @@ module.exports = class PostNode extends BlockNode {
     if (deltaT <= 0) throw ErrorType.Chain.timeTravel();
 
     // get required difficulty
-    // TODO: pass config through
     const reqDiff = Difficulty.requiredPostDifficulty(
       deltaT,
       this.config,
@@ -82,23 +69,36 @@ module.exports = class PostNode extends BlockNode {
     if (post.header.difficulty < reqDiff) {
       throw ErrorType.Difficulty.insufficient();
     }
-
-    this.children.set(post);
   }
 
-  insertChildThread(thread) {
-    this.checkChildThread(thread);
-    this.rawInsertChildThread(thread);
+  addChild(node) {
+    node.setConfig(this.config);
+    this.children.set(node);
   }
 
-  checkChildThread(thread) {
-    // TODO: do we need to check hash here?
-    if (this.timestamp() >= thread.timestamp()) {
-      throw ErrorType.Chain.timeTravel();
+  getChild(hash) {
+    if (this.children.contains(hash)) {
+      return this.children.get(hash);
     }
+
+    let requestedNode;
+    this.children.forEach((childNode) => {
+      requestedNode = requestedNode || childNode.getNode(hash);
+    });
+
+    return requestedNode;
   }
 
-  rawInsertChildThread(thread) {
-    this.children.set(thread);
+  setConfig(config) {
+    this.config = config;
+  }
+
+  // convenience
+  type() {
+    return this.header.type();
+  }
+
+  timestamp() {
+    return this.header.timestamp();
   }
 };

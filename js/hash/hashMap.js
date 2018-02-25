@@ -31,10 +31,8 @@ module.exports = class HashMap {
     this.map = new Map();
   }
 
-  set(obj) {
-    this.setRaw(obj.hash, obj, false);
-    // TODO: remove this
-    return obj.hash;
+  set(obj, overwrite) {
+    this.setRaw(obj.hash, obj, overwrite);
   }
 
   setRaw(hash, obj, overwrite) {
@@ -64,10 +62,6 @@ module.exports = class HashMap {
     return this.map.size;
   }
 
-  isEmpty() {
-    return this.map.size === 0;
-  }
-
   forEach(fn) {
     this.map.forEach(fn);
   }
@@ -76,8 +70,8 @@ module.exports = class HashMap {
     this.map.clear();
   }
 
-  contains(key) {
-    return this.map.has(HashMap.uint8ArrToHex(key));
+  contains(hash) {
+    return this.map.has(HashMap.uint8ArrToHex(hash));
   }
 
   containsStringifiedKey(keyStr) {

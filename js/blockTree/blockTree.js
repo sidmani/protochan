@@ -24,11 +24,22 @@
 
 'use strict';
 
-// class Fork {
-//   constructor(heads, threadHash) {
-//     this.heads = heads;
-//     this.thread = threadHash;
-//   }
-//
-//   pushPost(post) { }
-// }
+const HashMap = require('../hash/hashMap.js');
+const GenesisNode = require('./node/genesisNode.js');
+const Config = require('../board/config.js');
+
+module.exports = class BlockTree {
+  constructor(originalNode) {
+    this.nodeMap = new HashMap();
+    this.root = new GenesisNode(originalPost);
+    this.nodeMap.set(this.root);
+  }
+
+  getNode(blockHash) {
+    return this.nodeMap.get(blockHash);
+  }
+
+  getBlock(blockHash) {
+    return this.getNode(blockHash).block;
+  }
+};

@@ -24,43 +24,21 @@
 
 'use strict';
 
-const Difficulty = require('../hash/difficulty.js');
-const Uint256 = require('../util/uint256.js');
+const t = require('tap');
+const PostDataParser = require('../../js/block/dataParser/postDataParser.js');
 
-// A Head keeps track of information about a thread
-module.exports = class Head {
-  constructor() {
-    // the height of the block referenced by this.pointer
-    this.height = 0;
+t.test('PostDataParser constructor', (t) => {
+  const data = new Uint8Array(32);
+  data[19] = 0x05;
+  const parser = new PostDataParser(data, 19);
+  const expectedHash = new Uint8Array([
+    224, 33, 30, 58, 246, 52, 222, 251,
+    113, 188, 178, 129, 80, 174, 128, 81,
+    251, 83, 53, 91, 253, 254, 235, 104,
+    47, 76, 197, 16, 246, 141, 123, 40
+  ]);
 
-    // the number of posts that are not yet under a thread block
-    this.unconfirmedPosts = 0;
+  t.strictSame(parser.hash, expectedHash, 'PostDataParser hashes data');
 
-    // the timestamp of the latest post block
-    this.strictTimestamp = 0;
-
-    // the total work done on this head
-    // work = avg # of hash ops performed to mine a block
-    this.work = new Uint256();
-  }
-
-  pushPost(post) {
-    // increment the height
-    this.height += 1;
-    // increment number of unconfirmed posts
-    this.unconfirmedPosts += 1;
-    // update the post-only timestamp
-    this.strictTimestamp = post.timestamp();
-    // add to total work
-    this.work.addExp2(Difficulty.countLeadingZeroes(post.hash));
-  }
-
-  pushThread(thread) {
-    // XXX: should height include threads?
-    this.height += 1;
-    // XXX: this runs the same calculation for every head.
-    this.work.addExp2(Difficulty.countLeadingZeroes(thread.hash));
-    // don't update strictTimestamp, since that depends on posts
-    this.unconfirmedPosts = 0;
-  }
-};
+  t.end();
+});

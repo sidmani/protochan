@@ -44,9 +44,13 @@ module.exports = class ThreadDataParser extends DataParser {
     const dataArray = Util.split(
       this.data,
       32,
-      offset,
+      offset + this.controlLength,
       (item, idx) => this.indexMap.setRaw(item, idx),
     );
+
+    // since the first array must be zero, just replace it
+    // if the hash check passes, then it was OK to begin with
+    dataArray[0] = new Uint8Array(32);
 
     this.merkleTree = new MerkleTree(dataArray);
 
@@ -62,32 +66,36 @@ module.exports = class ThreadDataParser extends DataParser {
   }
 
   getThread(index) {
-    return this.data.subarray(
-      this.offset + (index * 64),
-      this.offset + (index * 64) + 32,
-    );
+    return this.getAbsoluteIndex(index * 2);
   }
 
   getPost(index) {
+    return this.getAbsoluteIndex((index * 2) + 1);
+  }
+
+  getAbsoluteIndex(index) {
     return this.data.subarray(
-      this.offset + (index * 64) + 32,
-      this.offset + (index * 64) + 64,
+      this.offset + this.controlLength + (index * 32),
+      this.offset + this.controlLength + (index * 32) + 32,
     );
   }
 
-  // // get the post associated with a particular thread
-  // getCorrespondingItem(hash) {
-  //   const idx = this.merkleTree.indexOf(hash);
-  //   if (idx === undefined) { return undefined; }
-  //   // return idx + 1 if getting post from thread
-  //   // return idx - 1 if getting thread from post
-  //   return this.merkleTree.index(idx + (1 - (2 * (idx % 2))));
-  // }
+  // get the post associated with a particular thread
+  getCorrespondingItem(hash) {
+    const idx = this.indexMap.get(hash);
+    if (idx === undefined) { return undefined; }
+    // return idx + 1 if getting post from thread
+    // return idx - 1 if getting thread from post
+    return this.getAbsoluteIndex(idx + (1 - (2 * (idx % 2))));
+  }
 
   // find records that are in this block but not in otherThread
-  subtractThreadRecords(otherThread) {
+  subtractRecords(otherThread) {
     // include keys where indices are even (just thread hashes)
-    return this.indexMap.difference(otherThread.merkleTree, (key, value) => value % 2 === 0);
+    return this.indexMap.difference(
+      otherThread.indexMap,
+      (key, value) => value % 2 === 0,
+    );
   }
 
   contains(hash) {
