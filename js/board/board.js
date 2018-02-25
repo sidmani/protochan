@@ -24,14 +24,11 @@
 
 'use strict';
 
-const Config = require('./config.js');
-const Chain = require('../chain/chain.js');
 const ErrorType = require('../error.js');
 
 const Board = class Board {
-  constructor(originalPost) {
-    this.config = new Config(originalPost);
-    this.chain = new Chain(this.config);
+  constructor(genesis) {
+    this.genesis = genesis;
   }
 
   pushPost(post) {
