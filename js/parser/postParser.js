@@ -24,22 +24,12 @@
 
 'use strict';
 
-const HashMap = require('../hash/hashMap.js');
-const GenesisNode = require('./node/genesisNode.js');
-const Config = require('../board/config.js');
+const DataParser = require('./parser.js');
+const Hash = require('../hash/blake2s.js');
 
-module.exports = class BlockTree {
-  constructor(originalNode) {
-    this.nodeMap = new HashMap();
-    this.root = new GenesisNode(originalPost);
-    this.nodeMap.set(this.root);
-  }
-
-  getNode(blockHash) {
-    return this.nodeMap.get(blockHash);
-  }
-
-  getBlock(blockHash) {
-    return this.getNode(blockHash).block;
+module.exports = class PostDataParser extends DataParser {
+  constructor(data, offset = 0) {
+    super(data, offset);
+    this.hash = Hash.digest(this.data);
   }
 };

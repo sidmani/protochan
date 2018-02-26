@@ -25,22 +25,20 @@
 'use strict';
 
 const t = require('tap');
-const DataParser = require('../../js/block/dataParser/dataParser.js');
-const ErrorType = require('../../js/error.js');
+const PostParser = require('../../js/parser/postParser.js');
 
-t.test('DataParser', function(t) {
+t.test('PostParser constructor', (t) => {
   const data = new Uint8Array(32);
-  data[5] = 0x1C;
+  data[19] = 0x05;
+  const parser = new PostParser(data, 19);
+  const expectedHash = new Uint8Array([
+    224, 33, 30, 58, 246, 52, 222, 251,
+    113, 188, 178, 129, 80, 174, 128, 81,
+    251, 83, 53, 91, 253, 254, 235, 104,
+    47, 76, 197, 16, 246, 141, 123, 40
+  ]);
 
-  t.throws(() => { new DataParser(data, 5); }, ErrorType.Data.controlLength(), 'Parser throws on control length too long');
+  t.strictSame(parser.hash, expectedHash, 'PostDataParser hashes data');
 
-  data[5] = 0x1A;
-
-  let parser;
-  t.doesNotThrow(() => { parser = new DataParser(data, 5); }, 'Parser accepts valid control length');
-  t.equal(parser.controlLength, 0x1A, 'Parser sets correct control length');
-  t.equal(parser.contentLength, 0x01, 'Parser sets correct content length');
-  t.equal(parser.offset, 0x05, 'Parser sets correct offset');
-  t.equal(parser.data, data, 'Parser sets data');
   t.end();
 });

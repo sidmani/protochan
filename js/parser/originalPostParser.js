@@ -24,8 +24,8 @@
 
 'use strict';
 
-const DataParser = require('./dataParser.js');
-const Hash = require('../../hash/blake2s.js');
+const DataParser = require('./parser.js');
+const Hash = require('../hash/blake2s.js');
 
 module.exports = class OriginalPostDataParser extends DataParser {
   constructor(data, offset = 0) {

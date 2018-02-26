@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Header = require('../../js/block/header.js');
+var Header = require('../../js/header/header.js');
 var ErrorType = require('../../js/error.js')
 
 var t = require('tap');

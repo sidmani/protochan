@@ -72,7 +72,6 @@ module.exports.requiredThreadDifficulty = function (deltaT, numPosts, config) {
   const maxThreads = config.MAX_THREAD_COUNT;
   const minDiff = config.MIN_THREAD_DIFFICULTY;
   const maxDiff = config.MAX_THREAD_DIFFICULTY;
-
   const interval = maxDiff - minDiff;
   const c = Math.log(3 / (2 * interval)) / -300;
   const d = Math.log(3 / (2 * interval)) / -maxThreads;

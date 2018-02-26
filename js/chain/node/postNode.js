@@ -24,63 +24,66 @@
 
 'use strict';
 
-const BlockType = require('../../block/type.js');
+const BlockType = require('../../header/type.js');
 const ErrorType = require('../../error.js');
 const BlockNode = require('./blockNode.js');
-const Difficulty = require('../../hash/difficulty.js');
-const Config = require('../../board/config.js');
 
-module.exports = class GenesisNode extends BlockNode {
-  constructor(header, data) {
-    super(header, data);
-    this.config = new Config(data);
+module.exports = class PostNode extends BlockNode {
+  // score the containing thread assuming this post is at the top
+  score(depth) {
+    return (this.segmentHeight / (this.height + 1)) - (depth / this.config.MAX_THREAD_COUNT);
+  }
+
+  // segmentHeight is the # of posts since the last thread block
+  setSegmentHeight(height) {
+    this.segmentHeight = height;
+  }
+
+  // height is the total # of posts in this thread
+  setHeight(height) {
+    this.height = height;
+  }
+
+  // the thread that this post is contained in
+  setThread(thread) {
+    this.thread = thread;
   }
 
   addChild(node) {
-    this.checkPrevHash(node);
-
     switch (node.type()) {
-      case BlockType.THREAD: {
-        this.checkThread(node);
-        node.setHeight(1);
-        // in order to guarantee that the tree is never
-        // invalid and has no side effects, this insertion
-        // must be after checkChildThread() returns
-        // TODO: make this not repeat the get operation
-        const op = this.children.get(node.data.getThread(0));
-        op.children.set(node);
+      case BlockType.POST: {
+        this.checkPost(node);
+        node.setSegmentHeight(this.segmentHeight + 1);
+        node.setHeight(this.height + 1);
+        node.setThread(this.thread);
+        node.setBaseThreadHeight(this.baseThreadHeight);
         break;
       }
-      case BlockType.ORIGINAL_POST: {
-        this.checkOriginalPost(node);
-        break;
-      }
+      case BlockType.THREAD:
+        // threads are never added directly to posts
+        throw ErrorType.State.internalConsistency();
       default: throw ErrorType.Chain.illegalType();
     }
 
     super.addChild(node);
   }
 
-  checkThread(thread) {
-    // the first thread block must contain exactly 1 record
-    if (thread.data.numRecords !== 1) {
-      throw ErrorType.Chain.unknownThread();
-    }
+  checkPost(post) {
+    this.checkPrevHash(post);
 
-    // check difficulty of thread hash
-    Difficulty.verifyThreads(this, thread, this.config, 0);
-
-    // check that the thread's original post hash points to
-    // a valid child of this node
-    const op = this.children.get(thread.data.getThread(0));
-    if (!op || op.type() !== BlockType.ORIGINAL_POST) {
-      throw ErrorType.Chain.missingReference();
-    }
-
-    op.checkThread(thread);
+    // verify difficulty and timestamps
+    this.checkPostDifficulty(post);
   }
 
-  checkOriginalPost(op) {
-    this.checkPostDifficulty(op);
+  checkThread(thread) {
+    // TODO: do we need to check hash here?
+    if (this.timestamp() >= thread.timestamp()) {
+      throw ErrorType.Chain.timeTravel();
+    }
+  }
+
+  insertThread(thread) {
+    thread.setThreadHeight(this.thread, this.height);
+    super.addChild(thread);
   }
 };

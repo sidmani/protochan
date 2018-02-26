@@ -26,14 +26,14 @@
 
 const ErrorType = require('../../error.js');
 const Util = require('../../util/util.js');
-const DataParser = require('../../block/dataParser/dataParserTypeMap.js');
 const HashMap = require('../../hash/hashMap.js');
 const Difficulty = require('../../hash/difficulty.js');
 
 module.exports = class BlockNode {
-  constructor(header, data) {
+  constructor(header, data, nodeMap) {
     this.header = header;
-    this.data = DataParser.create(header.blockType(), data);
+    this.data = data;
+    this.nodeMap = nodeMap;
 
     if (!Util.arrayEquality(this.data.hash, header.dataHash())) {
       throw ErrorType.Data.hash();
@@ -71,22 +71,30 @@ module.exports = class BlockNode {
     }
   }
 
-  addChild(node) {
-    node.setConfig(this.config);
-    this.children.set(node);
+  checkThreadDifficulty(thread, numPosts) {
+    // get the time difference
+    const deltaT = thread.timestamp() - this.timestamp();
+
+    // if new block is older than the previous block, error
+    if (deltaT <= 0) throw ErrorType.Chain.timeTravel();
+
+    // get required difficulty
+    const reqDiff = Difficulty.requiredThreadDifficulty(
+      deltaT,
+      numPosts,
+      this.config,
+    );
+
+    // if new block doesn't have the required difficulty, error
+    if (thread.header.difficulty < reqDiff) {
+      throw ErrorType.Difficulty.insufficient();
+    }
   }
 
-  getChild(hash) {
-    if (this.children.contains(hash)) {
-      return this.children.get(hash);
-    }
-
-    let requestedNode;
-    this.children.forEach((childNode) => {
-      requestedNode = requestedNode || childNode.getNode(hash);
-    });
-
-    return requestedNode;
+  addChild(node) {
+    node.setConfig(this.config);
+    this.children.setRaw(node.hash, true);
+    this.nodeMap.set(node);
   }
 
   setConfig(config) {
@@ -95,7 +103,7 @@ module.exports = class BlockNode {
 
   // convenience
   type() {
-    return this.header.type();
+    return this.header.blockType();
   }
 
   timestamp() {

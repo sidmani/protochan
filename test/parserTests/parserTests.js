@@ -24,53 +24,23 @@
 
 'use strict';
 
-const BlockType = require('../../block/type.js');
-const ErrorType = require('../../error.js');
-const BlockNode = require('./blockNode.js');
+const t = require('tap');
+const DataParser = require('../../js/parser/parser.js');
+const ErrorType = require('../../js/error.js');
 
-module.exports = class PostNode extends BlockNode {
-  setSegmentHeight(height) {
-    this.segmentHeight = height;
-  }
+t.test('DataParser', function(t) {
+  const data = new Uint8Array(32);
+  data[5] = 0x1C;
 
-  setHeight(height) {
-    this.height = height;
-  }
+  t.throws(() => { new DataParser(data, 5); }, ErrorType.Data.controlLength(), 'Parser throws on control length too long');
 
-  setThread(thread) {
-    this.thread = thread;
-  }
+  data[5] = 0x1A;
 
-  addChild(node) {
-    switch (node.type()) {
-      case BlockType.POST: {
-        this.checkPost(node);
-        node.setSegmentHeight(this.segmentHeight + 1);
-        node.setHeight(this.height + 1);
-        node.setThread(this.thread);
-        break;
-      }
-      case BlockType.THREAD: {
-        this.checkThread(node);
-        break;
-      }
-      default: throw ErrorType.Chain.illegalType();
-    }
-
-    super.addChild(node);
-  }
-
-  checkPost(post) {
-    this.checkPrevHash(post);
-
-    // verify difficulty and timestamps
-    this.checkPostDifficulty(post);
-  }
-
-  checkThread(thread) {
-    // TODO: do we need to check hash here?
-    if (this.timestamp() >= thread.timestamp()) {
-      throw ErrorType.Chain.timeTravel();
-    }
-  }
-};
+  let parser;
+  t.doesNotThrow(() => { parser = new DataParser(data, 5); }, 'Parser accepts valid control length');
+  t.equal(parser.controlLength, 0x1A, 'Parser sets correct control length');
+  t.equal(parser.contentLength, 0x01, 'Parser sets correct content length');
+  t.equal(parser.offset, 0x05, 'Parser sets correct offset');
+  t.equal(parser.data, data, 'Parser sets data');
+  t.end();
+});

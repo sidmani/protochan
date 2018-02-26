@@ -51,7 +51,7 @@ t.test('countLeadingZeroes returns 0 for empty array', function(t) {
 t.test('Post difficulty function works', function(t) {
   let config = {
     MIN_POST_DIFFICULTY: 10,
-    MAX_POST_DIFFICULTY: 40
+    MAX_POST_DIFFICULTY: 40,
   }
   t.equal(Difficulty.requiredPostDifficulty(0, config), 40,
   'Post difficulty f(0) = max difficulty');
@@ -62,11 +62,11 @@ t.test('Post difficulty function works', function(t) {
 });
 
 t.test('Thread difficulty function works', function(t) {
-  let config = {
+  const config = {
     MIN_THREAD_DIFFICULTY: 24,
     MAX_THREAD_DIFFICULTY: 64,
-    MAX_THREAD_COUNT: 255
-  }
+    MAX_THREAD_COUNT: 255,
+  };
   t.equal(Difficulty.requiredThreadDifficulty(0, 0, config), 64, 'Thread difficulty f(0 sec, 0 posts) = max difficulty');
   t.equal(Difficulty.requiredThreadDifficulty(300, 0, config), 45, 'Thread difficulty f(300 sec, 0 posts) = 0.5*difficulty interval + minimum difficulty + 1');
   t.equal(Difficulty.requiredThreadDifficulty(0, 255, config), 45, 'Thread difficulty f(0 sec, maxThread posts) = 0.5*difficulty interval + minimum difficulty + 1');

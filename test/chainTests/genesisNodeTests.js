@@ -22,36 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
-
-const BlockType = require('../../block/type.js');
-const BlockNode = require('./blockNode.js');
-const ErrorType = require('../../error.js');
-const Util = require('../../util/util.js');
-
-module.exports = class OriginalPostNode extends BlockNode {
-  // XXX: this requires that a thread has already been inserted
-  // before all checks complete
-  addChild(node) {
-    switch (node.type()) {
-      case BlockType.THREAD: {
-        this.checkThread(node);
-        break;
-      }
-      default: throw ErrorType.Chain.illegalType();
-    }
-
-    super.addChild(node);
-  }
-
-  checkThread(thread) {
-    // TODO: is hash check actually necessary?
-    if (!Util.arrayEquality(thread.data.getPost(0), this.hash)) {
-      throw ErrorType.Chain.hashMismatch();
-    }
-
-    if (this.timestamp() >= thread.timestamp()) {
-      throw ErrorType.Chain.timeTravel();
-    }
-  }
-};
+const t = require('tap');
+const ErrorType = require('../../js/error.js')
+const GenesisNode = require('../../js/chain/node/genesisNode.js');

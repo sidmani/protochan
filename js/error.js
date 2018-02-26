@@ -35,21 +35,13 @@ module.exports.Data = {
 module.exports.Chain = {
   illegalType() { return new Error('Block of specified type cannot be inserted'); },
   wrongBoard() { return new Error('Board ID mismatch.'); },
+  wrongThread() { return new Error('Thread ID mismatch.'); },
   missingReference() { return new Error('Referenced block does not exist.'); },
   hashMismatch() { return new Error('Hashes were not equal as expected.'); },
   missingThread() { return new Error('Thread was removed illegally.'); },
   threadOrder() { return new Error('Order of threads in thread block is illegal.'); },
   unknownThread() { return new Error('Thread record referenced nonexistent thread.'); },
   timeTravel() { return new Error('Timestamp order is illegal.'); },
-};
-
-module.exports.Head = {
-  resurrection() { return new Error('Attempt to resurrect a buried thread.'); },
-};
-
-module.exports.Block = {
-  type() { return new Error('Block type is incorrect.'); },
-  illegalControlValues() { return new Error('Control bytes contain illegal values.'); },
 };
 
 module.exports.Parameter = {

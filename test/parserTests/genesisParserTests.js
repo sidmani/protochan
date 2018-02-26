@@ -25,7 +25,7 @@
 'use strict';
 
 const t = require('tap');
-const GenesisDataParser = require('../../js/block/dataParser/genesisDataParser.js');
+const GenesisDataParser = require('../../js/parser/genesisParser.js');
 const ErrorType = require('../../js/error.js');
 
 t.test('GenesisDataParser constructor', (t) => {

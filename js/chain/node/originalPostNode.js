@@ -24,21 +24,39 @@
 
 'use strict';
 
-const t = require('tap');
-const PostDataParser = require('../../js/block/dataParser/postDataParser.js');
+const BlockType = require('../../header/type.js');
+const BlockNode = require('./blockNode.js');
+const ErrorType = require('../../error.js');
+const Util = require('../../util/util.js');
 
-t.test('PostDataParser constructor', (t) => {
-  const data = new Uint8Array(32);
-  data[19] = 0x05;
-  const parser = new PostDataParser(data, 19);
-  const expectedHash = new Uint8Array([
-    224, 33, 30, 58, 246, 52, 222, 251,
-    113, 188, 178, 129, 80, 174, 128, 81,
-    251, 83, 53, 91, 253, 254, 235, 104,
-    47, 76, 197, 16, 246, 141, 123, 40
-  ]);
+module.exports = class OriginalPostNode extends BlockNode {
+  // XXX: this requires that a thread has already been inserted
+  // before all checks complete
+  addChild(node) {
+    switch (node.type()) {
+      case BlockType.THREAD: {
+        this.checkThread(node);
+        break;
+      }
+      default: throw ErrorType.Chain.illegalType();
+    }
 
-  t.strictSame(parser.hash, expectedHash, 'PostDataParser hashes data');
+    super.addChild(node);
+  }
 
-  t.end();
-});
+  checkThread(thread) {
+    // TODO: is hash check actually necessary?
+    if (!Util.arrayEquality(thread.data.getPost(0), this.hash)) {
+      throw ErrorType.Chain.hashMismatch();
+    }
+
+    if (this.timestamp() >= thread.timestamp()) {
+      throw ErrorType.Chain.timeTravel();
+    }
+  }
+
+  insertThread(thread) {
+    thread.setThreadHeight(thread.hash, 0);
+    super.addChild(thread);
+  }
+};
