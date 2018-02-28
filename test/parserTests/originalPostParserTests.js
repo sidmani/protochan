@@ -24,10 +24,10 @@
 
 'use strict';
 
-const t = require('tap');
-const OriginalPostDataParser = require('../../js/parser/originalPostParser.js');
+const tap = require('tap');
+const OriginalPostDataParser = require('../../js/chain/parser/originalPostParser.js');
 
-t.test('OriginalPostDataParser constructor', (t) => {
+tap.test('OriginalPostDataParser constructor', (t) => {
   const data = new Uint8Array(32);
   data[19] = 0x05;
   const parser = new OriginalPostDataParser(data, 19);
@@ -35,7 +35,7 @@ t.test('OriginalPostDataParser constructor', (t) => {
     224, 33, 30, 58, 246, 52, 222, 251,
     113, 188, 178, 129, 80, 174, 128, 81,
     251, 83, 53, 91, 253, 254, 235, 104,
-    47, 76, 197, 16, 246, 141, 123, 40
+    47, 76, 197, 16, 246, 141, 123, 40,
   ]);
 
   t.strictSame(parser.hash, expectedHash, 'OriginalPostDataParser hashes data');

@@ -22,12 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const t = require('tap');
-const ErrorType = require('../../js/error.js')
+const tap = require('tap');
+const ErrorType = require('../../js/error.js');
 const GenesisNode = require('../../js/chain/node/genesisNode.js');
 const HashMap = require('../../js/hash/hashMap.js');
 
-t.test('GenesisNode constructor', t => {
+tap.test('GenesisNode constructor', (t) => {
   const header = {
     hash: new Uint8Array([1, 2, 3, 4]),
     dataHash() {
@@ -38,7 +38,7 @@ t.test('GenesisNode constructor', t => {
         253, 229, 111, 10, 89, 214, 124, 116,
       ]);
     },
-    timestamp() { return 12; }
+    timestamp() { return 12; },
   };
   const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
   const nodeMap = new HashMap();
@@ -48,12 +48,12 @@ t.test('GenesisNode constructor', t => {
     MAX_THREAD_COUNT: 11,
   };
   let n;
-  t.doesNotThrow(() => { n = new GenesisNode(header, data, nodeMap, config); })
+  t.doesNotThrow(() => { n = new GenesisNode(header, data, nodeMap, config); });
   t.strictSame(n.data.maxThreads, 1, 'GenesisNode creates parser');
   t.end();
 });
 
-t.test('GenesisNode.checkThread', t => {
+tap.test('GenesisNode.checkThread', (t) => {
   const header = {
     hash: new Uint8Array([1, 2, 3, 4]),
     dataHash() {
@@ -64,7 +64,7 @@ t.test('GenesisNode.checkThread', t => {
         253, 229, 111, 10, 89, 214, 124, 116,
       ]);
     },
-    timestamp() { return 12; }
+    timestamp() { return 12; },
   };
   const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
   const nodeMap = new HashMap();
@@ -74,13 +74,13 @@ t.test('GenesisNode.checkThread', t => {
     MAX_THREAD_COUNT: 11,
   };
 
-  n = new GenesisNode(header, data, nodeMap, config);
+  const n = new GenesisNode(header, data, nodeMap, config);
   const thread = {
     data: {
       numRecords: 2,
       getThread(idx) {
         return new Uint8Array([idx, 5, 6, 7]);
-      }
+      },
     },
     header: {
       difficulty: 44,
@@ -88,35 +88,35 @@ t.test('GenesisNode.checkThread', t => {
     hash: new Uint8Array([1, 2, 5, 9]),
     type() { return 0x01; },
     timestamp() { return 312; },
-    setHeight(height) { this.height = height; }
-  }
+    setHeight(height) { this.height = height; },
+  };
 
   t.throws(
     () => { n.checkThread(thread); },
     ErrorType.unknownThread(),
-    'checkThread rejects numRecords != 1'
+    'checkThread rejects numRecords != 1',
   );
   thread.data.numRecords = 1;
   t.throws(
     () => { n.checkThread(thread); },
     ErrorType.insufficientDifficulty(),
-    'checkThread rejects insufficient difficulty'
+    'checkThread rejects insufficient difficulty',
   );
   thread.header.difficulty = 45;
   t.throws(
     () => { n.checkThread(thread); },
     ErrorType.missingReference(new Uint8Array([0, 5, 6, 7])),
-    'checkThread rejects missing original post'
+    'checkThread rejects missing original post',
   );
 
   nodeMap.set({
-    type() { return 0x00; }
+    type() { return 0x00; },
   }, new Uint8Array([0, 5, 6, 7]));
 
   t.throws(
     () => { n.checkThread(thread); },
     ErrorType.invalidChild(),
-    'checkThread rejects non-child original post'
+    'checkThread rejects non-child original post',
   );
 
   n.children.set(true, new Uint8Array([0, 5, 6, 7]));
@@ -124,7 +124,7 @@ t.test('GenesisNode.checkThread', t => {
   t.throws(
     () => { n.checkThread(thread); },
     ErrorType.illegalNodeType(),
-    'checkThread rejects illegal original post type'
+    'checkThread rejects illegal original post type',
   );
 
   let opCheckedThread = false;
@@ -132,7 +132,7 @@ t.test('GenesisNode.checkThread', t => {
   const op = {
     type() { return 0x02; },
     checkThread() { opCheckedThread = true; },
-    insertThread() { opInsertedThread = true; }
+    insertThread() { opInsertedThread = true; },
   };
   nodeMap.set(op, new Uint8Array([0, 5, 6, 7]), true);
   t.doesNotThrow(() => { n.checkThread(thread); }, 'checkThread accepts valid thread');

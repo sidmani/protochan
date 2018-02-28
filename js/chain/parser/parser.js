@@ -24,13 +24,25 @@
 
 'use strict';
 
-const DataParser = require('./parser.js');
-const Hash = require('../hash/blake2s.js');
+const ErrorType = require('../../error.js');
 
-module.exports = class OriginalPostDataParser extends DataParser {
+module.exports = class DataParser {
   constructor(data, offset = 0) {
-    super(data, offset);
-    this.hash = Hash.digest(this.data);
-    // Parse thread options here
+    this.controlLength = data[offset + 0];
+    // TODO: is there a way to avoid this check?
+    // pad with zeroes?
+    if ((this.controlLength + offset) > data.byteLength) {
+      throw ErrorType.controlLength();
+    }
+
+    this.contentLength = data.byteLength
+      - this.controlLength
+      - offset;
+
+    this.offset = offset;
+    // no error if length too long, so protocol is more extensible
+    // just ignore everything after length
+    // create as few arrays as possible
+    this.data = data;
   }
 };

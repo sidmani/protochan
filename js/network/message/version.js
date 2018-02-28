@@ -24,30 +24,21 @@
 
 'use strict';
 
-const BlockNode = require('./blockNode.js');
-const ErrorType = require('../../error.js');
-const Parser = require('../parser/originalPostParser.js');
+const Message = require('./message.js');
 
-module.exports = class OriginalPostNode extends BlockNode {
-  constructor(header, data, nodeMap, config) {
-    const parser = new Parser(data);
-    super(header, parser, nodeMap, config);
+module.exports = class VersionMessage extends Message {
+  constructor(data) {
+    // 4b version
+    // 4b timestamp
+    // 4b services
+    super(data, 12);
   }
 
-  /* eslint-disable */
-  addChild() {
-    throw ErrorType.illegalNodeType();
-  }
-  /* eslint-enable */
-
-  checkThread(thread) {
-    if (this.timestamp() >= thread.timestamp()) {
-      throw ErrorType.timeTravel();
-    }
+  version() {
+    return Message.getUint32(this.data, 12);
   }
 
-  insertThread(thread) {
-    thread.setThreadHeight(thread.hash, 0);
-    super.addChild(thread);
+  timestamp() {
+    return Message.getUint32(this.data, 16);
   }
 };

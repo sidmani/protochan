@@ -24,9 +24,9 @@
 
 const Miner = require('../../js/miner/miner.js');
 const Hash = require('../../js/hash/blake2s.js');
-const t = require('tap');
+const tap = require('tap');
 
-t.test('Miner produces a leading zero byte for 8 difficulty', function(t) {
+tap.test('Miner produces a leading zero byte for 8 difficulty', (t) => {
   const data = new Uint8Array(80);
 
   const miner = new Miner(data);
@@ -36,7 +36,7 @@ t.test('Miner produces a leading zero byte for 8 difficulty', function(t) {
   t.end();
 });
 
-t.test('Header nonce methods', function(t) {
+tap.test('Header nonce methods', (t) => {
   const data = new Uint8Array(80);
   const m = new Miner(data);
 

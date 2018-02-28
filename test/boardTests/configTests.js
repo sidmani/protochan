@@ -22,11 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Configuration = require('../../js/board/config.js');
-var t = require('tap');
+const Configuration = require('../../js/chain/config.js');
+const tap = require('tap');
 
-t.test('Configuration constructor', function(t) {
-  let data = {
+tap.test('Configuration constructor', (t) => {
+  const data = {
     minPostDifficulty: 0xf5,
     maxPostDifficulty: 0xf6,
     minThreadDifficulty: 0xf7,
@@ -34,7 +34,7 @@ t.test('Configuration constructor', function(t) {
     maxThreads: 0xf9,
   };
 
-  let config = new Configuration(data);
+  const config = new Configuration(data);
   t.equal(config.MIN_POST_DIFFICULTY, 0xf5, 'Configuration sets minimum post difficulty');
   t.equal(config.MAX_POST_DIFFICULTY, 0xf6, 'Configuration sets maximum post difficulty');
   t.equal(config.MIN_THREAD_DIFFICULTY, 0xf7, 'Configuration sets min thread difficulty');

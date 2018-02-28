@@ -22,19 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Difficulty = require('../../js/hash/difficulty.js');
-var ErrorType = require('../../js/error.js');
-var t = require('tap');
+const Difficulty = require('../../js/hash/difficulty.js');
+const tap = require('tap');
 
-t.test('countLeadingZeroes counts number of zeroes in a single byte', function(t) {
-  var arr = new Uint8Array(32);
+tap.test('countLeadingZeroes counts number of zeroes in a single byte', (t) => {
+  const arr = new Uint8Array(32);
   arr[0] = 0b00011011;
   t.equal(Difficulty.countLeadingZeroes(arr), 3);
   t.end();
 });
 
-t.test('countLeadingZeroes counts number of zeroes in multiple bytes', function(t) {
-  var arr = new Uint8Array(32);
+tap.test('countLeadingZeroes counts number of zeroes in multiple bytes', (t) => {
+  const arr = new Uint8Array(32);
   arr[0] = 0;
   arr[1] = 0;
   arr[2] = 0;
@@ -43,25 +42,35 @@ t.test('countLeadingZeroes counts number of zeroes in multiple bytes', function(
   t.end();
 });
 
-t.test('countLeadingZeroes returns 0 for empty array', function(t) {
+tap.test('countLeadingZeroes returns 0 for empty array', (t) => {
   t.assert(Difficulty.countLeadingZeroes(new Uint8Array([])) === 0);
   t.end();
 });
 
-t.test('Post difficulty function works', function(t) {
-  let config = {
+tap.test('Post difficulty function works', (t) => {
+  const config = {
     MIN_POST_DIFFICULTY: 10,
     MAX_POST_DIFFICULTY: 40,
-  }
-  t.equal(Difficulty.requiredPostDifficulty(0, config), 40,
-  'Post difficulty f(0) = max difficulty');
-  t.equal(Difficulty.requiredPostDifficulty(10, config), 20,
-  'Post difficulty f(10) = max difficulty / 2');
-  t.equal(Difficulty.requiredPostDifficulty(999999999, config), 10, 'Post difficulty = 10 when delta-t increases');
+  };
+  t.equal(
+    Difficulty.requiredPostDifficulty(0, config),
+    40,
+    'Post difficulty f(0) = max difficulty',
+  );
+  t.equal(
+    Difficulty.requiredPostDifficulty(10, config),
+    20,
+    'Post difficulty f(10) = max difficulty / 2',
+  );
+  t.equal(
+    Difficulty.requiredPostDifficulty(999999999, config),
+    10,
+    'Post difficulty = 10 when delta-t increases',
+  );
   t.end();
 });
 
-t.test('Thread difficulty function works', function(t) {
+tap.test('Thread difficulty function works', (t) => {
   const config = {
     MIN_THREAD_DIFFICULTY: 24,
     MAX_THREAD_DIFFICULTY: 64,

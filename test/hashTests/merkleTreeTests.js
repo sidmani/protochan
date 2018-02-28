@@ -22,16 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var MerkleTree = require('../../js/hash/merkleTree.js');
-var Hash = require('../../js/hash/blake2s.js');
+const MerkleTree = require('../../js/hash/merkleTree.js');
+const Hash = require('../../js/hash/blake2s.js');
 
-var t = require('tap');
-var ErrorType = require('../../js/error.js');
+const tap = require('tap');
+const ErrorType = require('../../js/error.js');
 
-t.test('MerkleTree', function(t) {
-  t.throws(function() { new MerkleTree([]); }, ErrorType.dataLength(), 'Merkle tree rejects zero length array');
+tap.test('MerkleTree', (t) => {
+  t.throws(() => new MerkleTree([]), ErrorType.dataLength(), 'Merkle tree rejects zero length array');
 
-  let data = new Uint8Array(192);
+  const data = new Uint8Array(192);
   data.fill(1, 0, 32);
   data.fill(2, 32, 64);
   data.fill(3, 64, 96);
@@ -39,58 +39,61 @@ t.test('MerkleTree', function(t) {
   data.fill(5, 128, 160);
   data.fill(6, 160, 192);
 
-  let level3 = [
+  const level3 = [
     data.subarray(0, 32),
     data.subarray(32, 64),
     data.subarray(64, 96),
     data.subarray(96, 128),
     data.subarray(128, 160),
-    data.subarray(160, 192)
+    data.subarray(160, 192),
   ];
 
-  let concat3_1 = new Uint8Array(64);
-  concat3_1.set(Hash.digest(level3[0]), 0);
-  concat3_1.set(Hash.digest(level3[1]), 32);
+  const concat31 = new Uint8Array(64);
+  concat31.set(Hash.digest(level3[0]), 0);
+  concat31.set(Hash.digest(level3[1]), 32);
 
-  let concat3_2 = new Uint8Array(64);
-  concat3_2.set(Hash.digest(level3[2]), 0);
-  concat3_2.set(Hash.digest(level3[3]), 32);
+  const concat32 = new Uint8Array(64);
+  concat32.set(Hash.digest(level3[2]), 0);
+  concat32.set(Hash.digest(level3[3]), 32);
 
-  let concat3_3 = new Uint8Array(64);
-  concat3_3.set(Hash.digest(level3[4]), 0);
-  concat3_3.set(Hash.digest(level3[5]), 32);
+  const concat33 = new Uint8Array(64);
+  concat33.set(Hash.digest(level3[4]), 0);
+  concat33.set(Hash.digest(level3[5]), 32);
 
-  let level2 = [
-    Hash.digest(concat3_1),
-    Hash.digest(concat3_2),
-    Hash.digest(concat3_3)
+  const level2 = [
+    Hash.digest(concat31),
+    Hash.digest(concat32),
+    Hash.digest(concat33),
   ];
 
-  let concat1 = new Uint8Array(64);
+  const concat1 = new Uint8Array(64);
   concat1.set(level2[0], 0);
   concat1.set(level2[1], 32);
 
-  let concat2 = new Uint8Array(64);
+  const concat2 = new Uint8Array(64);
   concat2.set(level2[2], 0);
   concat2.set(level2[2], 32);
 
-  let level1 = [
+  const level1 = [
     Hash.digest(concat1),
-    Hash.digest(concat2)
+    Hash.digest(concat2),
   ];
 
-  let concat3 = new Uint8Array(64);
+  const concat3 = new Uint8Array(64);
   concat3.set(level1[0], 0);
   concat3.set(level1[1], 32);
 
-  let expectedRoot = Hash.digest(concat3);
+  const expectedRoot = Hash.digest(concat3);
 
-  let tree = new MerkleTree(level3);
+  const tree = new MerkleTree(level3);
 
   t.strictSame(tree.root, expectedRoot, 'Merkle tree sets root correctly');
   // let expectedArr = new Uint8Array(32);
   // expectedArr.fill(3, 0, 32);
-  // t.strictSame(tree.get([level1[0], level2[1], level3[2]]), expectedArr, 'Merkle tree gets object from intermediate path');
+  // t.strictSame(
+  // tree.get([level1[0], level2[1], level3[2]]),
+  // expectedArr,
+  // 'Merkle tree gets object from intermediate path');
   t.equal(tree.depth, 4, 'Tree sets depth');
   t.end();
 });

@@ -24,25 +24,7 @@
 
 'use strict';
 
-const ErrorType = require('../error.js');
+const Message = require('./message.js');
 
-module.exports = class DataParser {
-  constructor(data, offset = 0) {
-    this.controlLength = data[offset + 0];
-    // TODO: is there a way to avoid this check?
-    // pad with zeroes?
-    if ((this.controlLength + offset) > data.byteLength) {
-      throw ErrorType.controlLength();
-    }
-
-    this.contentLength = data.byteLength
-      - this.controlLength
-      - offset;
-
-    this.offset = offset;
-    // no error if length too long, so protocol is more extensible
-    // just ignore everything after length
-    // create as few arrays as possible
-    this.data = data;
-  }
-};
+// verack doesn't have any other fields
+module.exports = Message;

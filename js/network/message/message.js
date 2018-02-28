@@ -24,30 +24,44 @@
 
 'use strict';
 
-const BlockNode = require('./blockNode.js');
 const ErrorType = require('../../error.js');
-const Parser = require('../parser/originalPostParser.js');
+const Hash = require('../../hash/blake2s.js');
 
-module.exports = class OriginalPostNode extends BlockNode {
-  constructor(header, data, nodeMap, config) {
-    const parser = new Parser(data);
-    super(header, parser, nodeMap, config);
-  }
+module.exports = class Message {
+  // 4 bytes magic #
+  // 4 bytes command
+  // 2 bytes length
+  // 4 bytes checksum (first 4 bytes of hash(payload))
+  // n bytes payload
+  constructor(data, expectedPayloadLength = 0) {
+    if (data.byteLength < 12 + expectedPayloadLength) {
+      throw ErrorType.dataLength();
+    }
+    this.data = data;
 
-  /* eslint-disable */
-  addChild() {
-    throw ErrorType.illegalNodeType();
-  }
-  /* eslint-enable */
-
-  checkThread(thread) {
-    if (this.timestamp() >= thread.timestamp()) {
-      throw ErrorType.timeTravel();
+    const payloadHash = Hash.digest(data.subarray(14, 14 + this.length()));
+    const evalChecksum = Message.getUint32(payloadHash.slice(0, 4));
+    if (evalChecksum !== this.checksum()) {
+      throw ErrorType.checksum();
     }
   }
 
-  insertThread(thread) {
-    thread.setThreadHeight(thread.hash, 0);
-    super.addChild(thread);
+  magic() {
+    return Message.getUint32(this.data);
+  }
+
+  command() {
+    return Message.getUint32(this.data, 4);
+  }
+
+  checksum() {
+    return Message.getUint32(this.data, 8);
+  }
+
+  static getUint32(arr, index = 0) {
+    return ((arr[index] << 24)
+    ^ (arr[index + 1] << 16)
+    ^ (arr[index + 2] << 8)
+    ^ arr[index + 3]) >>> 0;
   }
 };

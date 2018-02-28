@@ -25,11 +25,11 @@
 'use strict';
 
 const DataParser = require('./parser.js');
-const MerkleTree = require('../hash/merkleTree.js');
-const Hash = require('../hash/blake2s.js');
-const HashMap = require('../hash/hashMap.js');
-const ErrorType = require('../error.js');
-const Util = require('../util/util.js');
+const MerkleTree = require('../../hash/merkleTree.js');
+const Hash = require('../../hash/blake2s.js');
+const HashMap = require('../../hash/hashMap.js');
+const ErrorType = require('../../error.js');
+const Util = require('../../util/util.js');
 
 module.exports = class ThreadDataParser extends DataParser {
   constructor(data, offset = 0) {

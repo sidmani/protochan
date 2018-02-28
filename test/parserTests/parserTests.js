@@ -24,15 +24,15 @@
 
 'use strict';
 
-const t = require('tap');
-const DataParser = require('../../js/parser/parser.js');
+const tap = require('tap');
+const DataParser = require('../../js/chain/parser/parser.js');
 const ErrorType = require('../../js/error.js');
 
-t.test('DataParser', function(t) {
+tap.test('DataParser', (t) => {
   const data = new Uint8Array(32);
   data[5] = 0x1C;
 
-  t.throws(() => { new DataParser(data, 5); }, ErrorType.controlLength(), 'Parser throws on control length too long');
+  tap.throws(() => new DataParser(data, 5), ErrorType.controlLength(), 'Parser throws on control length too long');
 
   data[5] = 0x1A;
 

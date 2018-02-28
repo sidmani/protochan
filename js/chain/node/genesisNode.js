@@ -24,10 +24,10 @@
 
 'use strict';
 
-const BlockType = require('../../header/type.js');
+const BlockType = require('../header/type.js');
 const ErrorType = require('../../error.js');
 const BlockNode = require('./blockNode.js');
-const Parser = require('../../parser/genesisParser.js');
+const Parser = require('../parser/genesisParser.js');
 
 module.exports = class GenesisNode extends BlockNode {
   constructor(header, data, nodeMap, config) {

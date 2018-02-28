@@ -24,30 +24,26 @@
 
 'use strict';
 
-const BlockNode = require('./blockNode.js');
+const DataParser = require('./parser.js');
 const ErrorType = require('../../error.js');
-const Parser = require('../parser/originalPostParser.js');
+const Hash = require('../../hash/blake2s.js');
 
-module.exports = class OriginalPostNode extends BlockNode {
-  constructor(header, data, nodeMap, config) {
-    const parser = new Parser(data);
-    super(header, parser, nodeMap, config);
-  }
+module.exports = class GenesisDataParser extends DataParser {
+  constructor(data, offset = 0) {
+    super(data, offset);
+    // 1 byte control length, 5b genesis options
+    if (this.controlLength < 6) throw ErrorType.controlLength();
 
-  /* eslint-disable */
-  addChild() {
-    throw ErrorType.illegalNodeType();
-  }
-  /* eslint-enable */
+    // instead of min/max, use min + range so no illegal values
+    this.minPostDifficulty = this.data[offset + 1];
+    this.maxPostDifficulty = this.minPostDifficulty + this.data[offset + 2];
+    this.minThreadDifficulty = this.data[offset + 3];
+    this.maxThreadDifficulty = this.minThreadDifficulty + this.data[offset + 4];
 
-  checkThread(thread) {
-    if (this.timestamp() >= thread.timestamp()) {
-      throw ErrorType.timeTravel();
-    }
-  }
+    this.maxThreads = this.data[offset + 5] + 1; // 1 to 256 max threads
+    // to extend the protocol with board options, store additional
+    // bytes in the post block's data and parse them here
 
-  insertThread(thread) {
-    thread.setThreadHeight(thread.hash, 0);
-    super.addChild(thread);
+    this.hash = Hash.digest(this.data);
   }
 };

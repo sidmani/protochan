@@ -24,30 +24,12 @@
 
 'use strict';
 
-const BlockNode = require('./blockNode.js');
-const ErrorType = require('../../error.js');
-const Parser = require('../parser/originalPostParser.js');
+const DataParser = require('./parser.js');
+const Hash = require('../../hash/blake2s.js');
 
-module.exports = class OriginalPostNode extends BlockNode {
-  constructor(header, data, nodeMap, config) {
-    const parser = new Parser(data);
-    super(header, parser, nodeMap, config);
-  }
-
-  /* eslint-disable */
-  addChild() {
-    throw ErrorType.illegalNodeType();
-  }
-  /* eslint-enable */
-
-  checkThread(thread) {
-    if (this.timestamp() >= thread.timestamp()) {
-      throw ErrorType.timeTravel();
-    }
-  }
-
-  insertThread(thread) {
-    thread.setThreadHeight(thread.hash, 0);
-    super.addChild(thread);
+module.exports = class PostDataParser extends DataParser {
+  constructor(data, offset = 0) {
+    super(data, offset);
+    this.hash = Hash.digest(this.data);
   }
 };

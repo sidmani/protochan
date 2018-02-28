@@ -24,15 +24,15 @@
 
 'use strict';
 
-const t = require('tap');
-const GenesisDataParser = require('../../js/parser/genesisParser.js');
+const tap = require('tap');
+const GenesisDataParser = require('../../js/chain/parser/genesisParser.js');
 const ErrorType = require('../../js/error.js');
 
-t.test('GenesisDataParser constructor', (t) => {
+tap.test('GenesisDataParser constructor', (t) => {
   t.throws(() => {
     const data = new Uint8Array(34);
     data[0] = 5;
-    new GenesisDataParser(data);
+    return new GenesisDataParser(data);
   }, ErrorType.controlLength(), 'GenesisDataParser rejects insufficient control length');
 
   const data = new Uint8Array(32);
@@ -47,7 +47,7 @@ t.test('GenesisDataParser constructor', (t) => {
     115, 144, 220, 144, 77, 222, 235, 237,
     89, 182, 93, 229, 132, 182, 241, 186,
     216, 30, 198, 236, 83, 146, 14, 80,
-    164, 237, 175, 39, 25, 120, 253, 182
+    164, 237, 175, 39, 25, 120, 253, 182,
   ]);
 
   t.strictSame(parser.hash, expectedHash, 'GenesisDataParser hashes data');

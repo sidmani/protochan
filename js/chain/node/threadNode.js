@@ -24,12 +24,12 @@
 
 'use strict';
 
-const BlockType = require('../../header/type.js');
+const BlockType = require('../header/type.js');
 const ErrorType = require('../../error.js');
 const BlockNode = require('./blockNode.js');
 const HashMap = require('../../hash/hashMap.js');
 const Util = require('../../util/util.js');
-const Parser = require('../../parser/threadParser.js');
+const Parser = require('../parser/threadParser.js');
 
 module.exports = class ThreadNode extends BlockNode {
   constructor(header, data, nodeMap, config) {

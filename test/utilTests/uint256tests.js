@@ -22,12 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var t = require('tap');
-var Uint256 = require('../../js/util/uint256.js');
+const tap = require('tap');
+const Uint256 = require('../../js/util/uint256.js');
 
-t.test('Uint256', function(t) {
-  let num = new Uint256(0xfff7aea9);
-  let expectedArr = new Uint8Array(32);
+tap.test('Uint256', (t) => {
+  const num = new Uint256(0xfff7aea9);
+  const expectedArr = new Uint8Array(32);
   expectedArr[31] = 0xa9;
   expectedArr[30] = 0xae;
   expectedArr[29] = 0xf7;
@@ -55,19 +55,19 @@ t.test('Uint256', function(t) {
 
   t.strictSame((new Uint256(expectedArr)).array, num.array, 'Uint256 sets input array');
 
-  let copy = num.copy();
+  const copy = num.copy();
   t.notEqual(num.array, copy.array, 'Uint256.copy returns deep copy of array');
   t.strictSame(num.array, copy.array, 'Uint256.copy returns identical duplicate');
 
-  let exp2_77 = Uint256.exp2(77);
-  let expected = new Uint8Array(32);
+  const exp77 = Uint256.exp2(77);
+  const expected = new Uint8Array(32);
   expected[9] = 0b00100000;
-  t.strictSame(exp2_77.array, expected, 'Uint256 correctly exponentiates 2');
-  let exp2_78_fast = new Uint256();
-  exp2_78_fast.addExp2(77);
-  exp2_78_fast.addExp2(77);
+  t.strictSame(exp77.array, expected, 'Uint256 correctly exponentiates 2');
+  const exp78 = new Uint256();
+  exp78.addExp2(77);
+  exp78.addExp2(77);
   expected[9] = 0b01000000;
-  t.strictSame(exp2_78_fast.array, expected, 'Uint256 correctly adds exponent of 2');
+  t.strictSame(exp78.array, expected, 'Uint256 correctly adds exponent of 2');
 
   t.equal(new Uint256(0xffcbffce).compare(new Uint256(0xffccffce)), -1, 'Uint256.compare (less than)');
   t.equal(new Uint256(0xffcbffce).compare(new Uint256(0xffcbffce)), 0, 'Uint256.compare (equal)');

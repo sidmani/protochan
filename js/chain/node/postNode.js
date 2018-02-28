@@ -24,10 +24,10 @@
 
 'use strict';
 
-const BlockType = require('../../header/type.js');
+const BlockType = require('../header/type.js');
 const ErrorType = require('../../error.js');
 const BlockNode = require('./blockNode.js');
-const Parser = require('../../parser/postParser.js');
+const Parser = require('../parser/postParser.js');
 
 module.exports = class PostNode extends BlockNode {
   constructor(header, data, nodeMap, config) {
@@ -55,21 +55,13 @@ module.exports = class PostNode extends BlockNode {
   }
 
   addChild(node) {
-    switch (node.type()) {
-      case BlockType.POST: {
-        this.checkPostDifficulty(node);
-        node.setSegmentHeight(this.segmentHeight + 1);
-        node.setHeight(this.height + 1);
-        node.setThread(this.thread);
-        node.setBaseThreadHeight(this.baseThreadHeight);
-        break;
-      }
-      case BlockType.THREAD:
-        // threads are never added directly to posts
-        throw ErrorType.internalConsistency();
-      default: throw ErrorType.illegalNodeType();
+    if (node.type() !== BlockType.POST) {
+      throw ErrorType.illegalNodeType();
     }
-
+    this.checkPostDifficulty(node);
+    node.setSegmentHeight(this.segmentHeight + 1);
+    node.setHeight(this.height + 1);
+    node.setThread(this.thread);
     super.addChild(node);
   }
 

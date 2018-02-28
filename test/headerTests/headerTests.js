@@ -22,31 +22,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var Header = require('../../js/header/header.js');
-var ErrorType = require('../../js/error.js')
+const Header = require('../../js/chain/header/header.js');
+const ErrorType = require('../../js/error.js');
 
-var t = require('tap');
+const tap = require('tap');
 
-t.test('Header constructor tests', function(t) {
+tap.test('Header constructor tests', (t) => {
   let h;
-  t.throws(function() { new Header(new Uint8Array(56))}, ErrorType.dataLength(), 'Header rejects data length < 80');
-  t.doesNotThrow(function() { h = new Header(new Uint8Array(80))}, 'Header accepts valid data');
+  t.throws(() => new Header(new Uint8Array(56)), ErrorType.dataLength(), 'Header rejects data length < 80');
+  t.doesNotThrow(() => { h = new Header(new Uint8Array(80)); }, 'Header accepts valid data');
 
   t.strictSame(h.hash, new Uint8Array([
     196, 253, 231, 106, 141, 104, 66, 44,
     95, 186, 253, 226, 80, 244, 146, 16,
     159, 178, 154, 198, 103, 83, 41, 46,
-    17, 83, 170, 17, 173, 174, 26, 58
-  ]))
+    17, 83, 170, 17, 173, 174, 26, 58,
+  ]));
   t.equal(h.difficulty, 0);
   t.end();
 });
 
-t.test('Header getter methods', function(t) {
-  let validBuffer = new ArrayBuffer(80);
-  let view = new DataView(validBuffer);
+tap.test('Header getter methods', (t) => {
+  const validBuffer = new ArrayBuffer(80);
+  const view = new DataView(validBuffer);
   // prevHash
-  let prev_hash_result = new Uint8Array([
+  const prevHashResult = new Uint8Array([
     0xea, 0x38, 0xad, 0x19,
     0xea, 0x38, 0xad, 0x19,
     0xea, 0x38, 0xad, 0x19,
@@ -58,15 +58,15 @@ t.test('Header getter methods', function(t) {
   ]);
 
   // dataHash
-  let data_hash_result = new Uint8Array([
+  const dataHashResult = new Uint8Array([
     0xea, 0x38, 0xad, 0x19,
     0xea, 0x38, 0xad, 0x19,
     0xea, 0x38, 0xad, 0x19,
     0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xaf, 0x19,
     0xea, 0x38, 0xad, 0x19,
     0xea, 0x38, 0xad, 0x19,
-    0xea, 0x38, 0xad, 0x19,
-    0xea, 0x38, 0xad, 0x19,
+    0xea, 0x38, 0xad, 0x20,
   ]);
 
   // protocol version
@@ -78,32 +78,29 @@ t.test('Header getter methods', function(t) {
   // nonce
   view.setUint32(7, 777711889);
   // prevHash
-  for (let i = 0; i < 32; i++) {
-    view.setUint8(11+i, prev_hash_result[i]);
-  }
-  // dataHash
-  for (let i = 0; i < 32; i++) {
-    view.setUint8(43+i, data_hash_result[i]);
+  for (let i = 0; i < 32; i += 1) {
+    view.setUint8(i + 11, prevHashResult[i]);
+    view.setUint8(i + 43, dataHashResult[i]);
   }
   // board ID
   view.setUint32(75, 0x4e5be7e9);
   // reserved
   view.setUint8(79, 0x7c);
-  let arr = new Uint8Array(validBuffer);
-  let h = new Header(arr);
+  const arr = new Uint8Array(validBuffer);
+  const h = new Header(arr);
 
   t.equal(h.protocolVersion(), 12345, 'Header returns correct protocol version');
   t.equal(h.type(), 0x07, 'Header returns correct block type');
   t.equal(h.timestamp(), 0xffffffff, 'Header returns correct timestamp');
   t.equal(h.nonce(), 777711889, 'Header returns correct nonce');
-  t.strictSame(h.prevHash(), prev_hash_result, 'Header returns correct previous hash');
-  t.strictSame(h.dataHash(), data_hash_result, 'Header returns correct data hash');
+  t.strictSame(h.prevHash(), prevHashResult, 'Header returns correct previous hash');
+  t.strictSame(h.dataHash(), dataHashResult, 'Header returns correct data hash');
   t.equal(h.board(), 0x4e5be7e9, 'Header returns correct board ID');
   t.equal(h.reserved(), 0x7c, 'Header returns correct reserved data');
 
-  let serialized = h.serialize();
+  const serialized = h.serialize();
   t.strictSame(serialized, arr, 'Header serializes data');
-  let deserialized = Header.deserialize(serialized);
-  t.strictSame(h, deserialized, 'Header deserializes data')
+  const deserialized = Header.deserialize(serialized);
+  t.strictSame(h, deserialized, 'Header deserializes data');
   t.end();
 });

@@ -25,25 +25,12 @@
 'use strict';
 
 const DataParser = require('./parser.js');
-const ErrorType = require('../error.js');
-const Hash = require('../hash/blake2s.js');
+const Hash = require('../../hash/blake2s.js');
 
-module.exports = class GenesisDataParser extends DataParser {
+module.exports = class OriginalPostDataParser extends DataParser {
   constructor(data, offset = 0) {
     super(data, offset);
-    // 1 byte control length, 5b genesis options
-    if (this.controlLength < 6) throw ErrorType.controlLength();
-
-    // instead of min/max, use min + range so no illegal values
-    this.minPostDifficulty = this.data[offset + 1];
-    this.maxPostDifficulty = this.minPostDifficulty + this.data[offset + 2];
-    this.minThreadDifficulty = this.data[offset + 3];
-    this.maxThreadDifficulty = this.minThreadDifficulty + this.data[offset + 4];
-
-    this.maxThreads = this.data[offset + 5] + 1; // 1 to 256 max threads
-    // to extend the protocol with board options, store additional
-    // bytes in the post block's data and parse them here
-
     this.hash = Hash.digest(this.data);
+    // Parse thread options here
   }
 };

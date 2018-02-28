@@ -25,9 +25,9 @@
 
 'use strict';
 
-const Hash = require('../hash/blake2s.js');
-const Difficulty = require('../hash/difficulty.js');
-const ErrorType = require('../error.js');
+const Hash = require('../../hash/blake2s.js');
+const Difficulty = require('../../hash/difficulty.js');
+const ErrorType = require('../../error.js');
 
 /**
  * The block header.

@@ -26,7 +26,6 @@
 
 const Difficulty = require('../hash/difficulty.js');
 const Hash = require('../hash/blake2s.js');
-const ErrorType = require('../error.js');
 
 module.exports = class Miner {
   constructor(data) {

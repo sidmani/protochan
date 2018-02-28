@@ -22,11 +22,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const t = require('tap');
-const ErrorType = require('../../js/error.js')
+const tap = require('tap');
 const Pool = require('../../js/chain/pool.js');
 
-t.test('Pool', t => {
+tap.test('Pool', (t) => {
   const p = new Pool();
   t.strictSame(p.getDependents(new Uint8Array([5])), [], 'Pool returns empty array if no dependents');
   const node1 = { hash: new Uint8Array([1]) };
@@ -47,7 +46,7 @@ t.test('Pool', t => {
 
   // test a simple traversal (no reassignment)
   const simpleTraversal = [];
-  p.traverse(baseNode, next => {
+  p.traverse(baseNode, (next) => {
     simpleTraversal.push(next);
   });
 
@@ -56,18 +55,18 @@ t.test('Pool', t => {
     node2, // last dependent of first node
     node3,
     node1,
-    node4
+    node4,
   ], 'Traversal processes all dependents recursively');
 
   const complicatedTraversal = [];
   let firstPass = true;
-  p.traverse(baseNode, next => {
+  p.traverse(baseNode, (next) => {
     complicatedTraversal.push(next);
     if (next === node2 && firstPass) {
       firstPass = false;
-      throw 'node 2 depends on node 4';
+      throw new Error('node 2 depends on node 4');
     }
-  }, (next, error) => {
+  }, () => {
     p.addDependent(node2, node4.hash);
   });
 
@@ -77,7 +76,7 @@ t.test('Pool', t => {
     node1,
     node4,
     node2,
-    node3
+    node3,
   ], 'Traversal works after further dependencies are resolved');
 
   p.recursivelyClearDependents(baseNode);

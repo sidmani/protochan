@@ -32,6 +32,7 @@ module.exports = class _Error extends Error {
     Error.captureStackTrace(this, _Error);
   }
 
+  static checksum() { return new _Error('Checksum mismatch.', 'CHECKSUM_MISMATCH'); }
   static dataLength() { return new _Error('Length of data is incorrect.', 'DATA_LENGTH_INVALID'); }
   static dataHash() { return new _Error('Data hash does not match expected value.', 'DATA_HASH_MISMATCH'); }
   static controlLength() { return new _Error('Invalid control byte length.', 'DATA_CONTROL_LENGTH'); }

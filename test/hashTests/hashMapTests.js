@@ -22,18 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var HashMap = require('../../js/hash/hashMap.js');
-var ErrorType = require('../../js/error.js');
-var t = require('tap');
+const HashMap = require('../../js/hash/hashMap.js');
+const ErrorType = require('../../js/error.js');
+const tap = require('tap');
 
-t.test('HashMap functions', function(t) {
-  let block = {
-    hash: new Uint8Array([1, 2, 7])
-  };
-  let map = new HashMap();
+tap.test('HashMap functions', (t) => {
+  const block = { hash: new Uint8Array([1, 2, 7]) };
+  const map = new HashMap();
   map.set(block);
   t.equal(map.get(block.hash), block, 'HashMap sets and gets block');
-  t.throws(function() { map.set(block); }, ErrorType.duplicateKey(), 'HashMap refuses to set same object twice');
+  t.throws(() => { map.set(block); }, ErrorType.duplicateKey(), 'HashMap refuses to set same object twice');
   map.unset(block);
   t.equal(map.get(block.hash), undefined, 'HashMap.unset removes object');
 
@@ -45,62 +43,53 @@ t.test('HashMap functions', function(t) {
   t.end();
 });
 
-t.test('HashMap.set with specified hash', function(t) {
-  let block = {
-    hash: new Uint8Array([1, 2, 7])
-  };
-  let map = new HashMap();
-  t.throws(function() { map.set(block, [5, 4, 1]); }, ErrorType.parameterType(), 'HashMap.set validates hash type');
-  let hash = map.set(block, new Uint8Array([5, 4, 3]));
+tap.test('HashMap.set with specified hash', (t) => {
+  const block = { hash: new Uint8Array([1, 2, 7]) };
+  const map = new HashMap();
+  t.throws(() => { map.set(block, [5, 4, 1]); }, ErrorType.parameterType(), 'HashMap.set validates hash type');
+  map.set(block, new Uint8Array([5, 4, 3]));
   t.equal(map.get(new Uint8Array([5, 4, 3])), block, 'HashMap.set sets block');
-  t.throws(function() { map.set('abc', new Uint8Array([5, 4, 3]), false); }, ErrorType.duplicateKey(), 'HashMap.set obeys false overwrite flag');
-  t.doesNotThrow(function() { map.set('cde', new Uint8Array([5, 4, 3]), true); }, 'HashMap.setRaw obeys true overwrite flag')
+  t.throws(() => { map.set('abc', new Uint8Array([5, 4, 3]), false); }, ErrorType.duplicateKey(), 'HashMap.set obeys false overwrite flag');
+  t.doesNotThrow(() => { map.set('cde', new Uint8Array([5, 4, 3]), true); }, 'HashMap.setRaw obeys true overwrite flag');
   t.equal(map.get(new Uint8Array([5, 4, 3])), 'cde', 'HashMap.set overwrites existing value when overwrite flag is true');
   t.end();
 });
 
-t.test('HashMap set functions', function(t) {
-  let block1 = {
-    hash: new Uint8Array([1, 2, 7])
-  };
-  let block2 = {
-    hash: new Uint8Array([6, 3, 9])
-  };
-  let block3 = {
-    hash: new Uint8Array([4, 1, 5])
-  };
-  let blocks = [block1, block2, block3];
+tap.test('HashMap set functions', (t) => {
+  const block1 = { hash: new Uint8Array([1, 2, 7]) };
+  const block2 = { hash: new Uint8Array([6, 3, 9]) };
+  const block3 = { hash: new Uint8Array([4, 1, 5]) };
+  const blocks = [block1, block2, block3];
 
-  let map = new HashMap();
-  let hash1 = map.set(block1, new Uint8Array([5, 4, 3]));
-  let hash2 = map.set(block2, new Uint8Array([6, 2, 1]));
-  let hash3 = map.set(block3, new Uint8Array([5, 7, 8]));
+  const map = new HashMap();
+  map.set(block1, new Uint8Array([5, 4, 3]));
+  map.set(block2, new Uint8Array([6, 2, 1]));
+  map.set(block3, new Uint8Array([5, 7, 8]));
 
   t.equal(map.contains(new Uint8Array([5, 4, 3])), true, 'HashMap.contains true for existing key');
   t.equal(map.contains(new Uint8Array([3, 4, 3])), false, 'HashMap.contains false for nonexistent key');
 
-  let result = map.enumerate();
+  const result = map.enumerate();
   t.strictSame(result, blocks, 'HashMap.enumerate returns correct array');
   let count = 0;
-  map.forEach(function(value, key, map) {
+  map.forEach((value) => {
+    t.strictSame(result[count], value, 'HashMap.forEach preserves order');
     count += 1;
   });
   t.equal(count, 3, 'HashMap.forEach iterates over all objects');
 
-  let map2 = new HashMap();
+  const map2 = new HashMap();
   map2.set(block1, new Uint8Array([5, 4, 3]));
   map2.set(block2, new Uint8Array([6, 2, 1]));
   map2.set(block3, new Uint8Array([5, 8, 8]));
 
-  let diff = map.difference(map2);
+  const diff = map.difference(map2);
   t.equal(diff.length, 1, 'HashMap.difference length is correct');
   t.strictSame(diff[0], new Uint8Array([5, 7, 8]), 'HashMap.difference contents are correct');
 
   map2.unsetRaw(new Uint8Array([6, 2, 1]));
 
-  let diff2 = map.difference(map2, function(key, value) {
-    return key === '060201';
-  })
+  const diff2 = map.difference(map2, key => key === '060201');
   t.equal(diff2.length, 1, 'HashMap.difference filtered length is correct');
   t.strictSame(diff2[0], new Uint8Array([6, 2, 1]), 'HashMap.difference filtered contents are correct');
 

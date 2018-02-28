@@ -22,11 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const t = require('tap');
-const ErrorType = require('../../js/error.js')
+const tap = require('tap');
+const ErrorType = require('../../js/error.js');
 const BlockNode = require('../../js/chain/node/blockNode.js');
 
-t.test('BlockNode', t => {
+tap.test('BlockNode', (t) => {
   const header = {
     type() {
       return 0x03;
@@ -37,23 +37,25 @@ t.test('BlockNode', t => {
     dataHash() {
       return new Uint8Array([0, 1, 5]);
     },
-    hash: new Uint8Array([8, 4, 7, 9])
+    hash: new Uint8Array([8, 4, 7, 9]),
   };
 
   const data = {
-    hash: new Uint8Array([0, 2])
+    hash: new Uint8Array([0, 2]),
   };
 
-  t.throws(() => {
-    new BlockNode(header, data);
-  }, ErrorType.dataHash(), 'BlockNode checks that header.dataHash and data.hash match');
+  t.throws(
+    () => new BlockNode(header, data),
+    ErrorType.dataHash(),
+    'BlockNode checks that header.dataHash and data.hash match',
+  );
 
   data.hash = header.dataHash();
   const nodeMap = {
     set(v) {
       this.setObj = v;
-    }
-  }
+    },
+  };
   const node = new BlockNode(header, data, nodeMap, 'abcd');
 
   t.equal(node.header, header, 'BlockNode sets header');
@@ -67,7 +69,7 @@ t.test('BlockNode', t => {
   t.strictSame(node.hash, header.hash, 'BlockNode sets hash');
 
   const child = {
-    hash: new Uint8Array([5, 4, 3])
+    hash: new Uint8Array([5, 4, 3]),
   };
   node.addChild(child);
   t.equal(nodeMap.setObj, child, 'BlockNode.addChild inserts into nodeMap');
@@ -113,7 +115,7 @@ t.test('BlockNode', t => {
 //   t.end();
 // });
 
-t.test('BlockNode.checkPostDifficulty', t => {
+tap.test('BlockNode.checkPostDifficulty', (t) => {
   const header = {
     dataHash() {
       return new Uint8Array([0, 1, 5]);
@@ -124,7 +126,7 @@ t.test('BlockNode.checkPostDifficulty', t => {
   };
 
   const data = {
-    hash: new Uint8Array([0, 1, 5])
+    hash: new Uint8Array([0, 1, 5]),
   };
 
   const n = new BlockNode(header, data, 'abcd', {
@@ -139,24 +141,24 @@ t.test('BlockNode.checkPostDifficulty', t => {
   t.throws(() => {
     n.checkPostDifficulty({
       header: {
-        difficulty: 19
+        difficulty: 19,
       },
-      timestamp() { return 15; }
+      timestamp() { return 15; },
     });
   }, ErrorType.insufficientDifficulty(), 'checkPostDifficulty rejects insufficient difficulty');
 
   t.doesNotThrow(() => {
     n.checkPostDifficulty({
       header: {
-        difficulty: 21
+        difficulty: 21,
       },
-      timestamp() { return 15; }
+      timestamp() { return 15; },
     });
   }, 'checkPostDifficulty accepts sufficient difficulty');
   t.end();
 });
 
-t.test('BlockNode.checkThreadDifficulty', t => {
+tap.test('BlockNode.checkThreadDifficulty', (t) => {
   const header = {
     dataHash() {
       return new Uint8Array([0, 1, 5]);
@@ -167,7 +169,7 @@ t.test('BlockNode.checkThreadDifficulty', t => {
   };
 
   const data = {
-    hash: new Uint8Array([0, 1, 5])
+    hash: new Uint8Array([0, 1, 5]),
   };
 
   const n = new BlockNode(header, data, 'abcd', {
@@ -183,18 +185,18 @@ t.test('BlockNode.checkThreadDifficulty', t => {
   t.throws(() => {
     n.checkThreadDifficulty({
       header: {
-        difficulty: 25
+        difficulty: 25,
       },
-      timestamp() { return 305; }
+      timestamp() { return 305; },
     }, 255, true);
   }, ErrorType.insufficientDifficulty(), 'checkThreadDifficulty rejects insufficient difficulty');
 
   t.doesNotThrow(() => {
     n.checkThreadDifficulty({
       header: {
-        difficulty: 26
+        difficulty: 26,
       },
-      timestamp() { return 305; }
+      timestamp() { return 305; },
     }, 255);
   }, 'checkThreadDifficulty accepts sufficient difficulty');
   t.end();

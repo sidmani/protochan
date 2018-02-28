@@ -24,12 +24,6 @@
 
 'use strict';
 
-const DataParser = require('./parser.js');
-const Hash = require('../hash/blake2s.js');
+module.exports = class Peer {
 
-module.exports = class PostDataParser extends DataParser {
-  constructor(data, offset = 0) {
-    super(data, offset);
-    this.hash = Hash.digest(this.data);
-  }
 };

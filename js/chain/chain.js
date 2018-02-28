@@ -25,9 +25,9 @@
 'use strict';
 
 const HashMap = require('../hash/hashMap.js');
-const HeaderType = require('../header/type.js');
+const HeaderType = require('./header/type.js');
 const ErrorType = require('../error.js');
-const Config = require('../board/config.js');
+const Config = require('./config.js');
 
 const GenesisNode = require('./node/genesisNode.js');
 const OriginalPostNode = require('./node/originalPostNode.js');
@@ -91,7 +91,7 @@ module.exports = class Chain {
   }
 
   addChild(node) {
-    const prevNode = this.getNode(node.header.prevHash());
+    const prevNode = this.get(node.header.prevHash());
     if (!prevNode) {
       throw ErrorType.missingReference(prevNode.hash);
     }

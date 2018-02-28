@@ -24,47 +24,46 @@
 
 'use strict';
 
-const t = require('tap');
-const ThreadDataParser = require('../../js/parser/threadParser.js');
+const tap = require('tap');
+const ThreadDataParser = require('../../js/chain/parser/threadParser.js');
 const ErrorType = require('../../js/error.js');
 
-t.test('ThreadDataParser constructor', (t) => {
+tap.test('ThreadDataParser constructor', (t) => {
   t.throws(() => {
     const arr = new Uint8Array(71);
-    new ThreadDataParser(arr);
+    return new ThreadDataParser(arr);
   }, ErrorType.dataLength(), 'ThreadDataParser rejects zero content length');
 
   t.throws(() => {
     const arr = new Uint8Array(71);
     arr[0] = 0x06; // 71 - 6 = 65
-    new ThreadDataParser(arr);
+    return new ThreadDataParser(arr);
   }, ErrorType.dataLength(), 'ThreadDataParser rejects length not divisible by 64');
 
   t.doesNotThrow(() => {
     const arr = new Uint8Array(71);
     arr[0] = 0x07; // 71 - 7 = 64
     arr[60] = 0x05; // avoid duplication
-    new ThreadDataParser(arr);
+    return new ThreadDataParser(arr);
   }, 'ThreadDataParser accepts valid length');
 
   t.end();
 });
 
-t.test('ThreadDataParser methods', (t) => {
-  let buf = new ArrayBuffer(132);
-  let arr = new Uint8Array(buf);
+tap.test('ThreadDataParser methods', (t) => {
+  const arr = new Uint8Array(132);
   arr[0] = 0x04;
   arr.fill(17, 36, 68);
   arr.fill(7, 68, 100);
   arr.fill(9, 100, 132);
 
-  let parser = new ThreadDataParser(arr);
+  const parser = new ThreadDataParser(arr);
   t.equal(parser.numRecords, 2, 'ThreadDataParser sets correct number of threads');
-  let expected = new Uint8Array(32);
+  const expected = new Uint8Array(32);
   expected.fill(9, 0, 32);
   t.strictSame(parser.getPost(1), expected, 'ThreadDataParser returns correct post hash');
 
-  let expectedThread = new Uint8Array(32);
+  const expectedThread = new Uint8Array(32);
   expectedThread.fill(7, 0, 32);
   t.strictSame(parser.getCorrespondingItem(expectedThread), expected, 'ThreadDataParser retrieves post from thread hash');
 
@@ -88,7 +87,7 @@ t.test('ThreadDataParser methods', (t) => {
 
   t.equal(parser.containsThread(expected), true, 'Thread.containsThread returns true for a thread');
 
-  let arr2 = new Uint8Array(196);
+  const arr2 = new Uint8Array(196);
   arr2[0] = 0x04;
   arr2.fill(51, 36, 68);
   arr2.fill(7, 68, 100);
@@ -99,10 +98,10 @@ t.test('ThreadDataParser methods', (t) => {
   // { 0, 51, 7, 9, 18, 15 } | idx % 2 === 0 => { 0, 7, 18 }
   // { 0, 7, 18 } - { 0, 17, 7, 9 } = { 18 }
 
-  let parser2 = new ThreadDataParser(arr2);
-  let diff = parser2.subtractRecords(parser);
-  let expectedDiff = new Uint8Array(32);
+  const parser2 = new ThreadDataParser(arr2);
+  const diff = parser2.subtractRecords(parser);
+  const expectedDiff = new Uint8Array(32);
   expectedDiff.fill(18, 0, 32);
   t.strictSame(diff, [expectedDiff], 'Thread.subtractThreadRecords');
   t.end();
-})
+});
