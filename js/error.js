@@ -25,39 +25,31 @@
 
 'use strict';
 
-module.exports.Data = {
-  length() { return new Error('Length of data is incorrect.'); },
-  hash() { return new Error('Data hash does not match expected value.'); },
-  controlLength() { return new Error('Invalid control byte length.'); },
-  delimiter() { return new Error('Malformed delimiter byte.'); },
-};
+module.exports = class _Error extends Error {
+  constructor(message, type) {
+    super(message);
+    this.type = type;
+    Error.captureStackTrace(this, _Error);
+  }
 
-module.exports.Chain = {
-  illegalType() { return new Error('Block of specified type cannot be inserted'); },
-  wrongBoard() { return new Error('Board ID mismatch.'); },
-  wrongThread() { return new Error('Thread ID mismatch.'); },
-  missingReference() { return new Error('Referenced block does not exist.'); },
-  hashMismatch() { return new Error('Hashes were not equal as expected.'); },
-  missingThread() { return new Error('Thread was removed illegally.'); },
-  threadOrder() { return new Error('Order of threads in thread block is illegal.'); },
-  unknownThread() { return new Error('Thread record referenced nonexistent thread.'); },
-  timeTravel() { return new Error('Timestamp order is illegal.'); },
-};
-
-module.exports.Parameter = {
-  type() { return new Error('Parameter type is incorrect.'); },
-  invalid() { return new Error('Parameter value is invalid.'); },
-};
-
-module.exports.Difficulty = {
-  insufficient() { return new Error('Data does not meet difficulty threshold.'); },
-};
-
-module.exports.HashMap = {
-  duplicate() { return new Error('Value is already set for that key.'); },
-};
-
-module.exports.State = {
-  invalid() { return new Error('Invalid object state.'); },
-  internalConsistency() { return new Error('Internal consistency exception.'); },
+  static dataLength() { return new _Error('Length of data is incorrect.', 'DATA_LENGTH_INVALID'); }
+  static dataHash() { return new _Error('Data hash does not match expected value.', 'DATA_HASH_MISMATCH'); }
+  static controlLength() { return new _Error('Invalid control byte length.', 'DATA_CONTROL_LENGTH'); }
+  static illegalNodeType() { return new _Error('Block of specified type cannot be inserted', 'CHAIN_ILLEGAL_TYPE'); }
+  static wrongThread() { return new _Error('Thread ID mismatch.', 'CHAIN_THREAD_MISMATCH'); }
+  static missingReference(ref) {
+    const err = new _Error('Thread ID mismatch.', 'CHAIN_MISSING_REF');
+    err.ref = ref;
+    return err;
+  }
+  static hashMismatch() { return new _Error('Hashes were not equal as expected.', 'CHAIN_HASH_MISMATCH'); }
+  static invalidChild() { return new _Error('Expected a child to exist, but no child was found.', 'INVALID_CHILD'); }
+  static missingThread() { return new _Error('Thread was removed illegally.', 'CHAIN_THREAD_MISSING'); }
+  static threadOrder() { return new _Error('Order of threads in thread block is illegal.', 'CHAIN_THREAD_ORDER'); }
+  static unknownThread() { return new _Error('Thread record referenced nonexistent thread.', 'CHAIN_UNKNOWN_THREAD'); }
+  static timeTravel() { return new _Error('Timestamp order is illegal.', 'CHAIN_TIME_TRAVEL'); }
+  static parameterType() { return new _Error('Parameter type is incorrect.', 'PARAMETER_TYPE_INVALID'); }
+  static insufficientDifficulty() { return new _Error('Data does not meet difficulty threshold.', 'DIFFICULTY_INSUFFICIENT'); }
+  static duplicateKey() { return new _Error('Value is already set for that key.', 'HASHMAP_DUPLICATE_KEY'); }
+  static internalConsistency() { return new _Error('Internal consistency exception.', 'INTERNAL_CONSISTENCY_EXCEPTION'); }
 };

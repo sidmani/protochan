@@ -28,8 +28,14 @@ const BlockType = require('../../header/type.js');
 const BlockNode = require('./blockNode.js');
 const ErrorType = require('../../error.js');
 const Util = require('../../util/util.js');
+const Parser = require('../../parser/originalPostParser.js');
 
 module.exports = class OriginalPostNode extends BlockNode {
+  constructor(header, data, nodeMap, config) {
+    const parser = new Parser(data);
+    super(header, parser, nodeMap, config);
+  }
+
   // XXX: this requires that a thread has already been inserted
   // before all checks complete
   addChild(node) {
@@ -38,7 +44,7 @@ module.exports = class OriginalPostNode extends BlockNode {
         this.checkThread(node);
         break;
       }
-      default: throw ErrorType.Chain.illegalType();
+      default: throw ErrorType.illegalNodeType();
     }
 
     super.addChild(node);
@@ -47,11 +53,11 @@ module.exports = class OriginalPostNode extends BlockNode {
   checkThread(thread) {
     // TODO: is hash check actually necessary?
     if (!Util.arrayEquality(thread.data.getPost(0), this.hash)) {
-      throw ErrorType.Chain.hashMismatch();
+      throw ErrorType.hashMismatch();
     }
 
     if (this.timestamp() >= thread.timestamp()) {
-      throw ErrorType.Chain.timeTravel();
+      throw ErrorType.timeTravel();
     }
   }
 

@@ -30,26 +30,18 @@ const HashMap = require('../../hash/hashMap.js');
 const Difficulty = require('../../hash/difficulty.js');
 
 module.exports = class BlockNode {
-  constructor(header, data, nodeMap) {
+  constructor(header, parser, nodeMap, config) {
     this.header = header;
-    this.data = data;
+    this.data = parser;
     this.nodeMap = nodeMap;
+    this.config = config;
 
     if (!Util.arrayEquality(this.data.hash, header.dataHash())) {
-      throw ErrorType.Data.hash();
+      throw ErrorType.dataHash();
     }
 
     this.hash = header.hash;
     this.children = new HashMap();
-  }
-
-  checkPrevHash(node) {
-    if (!Util.arrayEquality(
-      node.header.prevHash(),
-      this.hash,
-    )) {
-      throw ErrorType.Chain.hashMismatch();
-    }
   }
 
   checkPostDifficulty(post) {
@@ -57,7 +49,7 @@ module.exports = class BlockNode {
     const deltaT = post.timestamp() - this.timestamp();
 
     // if new block is older than the previous block, error
-    if (deltaT <= 0) throw ErrorType.Chain.timeTravel();
+    if (deltaT <= 0) throw ErrorType.timeTravel();
 
     // get required difficulty
     const reqDiff = Difficulty.requiredPostDifficulty(
@@ -67,7 +59,7 @@ module.exports = class BlockNode {
 
     // if new block doesn't have the required difficulty, error
     if (post.header.difficulty < reqDiff) {
-      throw ErrorType.Difficulty.insufficient();
+      throw ErrorType.insufficientDifficulty();
     }
   }
 
@@ -76,7 +68,7 @@ module.exports = class BlockNode {
     const deltaT = thread.timestamp() - this.timestamp();
 
     // if new block is older than the previous block, error
-    if (deltaT <= 0) throw ErrorType.Chain.timeTravel();
+    if (deltaT <= 0) throw ErrorType.timeTravel();
 
     // get required difficulty
     const reqDiff = Difficulty.requiredThreadDifficulty(
@@ -87,23 +79,18 @@ module.exports = class BlockNode {
 
     // if new block doesn't have the required difficulty, error
     if (thread.header.difficulty < reqDiff) {
-      throw ErrorType.Difficulty.insufficient();
+      throw ErrorType.insufficientDifficulty();
     }
   }
 
   addChild(node) {
-    node.setConfig(this.config);
-    this.children.setRaw(node.hash, true);
-    this.nodeMap.set(node);
-  }
-
-  setConfig(config) {
-    this.config = config;
+    this.nodeMap.set(node); // set first to check duplication
+    this.children.set(true, node.hash);
   }
 
   // convenience
   type() {
-    return this.header.blockType();
+    return this.header.type();
   }
 
   timestamp() {

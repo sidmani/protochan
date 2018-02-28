@@ -29,8 +29,15 @@ const ErrorType = require('../../error.js');
 const BlockNode = require('./blockNode.js');
 const HashMap = require('../../hash/hashMap.js');
 const Util = require('../../util/util.js');
+const Parser = require('../../parser/threadParser.js');
 
 module.exports = class ThreadNode extends BlockNode {
+  constructor(header, data, nodeMap, config) {
+    const parser = new Parser(data);
+    super(header, parser, nodeMap, config);
+    this.threadHeights = new HashMap();
+  }
+
   static maxScore() {
     return 2;
   }
@@ -39,13 +46,8 @@ module.exports = class ThreadNode extends BlockNode {
     return -(depth / this.config.MAX_THREAD_COUNT);
   }
 
-  constructor(header, data, nodeMap) {
-    super(header, data, nodeMap);
-    this.threadHeights = new HashMap();
-  }
-
   setThreadHeight(hash, height) {
-    this.threadHeights.setRaw(hash, height);
+    this.threadHeights.set(height, hash);
   }
 
   setHeight(height) {
@@ -53,8 +55,6 @@ module.exports = class ThreadNode extends BlockNode {
   }
 
   addChild(node) {
-    this.checkPrevHash(node);
-
     switch (node.type()) {
       case BlockType.POST: {
         this.checkPost(node);
@@ -74,7 +74,7 @@ module.exports = class ThreadNode extends BlockNode {
         parentPosts.forEach(post => post.insertThread(node));
         break;
       }
-      default: throw ErrorType.Chain.illegalType();
+      default: throw ErrorType.illegalNodeType();
     }
 
     super.addChild(node);
@@ -88,7 +88,7 @@ module.exports = class ThreadNode extends BlockNode {
 
     // check that post reserved byte points to valid index
     if (post.header.reserved() >= this.data.numRecords) {
-      throw ErrorType.Chain.unknownThread();
+      throw ErrorType.unknownThread();
     }
   }
 
@@ -120,34 +120,34 @@ module.exports = class ThreadNode extends BlockNode {
       const latestNode = this.nodeMap.get(latestRecord);
       // if the node doesn't exist, error
       if (!latestNode) {
-        throw ErrorType.Chain.missingReference();
+        throw ErrorType.missingReference(latestRecord);
       }
 
       switch (latestNode.type()) {
         case BlockType.THREAD:
           // if the node is a thread, it must be this thread block
           if (!Util.arrayEquality(latestNode.hash, this.hash)) {
-            throw ErrorType.chain.HashMismatch();
+            throw ErrorType.hashMismatch();
           }
           break;
         case BlockType.POST:
           // if the node is a post, it must actually be in the paired thread
           if (!Util.arrayEquality(latestNode.thread, threadRecord)) {
-            throw ErrorType.Chain.wrongThread();
+            throw ErrorType.wrongThread();
           }
           // add the segment height to numPosts
           numPosts += latestNode.segmentHeight;
           // add the node to the parent list
           parentPosts.push(latestNode);
           break;
-        default: throw ErrorType.Chain.illegalType();
+        default: throw ErrorType.internalConsistency();
       }
 
       // check that score is decreasing or equal
       const baseThreadDepth = (this.height + 1) - baseThreadNode.height;
       const currentScore = latestNode.score(baseThreadDepth);
       if (minScore > currentScore) {
-        throw ErrorType.Chain.threadOrder();
+        throw ErrorType.threadOrder();
       }
       minScore = currentScore;
     }
@@ -160,10 +160,9 @@ module.exports = class ThreadNode extends BlockNode {
       const removedThreadDepth = (this.height + 1) - removedThread.height;
       // calculate minimum possible score of removed node
       const removedScore = removedThread.score(removedThreadDepth);
-
       // the removed thread must have a lower score than the worst included thread
       if (minScore < removedScore) {
-        throw ErrorType.Chain.threadOrder();
+        throw ErrorType.threadOrder();
       }
     }
 
@@ -183,7 +182,7 @@ module.exports = class ThreadNode extends BlockNode {
 
     // must be of type original post
     if (op.type() !== BlockType.ORIGINAL_POST) {
-      throw ErrorType.Chain.illegalType();
+      throw ErrorType.illegalNodeType();
     }
 
     return op;
@@ -197,7 +196,7 @@ module.exports = class ThreadNode extends BlockNode {
     const expectedRemovalCount = this.height < this.config.MAX_THREAD_COUNT ? 0 : 1;
 
     if (removedThreads.length !== expectedRemovalCount) {
-      throw ErrorType.Chain.missingThread();
+      throw ErrorType.missingThread();
     }
 
     // new - old = added records
@@ -206,7 +205,7 @@ module.exports = class ThreadNode extends BlockNode {
     // since new thread has zero hash, it's subtracted out
     // the only added thread is the second-newest thread
     if (addedThreads.length !== 1) {
-      throw ErrorType.Chain.unknownThread();
+      throw ErrorType.unknownThread();
     }
 
     return removedThreads[0];

@@ -24,23 +24,48 @@
 
 'use strict';
 
-const t = require('tap');
-const DataParser = require('../../js/parser/parser.js');
-const ErrorType = require('../../js/error.js');
+const HashMap = require('../hash/hashMap.js');
 
-t.test('DataParser', function(t) {
-  const data = new Uint8Array(32);
-  data[5] = 0x1C;
+module.exports = class Pool {
+  constructor() {
+    this.pool = new HashMap();
+    // this.blacklist = new HashMap();
+  }
 
-  t.throws(() => { new DataParser(data, 5); }, ErrorType.controlLength(), 'Parser throws on control length too long');
+  addDependent(dependentNode, dependencyHash) {
+    if (this.pool.contains(dependencyHash)) {
+      this.pool.get(dependencyHash).push(dependentNode);
+    } else {
+      this.pool.set([dependentNode], dependencyHash);
+    }
+  }
 
-  data[5] = 0x1A;
+  getDependents(hash) {
+    return this.pool.get(hash) || [];
+  }
 
-  let parser;
-  t.doesNotThrow(() => { parser = new DataParser(data, 5); }, 'Parser accepts valid control length');
-  t.equal(parser.controlLength, 0x1A, 'Parser sets correct control length');
-  t.equal(parser.contentLength, 0x01, 'Parser sets correct content length');
-  t.equal(parser.offset, 0x05, 'Parser sets correct offset');
-  t.equal(parser.data, data, 'Parser sets data');
-  t.end();
-});
+  clearDependents(hash) {
+    this.pool.unsetRaw(hash);
+  }
+
+  recursivelyClearDependents(node) {
+    this.traverse(node, (next) => {
+      this.clearDependents(next.hash);
+    });
+  }
+
+  traverse(node, fn, onErr = () => {}) {
+    let dependents = [node];
+
+    while (dependents.length > 0) {
+      const next = dependents.pop();
+      const nextDependents = this.getDependents(next.hash);
+      try {
+        fn(next);
+        dependents = dependents.concat(nextDependents);
+      } catch (error) {
+        onErr(next, error);
+      }
+    }
+  }
+};

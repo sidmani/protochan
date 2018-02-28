@@ -37,7 +37,7 @@ module.exports = class ThreadDataParser extends DataParser {
 
     // content contains pairs of 32-byte hashes
     if (this.contentLength % 64 !== 0 || this.contentLength === 0) {
-      throw ErrorType.Data.length();
+      throw ErrorType.dataLength();
     }
 
     this.indexMap = new HashMap();
@@ -45,7 +45,7 @@ module.exports = class ThreadDataParser extends DataParser {
       this.data,
       32,
       offset + this.controlLength,
-      (item, idx) => this.indexMap.setRaw(item, idx),
+      (hash, idx) => this.indexMap.set(idx, hash),
     );
 
     // since the first array must be zero, just replace it

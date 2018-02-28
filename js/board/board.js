@@ -27,24 +27,25 @@
 const ErrorType = require('../error.js');
 
 const Board = class Board {
-  constructor(genesis) {
-    this.genesis = genesis;
+  constructor(header, data) {
+    // chain contains verified posts
+    this.chain = new Chain(header, data);
+    // pool contains posts that were rejected from the chain
+    this.pool = new HashMap();
   }
 
-  pushPost(post) {
-    // check board id
-    if (post.header.board() !== this.config.BOARD_ID) {
-      throw ErrorType.Chain.wrongBoard();
-    }
-
+  received(header, data) {
     try {
-      this.chain.pushPost(post);
+      this.chain.addChild(header, data);
     } catch (error) {
-      // possible errors:
-      // - missing reference
-      // - internal consistency
+
     }
   }
+
+  getTopThreads(count) {
+    
+  }
+
 };
 
 module.exports = Board;

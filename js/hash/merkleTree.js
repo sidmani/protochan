@@ -32,7 +32,7 @@ module.exports = class MerkleTree {
     // array of uint8arrays
     let builtArray = dataArr;
 
-    if (dataArr.length === 0) throw ErrorType.Data.length();
+    if (dataArr.length === 0) throw ErrorType.dataLength();
 
     this.depth = 1;
 

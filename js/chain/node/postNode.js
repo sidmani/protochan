@@ -27,8 +27,13 @@
 const BlockType = require('../../header/type.js');
 const ErrorType = require('../../error.js');
 const BlockNode = require('./blockNode.js');
+const Parser = require('../../parser/postParser.js');
 
 module.exports = class PostNode extends BlockNode {
+  constructor(header, data, nodeMap, config) {
+    const parser = new Parser(data);
+    super(header, parser, nodeMap, config);
+  }
   // score the containing thread assuming this post is at the top
   score(depth) {
     return (this.segmentHeight / (this.height + 1)) - (depth / this.config.MAX_THREAD_COUNT);
@@ -52,7 +57,7 @@ module.exports = class PostNode extends BlockNode {
   addChild(node) {
     switch (node.type()) {
       case BlockType.POST: {
-        this.checkPost(node);
+        this.checkPostDifficulty(node);
         node.setSegmentHeight(this.segmentHeight + 1);
         node.setHeight(this.height + 1);
         node.setThread(this.thread);
@@ -61,24 +66,17 @@ module.exports = class PostNode extends BlockNode {
       }
       case BlockType.THREAD:
         // threads are never added directly to posts
-        throw ErrorType.State.internalConsistency();
-      default: throw ErrorType.Chain.illegalType();
+        throw ErrorType.internalConsistency();
+      default: throw ErrorType.illegalNodeType();
     }
 
     super.addChild(node);
   }
 
-  checkPost(post) {
-    this.checkPrevHash(post);
-
-    // verify difficulty and timestamps
-    this.checkPostDifficulty(post);
-  }
-
   checkThread(thread) {
     // TODO: do we need to check hash here?
     if (this.timestamp() >= thread.timestamp()) {
-      throw ErrorType.Chain.timeTravel();
+      throw ErrorType.timeTravel();
     }
   }
 

@@ -29,7 +29,7 @@ var t = require('tap');
 var ErrorType = require('../../js/error.js');
 
 t.test('MerkleTree', function(t) {
-  t.throws(function() { new MerkleTree([]); }, ErrorType.Data.length(), 'Merkle tree rejects zero length array');
+  t.throws(function() { new MerkleTree([]); }, ErrorType.dataLength(), 'Merkle tree rejects zero length array');
 
   let data = new Uint8Array(192);
   data.fill(1, 0, 32);

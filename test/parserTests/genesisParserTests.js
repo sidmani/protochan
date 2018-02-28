@@ -33,7 +33,7 @@ t.test('GenesisDataParser constructor', (t) => {
     const data = new Uint8Array(34);
     data[0] = 5;
     new GenesisDataParser(data);
-  }, ErrorType.Data.controlLength(), 'GenesisDataParser rejects insufficient control length');
+  }, ErrorType.controlLength(), 'GenesisDataParser rejects insufficient control length');
 
   const data = new Uint8Array(32);
   data[14] = 0x06; // ctrl length

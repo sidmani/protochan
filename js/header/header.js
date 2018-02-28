@@ -40,7 +40,7 @@ class Header {
   constructor(data) {
     // check length is at least 80 bytes
     if (data.byteLength < 80) {
-      throw ErrorType.Data.length();
+      throw ErrorType.dataLength();
     }
 
     this.data = data;
@@ -54,7 +54,7 @@ class Header {
   }
 
   // Block type (uint8)
-  blockType() {
+  type() {
     return this.data[2];
   }
 

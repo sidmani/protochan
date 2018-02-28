@@ -28,7 +28,7 @@ const BlockNode = require('../../js/chain/node/blockNode.js');
 
 t.test('BlockNode', t => {
   const header = {
-    blockType() {
+    type() {
       return 0x03;
     },
     timestamp() {
@@ -46,7 +46,7 @@ t.test('BlockNode', t => {
 
   t.throws(() => {
     new BlockNode(header, data);
-  }, ErrorType.Data.hash(), 'BlockNode checks that header.dataHash and data.hash match');
+  }, ErrorType.dataHash(), 'BlockNode checks that header.dataHash and data.hash match');
 
   data.hash = header.dataHash();
   const nodeMap = {
@@ -54,13 +54,11 @@ t.test('BlockNode', t => {
       this.setObj = v;
     }
   }
-  const node = new BlockNode(header, data, nodeMap);
+  const node = new BlockNode(header, data, nodeMap, 'abcd');
 
   t.equal(node.header, header, 'BlockNode sets header');
   t.equal(node.data, data, 'BlockNode sets data');
   t.equal(node.nodeMap, nodeMap, 'BlockNode sets nodeMap');
-
-  node.setConfig('abcd');
   t.equal(node.config, 'abcd', 'BlockNode sets config');
 
   t.equal(node.type(), 0x03, 'BlockNode gets type');
@@ -69,53 +67,51 @@ t.test('BlockNode', t => {
   t.strictSame(node.hash, header.hash, 'BlockNode sets hash');
 
   const child = {
-    setConfig(config) { this.config = config; },
     hash: new Uint8Array([5, 4, 3])
   };
   node.addChild(child);
-  t.equal(child.config, 'abcd', 'BlockNode.addChild sets config');
   t.equal(nodeMap.setObj, child, 'BlockNode.addChild inserts into nodeMap');
   t.end();
 });
 
-t.test('BlockNode.checkPrevHash', t => {
-  const header = {
-    blockType() {
-      return 0x03;
-    },
-    dataHash() {
-      return new Uint8Array([0, 1, 5]);
-    },
-    hash: new Uint8Array([8, 4, 7, 9])
-  };
-
-  const data = {
-    hash: new Uint8Array([0, 1, 5])
-  };
-
-  const n = new BlockNode(header, data, 'abcd');
-  t.throws(() => {
-    const bad = {
-      header: {
-        prevHash() { return new Uint8Array([8, 4, 7, 5]); }
-      }
-    }
-    n.checkPrevHash(bad);
-  }, ErrorType.Chain.hashMismatch(), 'BlockNode.checkPrevHash rejects mismatched hashes');
-
-  t.doesNotThrow(() => {
-    const good = {
-      header: {
-        prevHash() {
-          return new Uint8Array([8, 4, 7, 9]);
-        }
-      }
-    }
-    n.checkPrevHash(good);
-  }, 'BlockNode.checkPrevHash accepts matched hashes');
-
-  t.end();
-});
+// t.test('BlockNode.checkPrevHash', t => {
+//   const header = {
+//     type() {
+//       return 0x03;
+//     },
+//     dataHash() {
+//       return new Uint8Array([0, 1, 5]);
+//     },
+//     hash: new Uint8Array([8, 4, 7, 9])
+//   };
+//
+//   const data = {
+//     hash: new Uint8Array([0, 1, 5])
+//   };
+//
+//   const n = new BlockNode(header, data, 'abcd');
+//   t.throws(() => {
+//     const bad = {
+//       header: {
+//         prevHash() { return new Uint8Array([8, 4, 7, 5]); }
+//       }
+//     }
+//     n.checkPrevHash(bad);
+//   }, ErrorType.hashMismatch(), 'BlockNode.checkPrevHash rejects mismatched hashes');
+//
+//   t.doesNotThrow(() => {
+//     const good = {
+//       header: {
+//         prevHash() {
+//           return new Uint8Array([8, 4, 7, 9]);
+//         }
+//       }
+//     }
+//     n.checkPrevHash(good);
+//   }, 'BlockNode.checkPrevHash accepts matched hashes');
+//
+//   t.end();
+// });
 
 t.test('BlockNode.checkPostDifficulty', t => {
   const header = {
@@ -131,14 +127,14 @@ t.test('BlockNode.checkPostDifficulty', t => {
     hash: new Uint8Array([0, 1, 5])
   };
 
-  const n = new BlockNode(header, data, 'abcd');
-  n.setConfig({
+  const n = new BlockNode(header, data, 'abcd', {
     MIN_POST_DIFFICULTY: 10,
     MAX_POST_DIFFICULTY: 40,
   });
+
   t.throws(() => {
     n.checkPostDifficulty({ timestamp() { return 4; } });
-  }, ErrorType.Chain.timeTravel(), 'checkPostDifficulty checks timestamp ordering');
+  }, ErrorType.timeTravel(), 'checkPostDifficulty checks timestamp ordering');
 
   t.throws(() => {
     n.checkPostDifficulty({
@@ -147,7 +143,7 @@ t.test('BlockNode.checkPostDifficulty', t => {
       },
       timestamp() { return 15; }
     });
-  }, ErrorType.Difficulty.insufficient(), 'checkPostDifficulty rejects insufficient difficulty');
+  }, ErrorType.insufficientDifficulty(), 'checkPostDifficulty rejects insufficient difficulty');
 
   t.doesNotThrow(() => {
     n.checkPostDifficulty({
@@ -174,8 +170,7 @@ t.test('BlockNode.checkThreadDifficulty', t => {
     hash: new Uint8Array([0, 1, 5])
   };
 
-  const n = new BlockNode(header, data, 'abcd');
-  n.setConfig({
+  const n = new BlockNode(header, data, 'abcd', {
     MIN_THREAD_DIFFICULTY: 24,
     MAX_THREAD_DIFFICULTY: 64,
     MAX_THREAD_COUNT: 255,
@@ -183,7 +178,7 @@ t.test('BlockNode.checkThreadDifficulty', t => {
 
   t.throws(() => {
     n.checkThreadDifficulty({ timestamp() { return 4; } }, 0);
-  }, ErrorType.Chain.timeTravel(), 'checkThreadDifficulty checks timestamp ordering');
+  }, ErrorType.timeTravel(), 'checkThreadDifficulty checks timestamp ordering');
 
   t.throws(() => {
     n.checkThreadDifficulty({
@@ -192,7 +187,7 @@ t.test('BlockNode.checkThreadDifficulty', t => {
       },
       timestamp() { return 305; }
     }, 255, true);
-  }, ErrorType.Difficulty.insufficient(), 'checkThreadDifficulty rejects insufficient difficulty');
+  }, ErrorType.insufficientDifficulty(), 'checkThreadDifficulty rejects insufficient difficulty');
 
   t.doesNotThrow(() => {
     n.checkThreadDifficulty({

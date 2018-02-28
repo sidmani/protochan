@@ -29,7 +29,7 @@ var t = require('tap');
 
 t.test('Header constructor tests', function(t) {
   let h;
-  t.throws(function() { new Header(new Uint8Array(56))}, ErrorType.Data.length(), 'Header rejects data length < 80');
+  t.throws(function() { new Header(new Uint8Array(56))}, ErrorType.dataLength(), 'Header rejects data length < 80');
   t.doesNotThrow(function() { h = new Header(new Uint8Array(80))}, 'Header accepts valid data');
 
   t.strictSame(h.hash, new Uint8Array([
@@ -93,7 +93,7 @@ t.test('Header getter methods', function(t) {
   let h = new Header(arr);
 
   t.equal(h.protocolVersion(), 12345, 'Header returns correct protocol version');
-  t.equal(h.blockType(), 0x07, 'Header returns correct block type');
+  t.equal(h.type(), 0x07, 'Header returns correct block type');
   t.equal(h.timestamp(), 0xffffffff, 'Header returns correct timestamp');
   t.equal(h.nonce(), 777711889, 'Header returns correct nonce');
   t.strictSame(h.prevHash(), prev_hash_result, 'Header returns correct previous hash');

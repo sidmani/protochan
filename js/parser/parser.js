@@ -32,7 +32,7 @@ module.exports = class DataParser {
     // TODO: is there a way to avoid this check?
     // pad with zeroes?
     if ((this.controlLength + offset) > data.byteLength) {
-      throw ErrorType.Data.controlLength();
+      throw ErrorType.controlLength();
     }
 
     this.contentLength = data.byteLength

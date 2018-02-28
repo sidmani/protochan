@@ -31,18 +31,14 @@ module.exports = class HashMap {
     this.map = new Map();
   }
 
-  set(obj, overwrite) {
-    this.setRaw(obj.hash, obj, overwrite);
-  }
-
-  setRaw(hash, obj, overwrite) {
+  set(obj, hash = obj.hash, overwrite = false) {
     const str = HashMap.uint8ArrToHex(hash);
-    if (this.map.has(str) && !overwrite) throw ErrorType.HashMap.duplicate();
+    if (this.map.has(str) && !overwrite) throw ErrorType.duplicateKey();
     this.map.set(str, obj);
   }
 
   unset(obj) {
-    this.map.delete(HashMap.uint8ArrToHex(obj.hash));
+    this.unsetRaw(obj.hash);
   }
 
   unsetRaw(hash) {
@@ -86,7 +82,7 @@ module.exports = class HashMap {
   }
 
   static uint8ArrToHex(arr) {
-    if (!(arr instanceof Uint8Array)) throw ErrorType.Parameter.type();
+    if (!(arr instanceof Uint8Array)) throw ErrorType.parameterType();
     let str = '';
     for (let i = 0; i < arr.byteLength; i += 1) {
       str += (arr[i] < 16 ? '0' : '') + arr[i].toString(16);

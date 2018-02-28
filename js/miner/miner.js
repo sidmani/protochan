@@ -30,9 +30,6 @@ const ErrorType = require('../error.js');
 
 module.exports = class Miner {
   constructor(data) {
-    if (!(data instanceof Uint8Array)) {
-      throw ErrorType.Parameter.type();
-    }
     this.data = data;
   }
 

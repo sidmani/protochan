@@ -25,21 +25,76 @@
 'use strict';
 
 const HashMap = require('../hash/hashMap.js');
-const GenesisNode = require('./node/genesisNode.js');
+const HeaderType = require('../header/type.js');
+const ErrorType = require('../error.js');
 const Config = require('../board/config.js');
 
-module.exports = class BlockTree {
-  constructor(originalNode) {
+const GenesisNode = require('./node/genesisNode.js');
+const OriginalPostNode = require('./node/originalPostNode.js');
+const ThreadNode = require('./node/threadNode.js');
+const PostNode = require('./node/postNode.js');
+
+const Pool = require('./pool.js');
+
+module.exports = class Chain {
+  constructor(header, data) {
     this.nodeMap = new HashMap();
-    this.root = new GenesisNode(originalPost);
+    this.config = new Config(data);
+    this.pool = new Pool();
+
+    this.root = new GenesisNode(
+      header,
+      data,
+      this.nodeMap,
+      this.config,
+    );
+
     this.nodeMap.set(this.root);
   }
 
-  getNode(blockHash) {
+  get(blockHash) {
     return this.nodeMap.get(blockHash);
   }
 
-  getBlock(blockHash) {
-    return this.getNode(blockHash).block;
+  createNode(header, data) {
+    switch (header.type()) {
+      case HeaderType.THREAD:
+        return new ThreadNode(header, data, this.nodeMap, this.config);
+      case HeaderType.POST:
+        return new PostNode(header, data, this.nodeMap, this.config);
+      case HeaderType.ORIGINAL_POST:
+        return new OriginalPostNode(header, data, this.nodeMap, this.config);
+      default: throw ErrorType.illegalNodeType();
+    }
+  }
+
+  add(header, data) {
+    const node = this.createNode(header, data);
+    this.resolve(node);
+  }
+
+  resolve(node) {
+    this.pool.traverse(node, (next) => {
+      // attempt to add it to the chain
+      this.addChild(next);
+      // remove the dependents from pool
+      this.pool.clearDependents(next.hash);
+    }, (next, error) => {
+      if (error.type === ErrorType.missingReference().type) {
+        // dependents of next are not yet proven invalid
+        this.pool.addDependent(next, error.ref);
+      } else {
+        // next is invalid, so its dependents are invalid
+        this.pool.recursivelyClearDependents(next.hash);
+      }
+    });
+  }
+
+  addChild(node) {
+    const prevNode = this.getNode(node.header.prevHash());
+    if (!prevNode) {
+      throw ErrorType.missingReference(prevNode.hash);
+    }
+    prevNode.addChild(node);
   }
 };

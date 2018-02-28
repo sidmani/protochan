@@ -22,21 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
-
-const ThreadDataParser = require('./threadParser.js');
-const PostDataParser = require('./postParser.js');
-const GenesisDataParser = require('./genesisParser.js');
-const OriginalPostDataParser = require('./originalPostParser.js');
-const HeaderType = require('../header/type.js');
-
-const DataParserTypeMap = {
-  [HeaderType.THREAD]: ThreadDataParser,
-  [HeaderType.POST]: PostDataParser,
-  [HeaderType.GENESIS]: GenesisDataParser,
-  [HeaderType.ORIGINAL_POST]: OriginalPostDataParser,
-};
-
-module.exports.create = function (type, data, offset = 0) {
-  return new DataParserTypeMap[type](data, offset);
-};
+const t = require('tap');
+const ErrorType = require('../../js/error.js')
+const Chain = require('../../js/chain/chain.js');

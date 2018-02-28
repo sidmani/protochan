@@ -32,7 +32,7 @@ module.exports = class GenesisDataParser extends DataParser {
   constructor(data, offset = 0) {
     super(data, offset);
     // 1 byte control length, 5b genesis options
-    if (this.controlLength < 6) throw ErrorType.Data.controlLength();
+    if (this.controlLength < 6) throw ErrorType.controlLength();
 
     // instead of min/max, use min + range so no illegal values
     this.minPostDifficulty = this.data[offset + 1];

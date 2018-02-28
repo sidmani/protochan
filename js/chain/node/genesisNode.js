@@ -27,35 +27,28 @@
 const BlockType = require('../../header/type.js');
 const ErrorType = require('../../error.js');
 const BlockNode = require('./blockNode.js');
-const Difficulty = require('../../hash/difficulty.js');
-const Config = require('../../board/config.js');
+const Parser = require('../../parser/genesisParser.js');
 
 module.exports = class GenesisNode extends BlockNode {
-  constructor(header, data) {
-    super(header, data);
-    this.config = new Config(data);
+  constructor(header, data, nodeMap, config) {
+    const parser = new Parser(data);
+    super(header, parser, nodeMap, config);
   }
 
   addChild(node) {
-    this.checkPrevHash(node);
-
     switch (node.type()) {
       case BlockType.THREAD: {
-        this.checkThread(node);
+        const op = this.checkThread(node);
+
         node.setHeight(1);
-        // in order to guarantee that the tree is never
-        // invalid and has no side effects, this insertion
-        // must be after checkChildThread() returns
-        // TODO: make this not repeat the get operation
-        const op = this.children.get(node.data.getThread(0));
-        op.children.set(node);
+        op.insertThread(node);
         break;
       }
       case BlockType.ORIGINAL_POST: {
-        this.checkOriginalPost(node);
+        this.checkPostDifficulty(node);
         break;
       }
-      default: throw ErrorType.Chain.illegalType();
+      default: throw ErrorType.illegalNodeType();
     }
 
     super.addChild(node);
@@ -64,23 +57,33 @@ module.exports = class GenesisNode extends BlockNode {
   checkThread(thread) {
     // the first thread block must contain exactly 1 record
     if (thread.data.numRecords !== 1) {
-      throw ErrorType.Chain.unknownThread();
+      throw ErrorType.unknownThread();
     }
 
     // check difficulty of thread hash
-    Difficulty.verifyThreads(this, thread, this.config, 0);
+    this.checkThreadDifficulty(thread, 0);
 
     // check that the thread's original post hash points to
     // a valid child of this node
-    const op = this.children.get(thread.data.getThread(0));
-    if (!op || op.type() !== BlockType.ORIGINAL_POST) {
-      throw ErrorType.Chain.missingReference();
+    const opHash = thread.data.getThread(0);
+
+    const op = this.nodeMap.get(opHash);
+    // if the referenced post doesn't exist, error
+    if (!op) {
+      throw ErrorType.missingReference(opHash);
+    }
+
+    // if the referenced post is not a child of this node, error
+    if (!this.children.contains(opHash)) {
+      throw ErrorType.invalidChild();
+    }
+
+    // if the type is invalid, error
+    if (op.type() !== BlockType.ORIGINAL_POST) {
+      throw ErrorType.illegalNodeType();
     }
 
     op.checkThread(thread);
-  }
-
-  checkOriginalPost(op) {
-    this.checkPostDifficulty(op);
+    return op;
   }
 };
