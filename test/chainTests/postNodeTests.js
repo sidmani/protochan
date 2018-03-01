@@ -81,11 +81,78 @@ tap.test('PostNode add thread methods', (t) => {
     MAX_THREAD_COUNT: 11,
   };
   const n = new PostNode(header, data, nodeMap, config);
-
-  let thread = { timestamp() { return 10; } };
+  n.height = 5;
+  n.thread = new Uint8Array([4, 5, 8]);
+  let thread = {
+    timestamp() { return 10; },
+  };
   t.throws(() => n.checkThread(thread), ErrorType.timeTravel(), 'PostNode rejects invalid thread timestamp order');
-  thread = { timestamp() { return 975339; } };
+  thread = {
+    hash: new Uint8Array([8, 7, 5]),
+    setThreadHeight(thr, height) {
+      this.setThread = thr;
+      this.setHeight = height;
+    },
+    timestamp() { return 975339; },
+  };
   t.doesNotThrow(() => n.checkThread(thread), 'PostNode accepts valid thread timestamp order');
+  n.insertThread(thread);
+  t.strictSame(thread.setThread, new Uint8Array([4, 5, 8]), 'PostNode sets height of thread in thread block');
+  t.strictSame(thread.setHeight, 5, 'PostNode sets height of thread in thread block');
+  t.equal(n.children.get(new Uint8Array([8, 7, 5])), true, 'PostNode sets thread as child');
+  t.end();
+});
 
+tap.test('PostNode add post methods', (t) => {
+  const header = {
+    hash: new Uint8Array([1, 2, 3, 4]),
+    dataHash() {
+      return new Uint8Array([
+        251, 87, 31, 115, 52, 134, 126, 208,
+        21, 36, 135, 244, 50, 189, 73, 4,
+        30, 63, 182, 141, 192, 181, 70, 91,
+        253, 229, 111, 10, 89, 214, 124, 116,
+      ]);
+    },
+    timestamp() { return 12; },
+  };
+  const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
+  const nodeMap = new HashMap();
+  const config = {
+    MIN_POST_DIFFICULTY: 10,
+    MAX_POST_DIFFICULTY: 40,
+  };
+  const n = new PostNode(header, data, nodeMap, config);
+  n.segmentHeight = 4;
+  n.height = 12;
+  n.thread = new Uint8Array([4, 23, 4]);
+
+  t.throws(() => { n.addChild({ type() { return 0x00; } }); }, ErrorType.illegalNodeType(), 'Post rejects genesis in addChild');
+  t.throws(() => { n.addChild({ type() { return 0x01; } }); }, ErrorType.illegalNodeType(), 'Post rejects thread in addChild');
+  t.throws(() => { n.addChild({ type() { return 0x02; } }); }, ErrorType.illegalNodeType(), 'Post rejects originalPost in addChild');
+
+  const child = {
+    type() { return 0x03; },
+    timestamp() { return 22; },
+    header: {
+      difficulty: 19,
+    },
+    setSegmentHeight(h) {
+      this.segmentHeight = h;
+    },
+    setHeight(h) {
+      this.height = h;
+    },
+    setThread(thr) {
+      this.thread = thr;
+    },
+    hash: new Uint8Array([11, 17, 231]),
+  };
+  t.throws(() => { n.addChild(child); }, ErrorType.insufficientDifficulty(), 'Post rejects insufficient difficulty');
+  child.header.difficulty = 21;
+  t.doesNotThrow(() => { n.addChild(child); }, 'Post accepts sufficient difficulty');
+  t.equal(child.segmentHeight, 5, 'Post sets segment height on child');
+  t.equal(child.height, 13, 'Post sets height on child');
+  t.strictSame(child.thread, new Uint8Array([4, 23, 4]), 'Post sets thread on child');
   t.end();
 });

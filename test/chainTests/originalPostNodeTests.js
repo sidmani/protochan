@@ -78,9 +78,18 @@ tap.test('OriginalPostNode addChild methods', (t) => {
 
   const thread = {
     timestamp() { return 12; },
+    setThreadHeight(thr, height) {
+      this.setThread = thr;
+      this.setHeight = height;
+    },
+    hash: new Uint8Array([4, 5, 8]),
   };
   t.throws(() => n.checkThread(thread), ErrorType.timeTravel(), 'checkThread rejects equal timestamps');
   thread.timestamp = () => 13;
   t.doesNotThrow(() => n.checkThread(thread), 'checkThread accepts valid timestamp');
+  n.insertThread(thread);
+  t.strictSame(thread.setThread, new Uint8Array([4, 5, 8]), 'PostNode sets height of thread in thread block for own hash');
+  t.strictSame(thread.setHeight, 0, 'PostNode sets zero height for thread in thread block');
+  t.equal(n.children.get(new Uint8Array([4, 5, 8])), true, 'PostNode sets thread as child');
   t.end();
 });

@@ -7,9 +7,10 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tap test/*Tests --cov -R classic",
+    "test": "tap test/* --cov -R classic",
     "posttest": "tap --coverage-report=lcov && codeclimate-test-reporter < coverage/lcov.info",
-    "test-local": "tap test/*Tests",
+    "tl": "tap test/*",
+    "tlc": "tap test/* --cov --coverage-report=lcov",
     "coverage": "tap --coverage-report=lcov"
   },
   "repository": {
