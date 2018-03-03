@@ -26,19 +26,23 @@
 
 const Message = require('./message.js');
 
-const PAYLOAD_LENGTH = 4;
-
 module.exports = class Verack extends Message {
+  static PAYLOAD_LENGTH() { return 4; }
+  static COMMAND() { return 0x00000001; }
+
   constructor(data) {
-    super(data, PAYLOAD_LENGTH);
+    super(data, Verack.PAYLOAD_LENGTH());
   }
 
   static create(magic, timestamp) {
+    const payload = new Uint8Array(Verack.PAYLOAD_LENGTH());
+    Message.setUint32(payload, timestamp, 0);
+
     const data = Message.createData(
       magic,
-      0x00000001,
+      Verack.COMMAND(),
+      payload,
     );
-    Message.setUint32(data, timestamp, 0);
     return new Verack(data);
   }
 

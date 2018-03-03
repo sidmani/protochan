@@ -22,6 +22,5 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const t = require('tap');
-const ErrorType = require('../../src/core/error.js')
-const ThreadNode = require('../../src/core/chain/node/threadNode.js');
+const tap = require('tap');
+const Verack = require('../../../src/core/network/message/verack.js');

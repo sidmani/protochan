@@ -22,45 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
-
-const Message = require('./message.js');
-
-module.exports = class Version extends Message {
-  static PAYLOAD_LENGTH() { return 12; }
-  static COMMAND() { return 0x00000000; }
-
-  constructor(data) {
-    // 4b version
-    // 4b services
-    // 4b timestamp
-    super(data, Version.PAYLOAD_LENGTH());
-  }
-
-  static create(
-    magic,
-    version,
-    services,
-    timestamp,
-  ) {
-    const payload = new Uint8Array(Version.PAYLOAD_LENGTH());
-    Message.setUint32(payload, version, 0);
-    Message.setUint32(payload, services, 4);
-    Message.setUint32(payload, timestamp, 8);
-
-    const data = Message.createData(
-      magic,
-      Version.COMMAND(),
-      payload,
-    );
-    return new Version(data);
-  }
-
-  version() {
-    return Message.getUint32(this.data, Message.HEADER_LENGTH() + 0);
-  }
-
-  timestamp() {
-    return Message.getUint32(this.data, Message.HEADER_LENGTH() + 8);
-  }
-};
+const t = require('tap');
+const ErrorType = require('../../../src/core/error.js')
+const ThreadNode = require('../../../src/core/chain/node/threadNode.js');

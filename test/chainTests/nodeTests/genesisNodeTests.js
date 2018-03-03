@@ -23,9 +23,9 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const ErrorType = require('../../src/core/error.js');
-const GenesisNode = require('../../src/core/chain/node/genesisNode.js');
-const HashMap = require('../../src/core/hash/hashMap.js');
+const ErrorType = require('../../../src/core/error.js');
+const GenesisNode = require('../../../src/core/chain/node/genesisNode.js');
+const HashMap = require('../../../src/core/hash/hashMap.js');
 
 tap.test('GenesisNode constructor', (t) => {
   const header = {

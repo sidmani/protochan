@@ -25,8 +25,8 @@
 'use strict';
 
 const tap = require('tap');
-const ThreadDataParser = require('../../src/core/chain/parser/threadParser.js');
-const ErrorType = require('../../src/core/error.js');
+const ThreadDataParser = require('../../../src/core/chain/parser/threadParser.js');
+const ErrorType = require('../../../src/core/error.js');
 
 tap.test('ThreadDataParser constructor', (t) => {
   t.throws(() => {

@@ -22,8 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const Header = require('../../src/core/chain/header/header.js');
-const ErrorType = require('../../src/core/error.js');
+const Header = require('../../../src/core/chain/header/header.js');
+const ErrorType = require('../../../src/core/error.js');
 
 const tap = require('tap');
 

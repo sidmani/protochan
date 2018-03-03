@@ -23,8 +23,8 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const ErrorType = require('../../src/core/error.js');
-const BlockNode = require('../../src/core/chain/node/blockNode.js');
+const ErrorType = require('../../../src/core/error.js');
+const BlockNode = require('../../../src/core/chain/node/blockNode.js');
 
 tap.test('BlockNode', (t) => {
   const header = {
