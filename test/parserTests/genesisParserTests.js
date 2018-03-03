@@ -25,8 +25,8 @@
 'use strict';
 
 const tap = require('tap');
-const GenesisDataParser = require('../../js/chain/parser/genesisParser.js');
-const ErrorType = require('../../js/error.js');
+const GenesisDataParser = require('../../src/core/chain/parser/genesisParser.js');
+const ErrorType = require('../../src/core/error.js');
 
 tap.test('GenesisDataParser constructor', (t) => {
   t.throws(() => {

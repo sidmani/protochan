@@ -23,5 +23,5 @@
 // SOFTWARE.
 
 const t = require('tap');
-const ErrorType = require('../../js/error.js')
-const Chain = require('../../js/chain/chain.js');
+const ErrorType = require('../../src/core/error.js')
+const Chain = require('../../src/core/chain/chain.js');

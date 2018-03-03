@@ -23,7 +23,7 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const blake2s = require('../../js/hash/blake2s.js');
+const blake2s = require('../../src/core/hash/blake2s.js');
 
 tap.test('Blake2s hash function produces expected output', (t) => {
   t.strictSame(

@@ -23,7 +23,7 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const Pool = require('../../js/chain/pool.js');
+const Pool = require('../../src/core/chain/pool.js');
 
 tap.test('Pool', (t) => {
   const p = new Pool();

@@ -22,8 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const HashMap = require('../../js/hash/hashMap.js');
-const ErrorType = require('../../js/error.js');
+const HashMap = require('../../src/core/hash/hashMap.js');
+const ErrorType = require('../../src/core/error.js');
 const tap = require('tap');
 
 tap.test('HashMap functions', (t) => {

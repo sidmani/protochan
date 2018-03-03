@@ -26,5 +26,23 @@
 
 const Message = require('./message.js');
 
-// verack doesn't have any other fields
-module.exports = Message;
+const PAYLOAD_LENGTH = 4;
+
+module.exports = class Verack extends Message {
+  constructor(data) {
+    super(data, PAYLOAD_LENGTH);
+  }
+
+  static create(magic, timestamp) {
+    const data = Message.createData(
+      magic,
+      0x00000001,
+    );
+    Message.setUint32(data, timestamp, 0);
+    return new Verack(data);
+  }
+
+  timestamp() {
+    return Message.getUint32(this.data, this.HEADER_LENGTH + 0);
+  }
+};

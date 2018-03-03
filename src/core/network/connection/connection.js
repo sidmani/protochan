@@ -24,6 +24,8 @@
 
 'use strict';
 
-module.exports = class Peer {
-
+module.exports = class Connection {
+  constructor(onReceive) {
+    this.onReceived = onReceive;
+  }
 };

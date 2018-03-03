@@ -34,5 +34,9 @@
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.8.0",
     "tap": "^11.1.0"
+  },
+  "dependencies": {
+    "npm": "^5.7.1",
+    "ws": "^4.1.0"
   }
 }

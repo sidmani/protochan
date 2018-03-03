@@ -103,10 +103,10 @@ module.exports = class ThreadDataParser extends DataParser {
   }
 
   containsThread(hash) {
-    return this.contains(hash) && this.indexMap.get(hash) % 2 === 0;
+    return this.indexMap.get(hash) % 2 === 0;
   }
 
   containsPost(hash) {
-    return this.contains(hash) && this.indexMap.get(hash) % 2 === 1;
+    return this.indexMap.get(hash) % 2 === 1;
   }
 };

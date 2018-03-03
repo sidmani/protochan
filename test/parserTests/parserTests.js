@@ -25,8 +25,8 @@
 'use strict';
 
 const tap = require('tap');
-const DataParser = require('../../js/chain/parser/parser.js');
-const ErrorType = require('../../js/error.js');
+const DataParser = require('../../src/core/chain/parser/parser.js');
+const ErrorType = require('../../src/core/error.js');
 
 tap.test('DataParser', (t) => {
   const data = new Uint8Array(32);

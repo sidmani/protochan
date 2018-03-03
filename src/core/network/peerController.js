@@ -22,44 +22,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const Miner = require('../../src/core/miner/miner.js');
-const Hash = require('../../src/core/hash/blake2s.js');
-const tap = require('tap');
+'use strict';
 
-tap.test('Miner produces a leading zero byte for 8 difficulty', (t) => {
-  const data = new Uint8Array(80);
+const HashMap = require('../hash/hashMap.js');
+const Peer = require('./peer.js');
 
-  const miner = new Miner(data);
-  miner.mine(8);
-  const hash = Hash.digest(data);
-  t.equal(hash[0], 0);
-  t.end();
-});
-
-tap.test('Header nonce methods', (t) => {
-  const data = new Uint8Array(80);
-  const m = new Miner(data);
-
-  function getNonce(d) {
-    return ((d[7] << 24)
-    ^ (d[8] << 16)
-    ^ (d[9] << 8)
-    ^ d[10]) >>> 0;
+module.exports = class PeerController {
+  constructor(maxPeers) {
+    this.maxPeers = maxPeers;
+    this.peers = new HashMap();
   }
 
-  m.setNonce(0x5f4f3f2f);
-  t.equal(getNonce(data), 0x5f4f3f2f, 'Miner sets nonce');
-  m.setNonce(0x5f4f3fff);
-  m.incrNonce();
-  t.equal(getNonce(data), 0x5f4f4000, 'Miner increments nonce');
+  addPeer(connection) {
+    const peer = new Peer(connection, this.received);
+    this.peers.set(peer, peer.id());
+  }
 
-  m.setNonce(0x55ffffff);
-  m.incrNonce();
-  t.equal(getNonce(data), 0x56000000, 'Miner increments nonce');
-
-  m.setNonce(0x579effff);
-  m.incrNonce();
-  t.equal(getNonce(data), 0x579f0000, 'Miner increments nonce');
-
-  t.end();
-});
+  // received(message, peer) {
+  // 
+  // }
+};

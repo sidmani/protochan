@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const Difficulty = require('../../js/hash/difficulty.js');
+const Difficulty = require('../../src/core/hash/difficulty.js');
 const tap = require('tap');
 
 tap.test('countLeadingZeroes counts number of zeroes in a single byte', (t) => {

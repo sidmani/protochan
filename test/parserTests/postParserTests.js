@@ -25,7 +25,7 @@
 'use strict';
 
 const tap = require('tap');
-const PostParser = require('../../js/chain/parser/postParser.js');
+const PostParser = require('../../src/core/chain/parser/postParser.js');
 
 tap.test('PostParser constructor', (t) => {
   const data = new Uint8Array(32);

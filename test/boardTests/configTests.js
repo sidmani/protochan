@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const Configuration = require('../../js/chain/config.js');
+const Configuration = require('../../src/core/chain/config.js');
 const tap = require('tap');
 
 tap.test('Configuration constructor', (t) => {

@@ -24,21 +24,19 @@
 
 'use strict';
 
-const Message = require('./message.js');
+module.exports = class Peer {
+  constructor(connection, onReceive) {
+    this.connection = connection;
+    this.connection.onReceive = this.received;
 
-module.exports = class VersionMessage extends Message {
-  constructor(data) {
-    // 4b version
-    // 4b timestamp
-    // 4b services
-    super(data, 12);
+    this.onReceive = onReceive;
   }
 
-  version() {
-    return Message.getUint32(this.data, 12);
+  id() {
+    return this.connection.id;
   }
 
-  timestamp() {
-    return Message.getUint32(this.data, 16);
+  received(message) {
+    this.onReceive(message, this);
   }
 };

@@ -23,5 +23,5 @@
 // SOFTWARE.
 
 const t = require('tap');
-const ErrorType = require('../../js/error.js')
-const ThreadNode = require('../../js/chain/node/threadNode.js');
+const ErrorType = require('../../src/core/error.js')
+const ThreadNode = require('../../src/core/chain/node/threadNode.js');

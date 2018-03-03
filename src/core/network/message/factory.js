@@ -24,44 +24,26 @@
 
 'use strict';
 
+const Verack = require('./verack.js');
+const Version = require('./version.js');
+const Message = require('./message.js');
 const ErrorType = require('../../error.js');
-const Hash = require('../../hash/blake2s.js');
 
-module.exports = class Message {
-  // 4 bytes magic #
-  // 4 bytes command
-  // 2 bytes length
-  // 4 bytes checksum (first 4 bytes of hash(payload))
-  // n bytes payload
-  constructor(data, expectedPayloadLength = 0) {
-    if (data.byteLength < 12 + expectedPayloadLength) {
-      throw ErrorType.dataLength();
+module.exports = class MessageFactory {
+  static version(magic, version, services, timestamp) {
+    return Version.create(magic, version, services, timestamp);
+  }
+
+  static verack(magic, timestamp) {
+    return Verack.create(magic, timestamp);
+  }
+
+  static create(data) {
+    const command = Message.getUint32(data, 4);
+    switch (command) {
+      case Version.COMMAND(): return new Version(data);
+      case Verack.COMMAND(): return new Verack(data);
+      default: throw ErrorType.messageType();
     }
-    this.data = data;
-
-    const payloadHash = Hash.digest(data.subarray(14, 14 + this.length()));
-    const evalChecksum = Message.getUint32(payloadHash.slice(0, 4));
-    if (evalChecksum !== this.checksum()) {
-      throw ErrorType.checksum();
-    }
-  }
-
-  magic() {
-    return Message.getUint32(this.data);
-  }
-
-  command() {
-    return Message.getUint32(this.data, 4);
-  }
-
-  checksum() {
-    return Message.getUint32(this.data, 8);
-  }
-
-  static getUint32(arr, index = 0) {
-    return ((arr[index] << 24)
-    ^ (arr[index + 1] << 16)
-    ^ (arr[index + 2] << 8)
-    ^ arr[index + 3]) >>> 0;
   }
 };

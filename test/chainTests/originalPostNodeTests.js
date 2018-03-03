@@ -23,9 +23,9 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const ErrorType = require('../../js/error.js');
-const OriginalPostNode = require('../../js/chain/node/originalPostNode.js');
-const HashMap = require('../../js/hash/hashMap.js');
+const ErrorType = require('../../src/core/error.js');
+const OriginalPostNode = require('../../src/core/chain/node/originalPostNode.js');
+const HashMap = require('../../src/core/hash/hashMap.js');
 
 tap.test('OriginalPostNode constructor', (t) => {
   const header = {

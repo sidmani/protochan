@@ -24,6 +24,10 @@
 
 'use strict';
 
-module.exports = class NetworkController {
+const PeerController = require('./peerController.js');
 
+module.exports = class NetworkController {
+  constructor() {
+    this.peerController = new PeerController();
+  }
 };

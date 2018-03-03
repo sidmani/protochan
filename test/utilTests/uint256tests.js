@@ -23,7 +23,7 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const Uint256 = require('../../js/util/uint256.js');
+const Uint256 = require('../../src/core/util/uint256.js');
 
 tap.test('Uint256', (t) => {
   const num = new Uint256(0xfff7aea9);
