@@ -57,7 +57,11 @@ module.exports = class Version extends Message {
   }
 
   version() {
-    return Message.getUint32(this.data, Message.HEADER_LENGTH() + 0);
+    return Message.getUint32(this.data, Message.HEADER_LENGTH());
+  }
+
+  services() {
+    return Message.getUint32(this.data, Message.HEADER_LENGTH() + 4);
   }
 
   timestamp() {

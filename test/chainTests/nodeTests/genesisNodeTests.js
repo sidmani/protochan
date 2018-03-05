@@ -142,7 +142,11 @@ tap.test('GenesisNode.checkThread', (t) => {
   t.doesNotThrow(() => { n.addChild(thread); }, 'GenesisNode adds child thread');
   t.assert(opInsertedThread, 'addChild inserts on original post');
   t.equal(thread.height, 1, 'addChild sets thread height to one');
-  t.assert(nodeMap.contains(thread.hash), 'addChild adds to node map');
-  t.assert(n.children.contains(thread.hash), 'addChild adds to children');
+  t.equal(nodeMap.get(thread.hash), thread, 'addChild adds to node map');
+  t.equal(n.children.get(thread.hash), true, 'addChild adds to children');
+  t.end();
+});
+
+tap.test('GenesisNode.addChild original post', (t) => {
   t.end();
 });

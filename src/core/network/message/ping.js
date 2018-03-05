@@ -24,8 +24,29 @@
 
 'use strict';
 
-module.exports = class Connection {
-  constructor(onReceive) {
-    this.onReceived = onReceive;
+const Message = require('./message.js');
+
+module.exports = class Ping extends Message {
+  static PAYLOAD_LENGTH() { return 4; }
+  static COMMAND() { return 0x00000002; }
+
+  constructor(data) {
+    super(data, Ping.PAYLOAD_LENGTH());
+  }
+
+  static create(magic, timestamp) {
+    const payload = new Uint8Array(Ping.PAYLOAD_LENGTH());
+    Message.setUint32(payload, timestamp, 0);
+
+    const data = Message.createData(
+      magic,
+      Ping.COMMAND(),
+      payload,
+    );
+    return new Ping(data);
+  }
+
+  timestamp() {
+    return Message.getUint32(this.data, Message.HEADER_LENGTH());
   }
 };

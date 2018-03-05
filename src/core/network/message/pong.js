@@ -26,24 +26,24 @@
 
 const Message = require('./message.js');
 
-module.exports = class Verack extends Message {
+module.exports = class Pong extends Message {
   static PAYLOAD_LENGTH() { return 4; }
-  static COMMAND() { return 0x00000001; }
+  static COMMAND() { return 0x00000003; }
 
   constructor(data) {
-    super(data, Verack.PAYLOAD_LENGTH());
+    super(data, Pong.PAYLOAD_LENGTH());
   }
 
   static create(magic, timestamp) {
-    const payload = new Uint8Array(Verack.PAYLOAD_LENGTH());
+    const payload = new Uint8Array(Pong.PAYLOAD_LENGTH());
     Message.setUint32(payload, timestamp, 0);
 
     const data = Message.createData(
       magic,
-      Verack.COMMAND(),
+      Pong.COMMAND(),
       payload,
     );
-    return new Verack(data);
+    return new Pong(data);
   }
 
   timestamp() {

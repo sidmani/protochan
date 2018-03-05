@@ -24,12 +24,20 @@
 
 'use strict';
 
-const Verack = require('./verack.js');
-const Version = require('./version.js');
 const Message = require('./message.js');
 const ErrorType = require('../../error.js');
 
+const Verack = require('./verack.js');
+const Version = require('./version.js');
+const Ping = require('./ping.js');
+const Pong = require('./pong.js');
+
 module.exports = class MessageFactory {
+  // convenience
+  static magic(data) {
+    return Message.getUint32(data, 0);
+  }
+  // parameters -> message object
   static version(magic, version, services, timestamp) {
     return Version.create(magic, version, services, timestamp);
   }
@@ -38,6 +46,36 @@ module.exports = class MessageFactory {
     return Verack.create(magic, timestamp);
   }
 
+  static ping(magic, timestamp) {
+    return Ping.create(magic, timestamp);
+  }
+
+  static pong(magic, timestamp) {
+    return Pong.create(magic, timestamp);
+  }
+
+  static messageType(data) {
+    return Message.getUint32(data, 4);
+  }
+
+  // message type getters
+  static versionCommand() {
+    return Version.COMMAND();
+  }
+
+  static verackCommand() {
+    return Verack.COMMAND();
+  }
+
+  static pingCommand() {
+    return Ping.COMMAND();
+  }
+
+  static pongCommand() {
+    return Pong.COMMAND();
+  }
+
+  // data -> message object
   static create(data) {
     const command = Message.getUint32(data, 4);
     switch (command) {

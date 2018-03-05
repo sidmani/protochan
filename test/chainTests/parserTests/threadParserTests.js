@@ -72,6 +72,7 @@ tap.test('ThreadDataParser methods', (t) => {
 
   expected.fill(17, 0, 32);
   t.strictSame(parser.getCorrespondingItem(new Uint8Array(32)), expected, 'ThreadDataParser retrieves genesis post from zero array');
+  t.strictSame(parser.getCorrespondingItem(new Uint8Array(3)), undefined, 'ThreadDataParser returns undefined for unknown item');
 
   expected.fill(9, 0, 32);
   t.strictSame(parser.getCorrespondingItem(expected), expectedThread, 'ThreadDataParser gets thread from post hash');

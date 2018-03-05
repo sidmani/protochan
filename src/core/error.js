@@ -33,6 +33,7 @@ module.exports = class _Error extends Error {
   }
 
   static messageType() { return new _Error('Unknown message type.', 'MESSAGE_TYPE_UNKNOWN'); }
+  static magicMismatch() { return new _Error('Message has incorrect magic field.', 'ERROR_CURSED'); }
   static dataLength() { return new _Error('Length of data is incorrect.', 'DATA_LENGTH_INVALID'); }
   static dataHash() { return new _Error('Data hash does not match expected value.', 'DATA_HASH_MISMATCH'); }
   static controlLength() { return new _Error('Invalid control byte length.', 'DATA_CONTROL_LENGTH'); }

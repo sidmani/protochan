@@ -102,5 +102,17 @@ tap.test('Header getter methods', (t) => {
   t.strictSame(serialized, arr, 'Header serializes data');
   const deserialized = Header.deserialize(serialized);
   t.strictSame(h, deserialized, 'Header deserializes data');
+
+  const created = Header.create(
+    12345,
+    0x07,
+    0xffffffff,
+    777711889,
+    prevHashResult,
+    dataHashResult,
+    0x4e5be7e9,
+    0x7c,
+  );
+  t.strictSame(created, h, 'Header.create works');
   t.end();
 });

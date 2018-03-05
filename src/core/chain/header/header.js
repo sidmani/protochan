@@ -95,7 +95,7 @@ class Header {
     ^ this.data[index + 3]) >>> 0;
   }
 
-  static createFrom(
+  static create(
     protocolVersion,
     blockType,
     timestamp,

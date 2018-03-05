@@ -72,9 +72,9 @@ module.exports = class Message {
 
   /* eslint-disable no-param-reassign */
   static setUint32(arr, value, index = 0) {
-    arr[index + 0] = value << 24;
-    arr[index + 1] = value << 16;
-    arr[index + 2] = value << 8;
+    arr[index + 0] = value >> 24;
+    arr[index + 1] = value >> 16;
+    arr[index + 2] = value >> 8;
     arr[index + 3] = value;
   }
   /* eslint-enable no-param-reassign */
@@ -85,6 +85,7 @@ module.exports = class Message {
     Message.setUint32(data, command, 4);
     const checksum = Hash.digest(payload).slice(0, 4);
     data.set(checksum, 8);
+    data.set(payload, 12);
     return data;
   }
 };
