@@ -25,55 +25,70 @@
 'use strict';
 
 module.exports = class Stream {
-  constructor() {
-    this.nexts = [];
-    this.nextErrors = [];
-  }
-
-  next(obj) {
-    for (let i = 0; i < this.nexts.length; i += 1) {
-      this.nexts[i](obj);
-    }
+  constructor(
+    fn = (obj, next) => next(obj),
+    destructor = () => {},
+  ) {
+    this.fn = fn;
+    this.destructor = destructor;
+    this.children = [];
   }
 
   nextError(error) {
-    for (let i = 0; i < this.nextErrors.length; i += 1) {
-      this.nextErrors[i](error);
+    this.children.forEach((child) => {
+      if (child) child.nextError(error);
+    });
+  }
+
+  next(obj) {
+    try {
+      // execute fn on obj, and leave further calls up to fn
+      this.fn(
+        obj,
+        o => this.propagate(o),
+      );
+    } catch (error) {
+      this.children.forEach(child => child.nextError(error));
     }
   }
 
-  attach(fn) {
-    const child = new Stream();
-    this.nexts.push((obj) => {
-      try {
-        fn(obj, child);
-      } catch (error) {
-        child.nextError(error);
-      }
-    });
+  // propagate the object without running any auxiliary functions
+  propagate(obj) {
+    this.children.forEach(child => child.next(obj));
+  }
 
-    this.nextErrors.push(error => child.nextError(error));
+  destroy() {
+    this.children.forEach((child) => {
+      child.destroy();
+    });
+    this.destructor();
+    this.children = [];
+  }
+
+  attach(fn, destructor = () => {}) {
+    const child = new Stream(fn, destructor);
+    this.children.push(child);
     return child;
   }
 
-  on(next) {
-    return this.attach((obj, child) => {
+  on(fn) {
+    return this.attach((obj, next) => {
+      fn(obj);
       next(obj);
-      child.next(obj);
     });
   }
 
-  filter(next) {
-    return this.attach((obj, child) => {
-      if (next(obj)) {
-        child.next(obj);
+  filter(fn) {
+    return this.attach((obj, next) => {
+      if (fn(obj)) {
+        next(obj);
       }
     });
   }
 
   after(...conditionals) {
     const evaluated = [];
-    return this.attach((obj, child) => {
+    return this.attach((obj, next) => {
       const result = conditionals.reduce((tot, cond, idx) => {
         if (evaluated[idx] || cond(obj)) {
           evaluated[idx] = true;
@@ -83,32 +98,30 @@ module.exports = class Stream {
       }, true);
 
       if (result) {
-        child.next(obj);
+        next(obj);
       }
     });
   }
 
   discard(n = 1) {
     let idx = 0;
-    return this.attach((obj, child) => {
+    return this.attach((obj, next) => {
       if (idx >= n) {
-        child.next(obj);
+        next(obj);
       }
       idx += 1;
     });
   }
 
-  map(next) {
-    return this.attach((obj, child) => {
-      child.next(next(obj));
-    });
+  map(fn) {
+    return this.attach((obj, next) => next(fn(obj)));
   }
 
   first(n = 1) {
     let idx = 0;
-    return this.attach((obj, child) => {
+    return this.attach((obj, next) => {
       if (idx < n) {
-        child.next(obj);
+        next(obj);
       }
       idx += 1;
     });
@@ -116,17 +129,18 @@ module.exports = class Stream {
 
   debounce(interval, time) {
     let last = 0;
-    return this.attach((obj, child) => {
+    return this.attach((obj, next) => {
       const now = time();
       if (now - last >= interval) {
-        child.next(obj);
+        next(obj);
         last = now;
       }
     });
   }
 
-  error(next) {
-    this.nextErrors.push(next);
+  error(fn) {
+    const child = this.attach(() => {});
+    child.nextError = fn;
   }
 
   merge(...streams) {
@@ -134,5 +148,30 @@ module.exports = class Stream {
       streams[i].on(obj => this.next(obj));
     }
     return this;
+  }
+
+  // emit if the source does not emit every interval
+  invert(interval, time) {
+    let last = 0;
+    let id;
+    const child = this.attach(() => {
+      last = time();
+    }, () => clearInterval(id));
+
+    id = setInterval(() => {
+      if (time() - last > interval) {
+        child.propagate();
+      }
+    }, interval);
+
+    return child;
+  }
+
+  static every(interval, obj) {
+    const str = new Stream();
+    setInterval(() => {
+      str.propagate(obj);
+    }, interval);
+    return str;
   }
 };

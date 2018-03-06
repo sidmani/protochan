@@ -30,7 +30,6 @@ tap.test('Stream.on', (t) => {
 
   const result = [];
   str.on((obj) => { result.push(obj); });
-
   str.next('foo');
   str.next('bar');
   str.next('baz');
@@ -185,4 +184,28 @@ tap.test('Stream.merge', (t) => {
 
   t.strictSame(result, [5, 7, 4, 18, 13], 'Stream.merge combines streams');
   t.end();
+});
+
+tap.test('Stream.invert', (t) => {
+  const str = new Stream();
+
+  let time = 0;
+  const result = [];
+  let index = 0;
+  str.invert(10, () => time)
+    .on(() => {
+      if (index < 2) {
+        result.push(true);
+        index += 1;
+      }
+    });
+
+  str.next(3);
+  time = 25;
+  const id = setTimeout(() => {
+    str.destroy();
+    t.strictSame(result, [true, true], 'Stream.invert emits when parent misses interval');
+    t.end();
+  }, 32);
+  clearInterval(id);
 });
