@@ -81,6 +81,8 @@ module.exports = class MessageFactory {
     switch (command) {
       case Version.COMMAND(): return new Version(data);
       case Verack.COMMAND(): return new Verack(data);
+      case Ping.COMMAND(): return new Ping(data);
+      case Pong.COMMAND(): return new Pong(data);
       default: throw ErrorType.messageType();
     }
   }

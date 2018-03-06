@@ -25,16 +25,35 @@
 'use strict';
 
 const Factory = require('./message/factory.js');
+const Stream = require('./stream.js');
 
 module.exports = class Peer {
   constructor(connection, network) {
     this.connection = connection;
     this.network = network;
+    this.outgoing = new Stream();
 
+    // convert data to messages
     this.stream = this.connection.stream
       .filter(data => Factory.magic(data) === this.network.magic)
       .map(data => Factory.create(data));
 
+    // for handlers that wait for the handshake to complete
+    this.afterHandshake = this.stream.after(
+      msg => msg.command() === Factory.versionCommand(),
+      msg => msg.command() === Factory.verackCommand(),
+    );
+
+    // tell connection to send messages pushed to outgoing
+    this.connection.attach(this.outgoing);
+
+    this.attachHandshake();
+    this.attachPong();
+    this.attachPing();
+    this.attachTerminator();
+  }
+
+  attachHandshake() {
     this.stream
       // get only version messages
       .filter(msg => msg.command() === Factory.versionCommand())
@@ -49,83 +68,65 @@ module.exports = class Peer {
 
         // set available services to bitmask of both
         this.services = this.network.services & msg.services();
-        console.log(`${connection.id}: Received version message, setting version to ${this.version}`);
-        this.send(Factory.verack(
+        this.outgoing.next(Factory.verack(
           this.network.magic,
           Date.now() / 1000,
         ));
       });
+  }
 
-    this.stream
-      // accept nothing until we receive version and verack
-      .after(
-        msg => msg.command() === Factory.versionCommand(),
-        msg => msg.command() === Factory.verackCommand(),
-      )
-      .on(() => console.log(`${connection.id}: Ready to transmit.`))
+  attachPing() {
+    // send a ping every 3 seconds if nothing sent or received
+    this.afterHandshake
+      .merge(this.outgoing)
+      .invert(3000, Date.now)
+      .on(() => {
+        this.outgoing.next(Factory.ping(
+          this.network.magic,
+          Date.now(),
+        ));
+      });
+  }
+
+  attachPong() {
+    this.afterHandshake
       // respond to ping commands
       .filter(msg => msg.command() === Factory.pingCommand())
-      // ignore pings more often than every 3s
-      .debounce(3000)
+      // ignore pings more often than every 2.5s
+      .debounce(2500, Date.now)
       // pong it
-      .on((msg) => {
-        console.log(`${connection.id}: Received ping @ ${msg.timestamp()}`);
-        this.send(Factory.pong(
+      .on(() => {
+        this.outgoing.next(Factory.pong(
           this.network.magic,
           Date.now() / 1000,
         ));
       });
+  }
+
+  attachTerminator() {
+    // terminate the connection if nothing received for 10s
+    this.afterHandshake
+      .invert(10000, Date.now)
+      .on(() => this.terminate());
+  }
+
+  terminate() {
+    this.connection.terminate();
+    this.outgoing.destroy();
   }
 
   init() {
     const versionMessage = Factory.version(
       this.network.magic,
       this.network.version,
-      0x00000000,
+      this.network.services,
       Date.now() / 1000,
     );
 
-    this.send(versionMessage);
+    this.outgoing.next(versionMessage);
   }
 
   id() {
     return this.connection.id;
   }
-
-  send(message) {
-    this.connection.send(message.data);
-  }
 };
-
-// const streamA = new Stream();
-// const streamB = new Stream();
-//
-// const connectionB = {
-//   stream: streamB,
-//   send(obj) { streamA.next(obj); },
-//   id: 'B',
-// };
-// const connectionA = {
-//   stream: streamA,
-//   send(obj) { streamB.next(obj); },
-//   id: 'A',
-// };
-//
-// const networkA = {
-//   magic: 0x13371337,
-//   services: 0x10000000,
-//   version: 2,
-// };
-//
-// const networkB = {
-//   magic: 0x13371337,
-//   services: 0x00001000,
-//   version: 1,
-// };
-//
-// const p1 = new module.exports(connectionA, networkA);
-// const p2 = new module.exports(connectionB, networkB);
-// p1.init();
-// p2.init();
-//
-// p2.send(Factory.ping(0x13371337, Date.now() / 1000));

@@ -43,10 +43,7 @@ module.exports = class Stream {
   next(obj) {
     try {
       // execute fn on obj, and leave further calls up to fn
-      this.fn(
-        obj,
-        o => this.propagate(o),
-      );
+      this.fn(obj, o => this.propagate(o));
     } catch (error) {
       this.children.forEach(child => child.nextError(error));
     }
