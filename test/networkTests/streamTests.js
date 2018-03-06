@@ -206,6 +206,6 @@ tap.test('Stream.invert', (t) => {
     str.destroy();
     t.strictSame(result, [true, true], 'Stream.invert emits when parent misses interval');
     t.end();
-  }, 32);
+  }, 40);
   clearInterval(id);
 });
