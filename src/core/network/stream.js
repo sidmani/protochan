@@ -52,9 +52,7 @@ module.exports = class Stream {
       }
     });
 
-    this.nextErrors.push((error) => {
-      child.nextError(error);
-    });
+    this.nextErrors.push(error => child.nextError(error));
     return child;
   }
 
@@ -116,10 +114,10 @@ module.exports = class Stream {
     });
   }
 
-  debounce(interval) {
-    let last = Date.now();
+  debounce(interval, time) {
+    let last = 0;
     return this.attach((obj, child) => {
-      const now = Date.now();
+      const now = time();
       if (now - last >= interval) {
         child.next(obj);
         last = now;
@@ -133,16 +131,8 @@ module.exports = class Stream {
 
   merge(...streams) {
     for (let i = 0; i < streams.length; i += 1) {
-      streams[i].on(obj => this.push(obj));
+      streams[i].on(obj => this.next(obj));
     }
     return this;
   }
-
-  static merge(...streams) {
-    const merged = new Stream();
-    for (let i = 0; i < streams.length; i += 1) {
-      streams[i].on(obj => merged.push(obj));
-    }
-    return merged;
-  }
-}
+};

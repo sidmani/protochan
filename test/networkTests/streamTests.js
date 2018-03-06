@@ -93,25 +93,6 @@ tap.test('Stream.discard', (t) => {
   t.end();
 });
 
-tap.test('Stream.first', (t) => {
-  const str = new Stream();
-
-  const result = [];
-
-  str.first(4)
-    .on((obj) => { result.push(obj); });
-
-  str.next(2);
-  str.next(4);
-  str.next(5);
-  str.next(4);
-  str.next(7);
-  str.next(1);
-
-  t.strictSame(result, [2, 4, 5, 4], 'Stream.first passes first n objects');
-  t.end();
-});
-
 tap.test('Stream.map', (t) => {
   const str = new Stream();
 
@@ -126,5 +107,82 @@ tap.test('Stream.map', (t) => {
   str.next(4);
 
   t.strictSame(result, ['2', '4', '5', '4'], 'Stream.map works');
+  t.end();
+});
+
+tap.test('Stream.first', (t) => {
+  const str = new Stream();
+
+  const result = [];
+
+  str.first(4)
+    .on((obj) => { result.push(obj); });
+
+  str.next(2);
+  str.next(4);
+  str.next(5);
+  str.next(6);
+  str.next(7);
+  str.next(1);
+
+  t.strictSame(result, [2, 4, 5, 6], 'Stream.first passes first n objects');
+  t.end();
+});
+
+tap.test('Stream.debounce', (t) => {
+  const str = new Stream();
+
+  const result = [];
+
+  let now = 1200;
+
+  str.debounce(1000, () => now)
+    .on((obj) => { result.push(obj); });
+
+  str.next(5);
+  str.next(6);
+  now = 1900;
+  str.next(7);
+  now = 3000;
+  str.next(8);
+  str.next(9);
+  now = 6000;
+  str.next(10);
+  t.strictSame(result, [5, 8, 10], 'Stream.first allows only one object per time interval');
+  t.end();
+});
+
+tap.test('Stream.error', (t) => {
+  const str = new Stream();
+
+  let error;
+  /* eslint-disable no-throw-literal */
+  str.filter(() => true)
+    .on(() => { throw 'abcdef'; })
+    .filter(() => true)
+    .error((e) => { error = e; });
+  /* eslint-enable no-throw-literal */
+
+  str.next(5);
+  t.equal(error, 'abcdef', 'Stream.error catches error');
+  t.end();
+});
+
+tap.test('Stream.merge', (t) => {
+  const str1 = new Stream();
+  const str2 = new Stream();
+  const str3 = new Stream();
+
+  const result = [];
+  str1.merge(str2, str3)
+    .on((obj) => { result.push(obj); });
+
+  str2.next(5);
+  str1.next(7);
+  str2.next(4);
+  str3.next(18);
+  str1.next(13);
+
+  t.strictSame(result, [5, 7, 4, 18, 13], 'Stream.merge combines streams');
   t.end();
 });
