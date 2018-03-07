@@ -50,16 +50,19 @@ tap.test('Peer', (t) => {
   stream.next(Factory.ping(0x13371337, 5).data);
   t.equal(latest, undefined, 'Peer does not respond to pings before handshake');
   p.init();
-  t.equal(latest.command(), 0, 'Peer.init sends version message');
-  t.equal(latest.version(), 1, 'Peer.init sends correct version');
-  t.equal(latest.services(), 0x10000010, 'Peer.init sends correct service bitmask');
+  let msg = Factory.create(latest);
+  t.equal(msg.command(), 0, 'Peer.init sends version message');
+  t.equal(msg.version(), 1, 'Peer.init sends correct version');
+  t.equal(msg.services(), 0x10000010, 'Peer.init sends correct service bitmask');
   stream.next(Factory.version(0x13371337, 4, 0x10100000, 11).data);
   t.equal(p.version, 1, 'Peer sets version to minimum of both clients');
   t.equal(p.services, 0x10000000, 'Peer sets services to common only');
-  t.equal(latest.command(), 1, 'Peer sends verack after receiving version');
+  msg = Factory.create(latest);
+  t.equal(msg.command(), 1, 'Peer sends verack after receiving version');
   stream.next(Factory.verack(0x13371337, 19).data);
   stream.next(Factory.ping(0x13371337, 5).data);
-  t.equal(latest.command(), 3, 'Peer responds to ping after handshake is complete');
+  msg = Factory.create(latest);
+  t.equal(msg.command(), 3, 'Peer responds to ping after handshake is complete');
 
   p.terminate();
   t.end();

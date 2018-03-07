@@ -68,7 +68,7 @@ module.exports = class Peer {
 
         // set available services to bitmask of both
         this.services = this.network.services & msg.services();
-        this.outgoing.next(Factory.verack(
+        this.send(Factory.verack(
           this.network.magic,
           Date.now() / 1000,
         ));
@@ -81,7 +81,7 @@ module.exports = class Peer {
       .merge(this.outgoing)
       .invert(3000, Date.now)
       .on(() => {
-        this.outgoing.next(Factory.ping(
+        this.send(Factory.ping(
           this.network.magic,
           Date.now(),
         ));
@@ -96,7 +96,7 @@ module.exports = class Peer {
       .debounce(2500, Date.now)
       // pong it
       .on(() => {
-        this.outgoing.next(Factory.pong(
+        this.send(Factory.pong(
           this.network.magic,
           Date.now() / 1000,
         ));
@@ -123,7 +123,11 @@ module.exports = class Peer {
       Date.now() / 1000,
     );
 
-    this.outgoing.next(versionMessage);
+    this.send(versionMessage);
+  }
+
+  send(message) {
+    this.outgoing.next(message.data);
   }
 
   id() {

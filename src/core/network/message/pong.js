@@ -27,26 +27,5 @@
 const Message = require('./message.js');
 
 module.exports = class Pong extends Message {
-  static PAYLOAD_LENGTH() { return 4; }
   static COMMAND() { return 0x00000003; }
-
-  constructor(data) {
-    super(data, Pong.PAYLOAD_LENGTH());
-  }
-
-  static create(magic, timestamp) {
-    const payload = new Uint8Array(Pong.PAYLOAD_LENGTH());
-    Message.setUint32(payload, timestamp, 0);
-
-    const data = Message.createData(
-      magic,
-      Pong.COMMAND(),
-      payload,
-    );
-    return new Pong(data);
-  }
-
-  timestamp() {
-    return Message.getUint32(this.data, Message.HEADER_LENGTH());
-  }
 };

@@ -26,15 +26,15 @@
 
 const ErrorType = require('../../error.js');
 const Hash = require('../../hash/blake2s.js');
+/* eslint-disable no-unused-vars */
+const ByteArray = require('../../util/byteArray.js');
+/* eslint-enable no-unused-vars */
 
 module.exports = class Message {
   static HEADER_LENGTH() {
-    return 12;
+    return 16;
   }
-  // 4 bytes magic #
-  // 4 bytes command
-  // 4 bytes checksum (first 4 bytes of hash(payload))
-  // n bytes payload
+
   constructor(data, expectedPayloadLength = 0) {
     if (data.byteLength < Message.HEADER_LENGTH() + expectedPayloadLength) {
       throw ErrorType.dataLength();
@@ -45,47 +45,39 @@ module.exports = class Message {
       Message.HEADER_LENGTH(),
       Message.HEADER_LENGTH() + expectedPayloadLength,
     ));
-    const evalChecksum = Message.getUint32(payloadHash.slice(0, 4));
+    const evalChecksum = payloadHash.slice(0, 4).getUint32(0);
     if (evalChecksum !== this.checksum()) {
       throw ErrorType.dataHash();
     }
   }
 
   magic() {
-    return Message.getUint32(this.data);
+    return this.data.getUint32(0);
   }
 
   command() {
-    return Message.getUint32(this.data, 4);
+    return this.data.getUint32(4);
+  }
+
+  timestamp() {
+    return this.data.getUint32(8);
   }
 
   checksum() {
-    return Message.getUint32(this.data, 8);
+    return this.data.getUint32(12);
   }
 
-  static getUint32(arr, index = 0) {
-    return ((arr[index] << 24)
-    ^ (arr[index + 1] << 16)
-    ^ (arr[index + 2] << 8)
-    ^ arr[index + 3]) >>> 0;
+  static set(data, magic, command, timestamp) {
+    data.setUint32(0, magic);
+    data.setUint32(4, command);
+    data.setUint32(8, timestamp);
+    const checksum = Hash.digest(data.slice(16)).slice(0, 4);
+    data.set(checksum, 12);
   }
 
-  /* eslint-disable no-param-reassign */
-  static setUint32(arr, value, index = 0) {
-    arr[index + 0] = value >> 24;
-    arr[index + 1] = value >> 16;
-    arr[index + 2] = value >> 8;
-    arr[index + 3] = value;
-  }
-  /* eslint-enable no-param-reassign */
-
-  static createData(magic, command, payload = new Uint8Array()) {
-    const data = new Uint8Array(Message.HEADER_LENGTH() + payload.byteLength);
-    Message.setUint32(data, magic, 0);
-    Message.setUint32(data, command, 4);
-    const checksum = Hash.digest(payload).slice(0, 4);
-    data.set(checksum, 8);
-    data.set(payload, 12);
-    return data;
+  static generic(magic, command, timestamp) {
+    const data = new Uint8Array(Message.HEADER_LENGTH());
+    Message.set(data, magic, command, timestamp);
+    return new Message(data);
   }
 };

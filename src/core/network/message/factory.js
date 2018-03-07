@@ -26,6 +26,9 @@
 
 const Message = require('./message.js');
 const ErrorType = require('../../error.js');
+/* eslint-disable no-unused-vars */
+const ByteArray = require('../../util/byteArray.js');
+/* eslint-enable no-unused-vars */
 
 const Verack = require('./verack.js');
 const Version = require('./version.js');
@@ -35,7 +38,7 @@ const Pong = require('./pong.js');
 module.exports = class MessageFactory {
   // convenience
   static magic(data) {
-    return Message.getUint32(data, 0);
+    return data.getUint32(0);
   }
   // parameters -> message object
   static version(magic, version, services, timestamp) {
@@ -43,15 +46,15 @@ module.exports = class MessageFactory {
   }
 
   static verack(magic, timestamp) {
-    return Verack.create(magic, timestamp);
+    return Message.generic(magic, Verack.COMMAND(), timestamp);
   }
 
   static ping(magic, timestamp) {
-    return Ping.create(magic, timestamp);
+    return Message.generic(magic, Ping.COMMAND(), timestamp);
   }
 
   static pong(magic, timestamp) {
-    return Pong.create(magic, timestamp);
+    return Message.generic(magic, Pong.COMMAND(), timestamp);
   }
 
   static messageType(data) {
@@ -77,7 +80,7 @@ module.exports = class MessageFactory {
 
   // data -> message object
   static create(data) {
-    const command = Message.getUint32(data, 4);
+    const command = data.getUint32(4);
     switch (command) {
       case Version.COMMAND(): return new Version(data);
       case Verack.COMMAND(): return new Verack(data);

@@ -28,6 +28,9 @@
 const Hash = require('../../hash/blake2s.js');
 const Difficulty = require('../../hash/difficulty.js');
 const ErrorType = require('../../error.js');
+/* eslint-disable no-unused-vars */
+const ByteArray = require('../../util/byteArray.js');
+/* eslint-enable no-unused-vars */
 
 /**
  * The block header.
@@ -50,7 +53,7 @@ class Header {
 
   // Protocol version (uint16)
   protocolVersion() {
-    return ((this.data[0] << 8) ^ this.data[1]) >>> 0;
+    return this.data.getUint16(0);
   }
 
   // Block type (uint8)
@@ -60,12 +63,12 @@ class Header {
 
   // Unix timestamp (uint32)
   timestamp() {
-    return this.getUint32(3);
+    return this.data.getUint32(3);
   }
 
   // nonce (uint32)
   nonce() {
-    return this.getUint32(7);
+    return this.data.getUint32(7);
   }
 
   // 32 bytes
@@ -80,19 +83,12 @@ class Header {
 
   // board id (uint32)
   board() {
-    return this.getUint32(75);
+    return this.data.getUint32(75);
   }
 
   // additional flags
   reserved() {
     return this.data[79];
-  }
-
-  getUint32(index) {
-    return ((this.data[index] << 24)
-    ^ (this.data[index + 1] << 16)
-    ^ (this.data[index + 2] << 8)
-    ^ this.data[index + 3]) >>> 0;
   }
 
   static create(
@@ -105,19 +101,19 @@ class Header {
     board,
     reserved,
   ) {
-    const buffer = new ArrayBuffer(80);
-    const data = new DataView(buffer);
+    const data = new Uint8Array(80);
+    // const data = new DataView(buffer);
     data.setUint16(0, protocolVersion);
-    data.setUint8(2, blockType);
+    data[2] = blockType;
     data.setUint32(3, timestamp);
     data.setUint32(7, nonce);
     for (let i = 0; i < 32; i += 1) {
-      data.setUint8(i + 11, prevHash[i]);
-      data.setUint8(i + 43, dataHash[i]);
+      data[i + 11] = prevHash[i];
+      data[i + 43] = dataHash[i];
     }
     data.setUint32(75, board);
-    data.setUint8(79, reserved);
-    return new Header(new Uint8Array(data.buffer));
+    data[79] = reserved;
+    return new Header(data);
   }
 
   serialize() {

@@ -25,6 +25,9 @@
 'use strict';
 
 const Message = require('./message.js');
+/* eslint-disable no-unused-vars */
+const ByteArray = require('../../util/byteArray.js');
+/* eslint-enable no-unused-vars */
 
 module.exports = class Version extends Message {
   static PAYLOAD_LENGTH() { return 12; }
@@ -43,28 +46,21 @@ module.exports = class Version extends Message {
     services,
     timestamp,
   ) {
-    const payload = new Uint8Array(Version.PAYLOAD_LENGTH());
-    Message.setUint32(payload, version, 0);
-    Message.setUint32(payload, services, 4);
-    Message.setUint32(payload, timestamp, 8);
+    const data = new Uint8Array(Message.HEADER_LENGTH() + Version.PAYLOAD_LENGTH());
 
-    const data = Message.createData(
-      magic,
-      Version.COMMAND(),
-      payload,
-    );
+    data.setUint32(Message.HEADER_LENGTH() + 0, version);
+    data.setUint32(Message.HEADER_LENGTH() + 4, services);
+
+    Message.set(data, magic, Version.COMMAND(), timestamp);
+
     return new Version(data);
   }
 
   version() {
-    return Message.getUint32(this.data, Message.HEADER_LENGTH());
+    return this.data.getUint32(Message.HEADER_LENGTH());
   }
 
   services() {
-    return Message.getUint32(this.data, Message.HEADER_LENGTH() + 4);
-  }
-
-  timestamp() {
-    return Message.getUint32(this.data, Message.HEADER_LENGTH() + 8);
+    return this.data.getUint32(Message.HEADER_LENGTH() + 4);
   }
 };

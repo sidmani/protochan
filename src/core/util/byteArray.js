@@ -24,8 +24,27 @@
 
 'use strict';
 
-const Message = require('./message.js');
+/* eslint-disable no-extend-native */
+Uint8Array.prototype.getUint32 = function (offset) {
+  return ((this[offset + 0] << 24) ^
+   (this[offset + 1] << 16) ^
+   (this[offset + 2] << 8) ^
+   (this[offset + 3] << 0)) >>> 0;
+};
 
-module.exports = class Verack extends Message {
-  static COMMAND() { return 0x00000001; }
+Uint8Array.prototype.setUint32 = function (offset, value) {
+  this[offset + 0] = value >> 24;
+  this[offset + 1] = value >> 16;
+  this[offset + 2] = value >> 8;
+  this[offset + 3] = value;
+};
+
+Uint8Array.prototype.getUint16 = function (offset) {
+  return ((this[offset + 0] << 8) ^
+   (this[offset + 1] << 0)) >>> 0;
+};
+
+Uint8Array.prototype.setUint16 = function (offset, value) {
+  this[offset + 0] = value >> 8;
+  this[offset + 1] = value >> 0;
 };

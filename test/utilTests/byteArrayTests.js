@@ -22,10 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
+const tap = require('tap');
+/* eslint-disable no-unused-vars */
+const ByteArray = require('../../src/core/util/byteArray.js');
+/* eslint-enable no-unused-vars */
 
-const Message = require('./message.js');
-
-module.exports = class Verack extends Message {
-  static COMMAND() { return 0x00000001; }
-};
+tap.test('Uint8Array get/set longer integers', (t) => {
+  const array = new Uint8Array([0xFF, 0xAB, 0xCD, 0xEF, 0x10]);
+  t.equal(array.getUint32(1), 0xABCDEF10, 'getUint32');
+  t.equal(array.getUint16(3), 0xEF10, 'getUint16');
+  array.setUint32(0, 0x14151618);
+  t.equal(array.getUint32(0), 0x14151618, 'setUint32');
+  array.setUint16(3, 0x7173);
+  t.equal(array.getUint16(3), 0x7173, 'setUint16');
+  t.end();
+});
