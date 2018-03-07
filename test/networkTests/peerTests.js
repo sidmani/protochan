@@ -25,16 +25,18 @@
 const tap = require('tap');
 const Peer = require('../../src/core/network/peer.js');
 const Stream = require('../../src/core/network/stream.js');
-const Factory = require('../../src/core/network/message/factory.js');
+
+const Ping = require('../../src/core/network/message/types/ping.js');
+const Pong = require('../../src/core/network/message/types/pong.js');
+const Version = require('../../src/core/network/message/types/version.js');
+const Verack = require('../../src/core/network/message/types/verack.js');
 
 tap.test('Peer', (t) => {
   const stream = new Stream();
   let latest;
   const connection = {
     stream,
-    attach(s) {
-      s.on((obj) => { latest = obj; });
-    },
+    send(data) { latest = data; },
     terminate() {
       this.stream.destroy();
     },
@@ -43,25 +45,26 @@ tap.test('Peer', (t) => {
   const network = {
     magic: 0x13371337,
     services: 0x10000010,
-    version: 1,
+    version: 3,
   };
 
   const p = new Peer(connection, network);
-  stream.next(Factory.ping(0x13371337, 5).data);
+
+  stream.next(Ping.generic(0x13371337, Ping.COMMAND(), 5).data);
   t.equal(latest, undefined, 'Peer does not respond to pings before handshake');
   p.init();
-  let msg = Factory.create(latest);
+  let msg = new Version(latest);
   t.equal(msg.command(), 0, 'Peer.init sends version message');
-  t.equal(msg.version(), 1, 'Peer.init sends correct version');
+  t.equal(msg.version(), 3, 'Peer.init sends correct version');
   t.equal(msg.services(), 0x10000010, 'Peer.init sends correct service bitmask');
-  stream.next(Factory.version(0x13371337, 4, 0x10100000, 11).data);
-  t.equal(p.version, 1, 'Peer sets version to minimum of both clients');
+  stream.next(Version.create(0x13371337, 2, 0x10100000, 11).data);
+  t.equal(p.version, 2, 'Peer sets version to minimum of both clients');
   t.equal(p.services, 0x10000000, 'Peer sets services to common only');
-  msg = Factory.create(latest);
+  msg = new Verack(latest);
   t.equal(msg.command(), 1, 'Peer sends verack after receiving version');
-  stream.next(Factory.verack(0x13371337, 19).data);
-  stream.next(Factory.ping(0x13371337, 5).data);
-  msg = Factory.create(latest);
+  stream.next(Verack.generic(0x13371337, Verack.COMMAND(), 19).data);
+  stream.next(Ping.generic(0x13371337, Ping.COMMAND(), 5).data);
+  msg = new Pong(latest);
   t.equal(msg.command(), 3, 'Peer responds to ping after handshake is complete');
 
   p.terminate();

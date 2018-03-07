@@ -24,8 +24,9 @@
 
 'use strict';
 
-const Message = require('./message.js');
+const Message = require('../message.js');
 
-module.exports = class Verack extends Message {
-  static COMMAND() { return 0x00000001; }
+module.exports = class Ping extends Message {
+  static COMMAND() { return 0x00000002; }
+  static match(data) { return Message.getCommand(data) === Ping.COMMAND(); }
 };

@@ -24,19 +24,20 @@
 
 'use strict';
 
-const Message = require('./message.js');
+const Message = require('../message.js');
 /* eslint-disable no-unused-vars */
-const ByteArray = require('../../util/byteArray.js');
+const ByteArray = require('../../../util/byteArray.js');
 /* eslint-enable no-unused-vars */
 
 module.exports = class Version extends Message {
   static PAYLOAD_LENGTH() { return 12; }
   static COMMAND() { return 0x00000000; }
 
+  static match(data) {
+    return Message.getCommand(data) === Version.COMMAND();
+  }
+
   constructor(data) {
-    // 4b version
-    // 4b services
-    // 4b timestamp
     super(data, Version.PAYLOAD_LENGTH());
   }
 

@@ -22,5 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-const Version = require('../../../src/core/network/message/version.js');
+'use strict';
+
+const Message = require('../message.js');
+
+module.exports = class Verack extends Message {
+  static COMMAND() { return 0x00000001; }
+  static match(data) { return Message.getCommand(data) === Verack.COMMAND(); }
+};

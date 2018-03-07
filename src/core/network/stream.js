@@ -100,6 +100,17 @@ module.exports = class Stream {
     });
   }
 
+  // wait for stream to emit an event before emitting
+  wait(stream) {
+    let ready = false;
+    stream.on(() => { ready = true; });
+    return this.attach((obj, next) => {
+      if (ready) {
+        next(obj);
+      }
+    });
+  }
+
   discard(n = 1) {
     let idx = 0;
     return this.attach((obj, next) => {

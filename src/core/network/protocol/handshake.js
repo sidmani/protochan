@@ -24,8 +24,32 @@
 
 'use strict';
 
-const Message = require('./message.js');
+const Verack = require('../message/types/verack.js');
+const Version = require('../message/types/version.js');
 
-module.exports = class Pong extends Message {
-  static COMMAND() { return 0x00000003; }
+module.exports = function (stream, network, outgoing) {
+  return stream
+    // get only version messages
+    .filter(data => Version.match(data))
+    .map(data => new Version(data))
+    // .filter(msg => msg.command() === Version.COMMAND())
+    // process the first message only
+    .first()
+    .map((msg) => {
+      // set version to minimum of two versions
+      const version = Math.min(
+        network.version,
+        msg.version(),
+      );
+
+      // set available services to bitmask of both
+      const services = network.services & msg.services();
+
+      outgoing.next(Verack.generic(
+        network.magic,
+        Verack.COMMAND(),
+        network.timestamp,
+      ));
+      return { version, services };
+    });
 };

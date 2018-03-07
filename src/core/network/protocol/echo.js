@@ -24,8 +24,32 @@
 
 'use strict';
 
-const Message = require('./message.js');
+const Ping = require('../message/types/ping.js');
+const Pong = require('../message/types/pong.js');
 
-module.exports = class Ping extends Message {
-  static COMMAND() { return 0x00000002; }
+module.exports = function (stream, network, outgoing) {
+  // send a ping every 3 seconds if nothing sent or received
+  stream.merge(outgoing)
+    .invert(3000, Date.now)
+    .on(() => {
+      outgoing.next(Ping.generic(
+        network.magic,
+        Ping.COMMAND(),
+        Date.now(),
+      ));
+    });
+
+  stream.filter(data => Ping.match(data))
+    // ignore pings more often than every 2.5s
+    .debounce(2500, Date.now)
+    // create the message
+    .map(data => new Ping(data))
+    // pong it
+    .on(() => {
+      outgoing.next(Pong.generic(
+        network.magic,
+        Pong.COMMAND(),
+        Date.now() / 1000,
+      ));
+    });
 };

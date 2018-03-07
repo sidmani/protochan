@@ -51,6 +51,14 @@ module.exports = class Message {
     }
   }
 
+  static getMagic(data) {
+    return data.getUint32(0);
+  }
+
+  static getCommand(data) {
+    return data.getUint32(4);
+  }
+
   magic() {
     return this.data.getUint32(0);
   }

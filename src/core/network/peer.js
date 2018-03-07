@@ -24,8 +24,14 @@
 
 'use strict';
 
-const Factory = require('./message/factory.js');
 const Stream = require('./stream.js');
+
+// protocol components
+const Handshake = require('./protocol/handshake.js');
+const Terminate = require('./protocol/terminate.js');
+const Echo = require('./protocol/echo.js');
+const Message = require('./message/message.js');
+const Version = require('./message/types/version.js');
 
 module.exports = class Peer {
   constructor(connection, network) {
@@ -35,99 +41,51 @@ module.exports = class Peer {
 
     // convert data to messages
     this.stream = this.connection.stream
-      .filter(data => Factory.magic(data) === this.network.magic)
-      .map(data => Factory.create(data));
+      .filter(data => Message.getMagic(data) === this.network.magic);
 
-    // for handlers that wait for the handshake to complete
-    this.afterHandshake = this.stream.after(
-      msg => msg.command() === Factory.versionCommand(),
-      msg => msg.command() === Factory.verackCommand(),
+    // send data of messages pushed to outgoing
+    this.outgoing.on(msg => this.connection.send(msg.data));
+
+    // attach protocol components
+    const handshake = this.import(Handshake);
+
+    // update version and services on receipt
+    handshake.on(({ version, services }) => {
+      this.version = version;
+      this.services = services;
+    });
+
+    // terminate connection if nothing received for 10s
+    this.import(Terminate);
+
+    // send and respond to pings
+    this.import(Echo, this.stream.wait(handshake));
+  }
+
+  import(component, stream = this.stream) {
+    return component(
+      stream,
+      this.network,
+      this.outgoing,
+      this.terminate,
     );
-
-    // tell connection to send messages pushed to outgoing
-    this.connection.attach(this.outgoing);
-
-    this.attachHandshake();
-    this.attachPong();
-    this.attachPing();
-    this.attachTerminator();
-  }
-
-  attachHandshake() {
-    this.stream
-      // get only version messages
-      .filter(msg => msg.command() === Factory.versionCommand())
-      // process the first message only
-      .first()
-      .on((msg) => {
-        // set version to minimum of two versions
-        this.version = Math.min(
-          this.network.version,
-          msg.version(),
-        );
-
-        // set available services to bitmask of both
-        this.services = this.network.services & msg.services();
-        this.send(Factory.verack(
-          this.network.magic,
-          Date.now() / 1000,
-        ));
-      });
-  }
-
-  attachPing() {
-    // send a ping every 3 seconds if nothing sent or received
-    this.afterHandshake
-      .merge(this.outgoing)
-      .invert(3000, Date.now)
-      .on(() => {
-        this.send(Factory.ping(
-          this.network.magic,
-          Date.now(),
-        ));
-      });
-  }
-
-  attachPong() {
-    this.afterHandshake
-      // respond to ping commands
-      .filter(msg => msg.command() === Factory.pingCommand())
-      // ignore pings more often than every 2.5s
-      .debounce(2500, Date.now)
-      // pong it
-      .on(() => {
-        this.send(Factory.pong(
-          this.network.magic,
-          Date.now() / 1000,
-        ));
-      });
-  }
-
-  attachTerminator() {
-    // terminate the connection if nothing received for 10s
-    this.afterHandshake
-      .invert(10000, Date.now)
-      .on(() => this.terminate());
-  }
-
-  terminate() {
-    this.connection.terminate();
-    this.outgoing.destroy();
   }
 
   init() {
-    const versionMessage = Factory.version(
+    const versionMessage = Version.create(
       this.network.magic,
       this.network.version,
       this.network.services,
       Date.now() / 1000,
     );
 
-    this.send(versionMessage);
+    this.outgoing.next(versionMessage);
   }
 
-  send(message) {
-    this.outgoing.next(message.data);
+  terminate() {
+    this.outgoing.destroy();
+    this.stream.destroy();
+    this.connection.terminate();
   }
 
   id() {
