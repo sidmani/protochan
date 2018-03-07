@@ -22,36 +22,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-const Stream = require('../../../src/core/network/stream.js');
-const Handshake = require('../../../src/core/network/protocol/handshake.js');
-const Version = require('../../../src/core/network/message/types/version.js');
+'use strict';
 
-tap.test('Handshake', (t) => {
-  const str = new Stream();
-  const init = new Stream();
-  let v;
-  let s;
-  const network = {
-    magic: 0x13371337,
-    services: 0x10000010,
-    version: 1,
-  };
+const Message = require('../message.js');
 
-  let msg;
-  const outgoing = { next: (m) => { msg = m; } };
+module.exports = class Getaddr extends Message {
+  static COMMAND() { return 0x00000005; }
+  static PAYLOAD_LENGTH() { return 2; }
 
-  Handshake(str, network, outgoing, init).on((obj) => {
-    v = obj.version;
-    s = obj.services;
-  });
+  static match(data) { return Message.getCommand(data) === Getaddr.COMMAND(); }
 
-  init.next();
-  t.equal(msg.command(), 0, 'Handshake sends version on init');
+  constructor(data) {
+    super(data, Getaddr.PAYLOAD_LENGTH());
+  }
 
-  str.next(Version.create(0x13371337, 4, 0x10100000, 11).data);
-  t.equal(v, 1, 'Handshake sets version to minimum of both clients');
-  t.equal(s, 0x10000000, 'Handshake sets services to common only');
-  t.equal(msg.command(), 1, 'Handshake sends verack after receiving version');
-  t.end();
-});
+  static create(magic, maxAddr, timestamp) {
+    const data = new Uint8Array(Message.HEADER_LENGTH() + Getaddr.PAYLOAD_LENGTH());
+
+    data.setUint16(Message.HEADER_LENGTH() + 0, maxAddr);
+    Message.set(data, magic, Getaddr.COMMAND(), timestamp);
+
+    return new Getaddr(data);
+  }
+};

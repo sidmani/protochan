@@ -28,17 +28,17 @@ const HashMap = require('../hash/hashMap.js');
 const Peer = require('./peer.js');
 
 module.exports = class PeerController {
-  constructor(maxPeers) {
-    this.maxPeers = maxPeers;
+  static MAX_PEERS() { return 10; }
+  constructor(eventHandler, host) {
+    this.eventHandler = eventHandler;
+    this.host = host;
+
     this.peers = new HashMap();
   }
 
   addPeer(connection) {
-    const peer = new Peer(connection, this.received);
+    const peer = new Peer(connection, this.host);
+    peer.initialize();
     this.peers.set(peer, peer.id());
   }
-
-  // received(message, peer) {
-  // 
-  // }
 };

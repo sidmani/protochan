@@ -41,12 +41,7 @@ module.exports = class Version extends Message {
     super(data, Version.PAYLOAD_LENGTH());
   }
 
-  static create(
-    magic,
-    version,
-    services,
-    timestamp,
-  ) {
+  static create(magic, version, services, timestamp) {
     const data = new Uint8Array(Message.HEADER_LENGTH() + Version.PAYLOAD_LENGTH());
 
     data.setUint32(Message.HEADER_LENGTH() + 0, version);

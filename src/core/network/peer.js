@@ -25,26 +25,35 @@
 'use strict';
 
 const Stream = require('./stream.js');
+const Message = require('./message/message.js');
 
 // protocol components
 const Handshake = require('./protocol/handshake.js');
 const Terminate = require('./protocol/terminate.js');
 const Echo = require('./protocol/echo.js');
-const Message = require('./message/message.js');
-const Version = require('./message/types/version.js');
 
 module.exports = class Peer {
-  constructor(connection, network) {
+  constructor(connection, host) {
     this.connection = connection;
-    this.network = network;
+    this.host = host;
     this.outgoing = new Stream();
 
-    // convert data to messages
+    this.init = new Stream();
+    this.terminate = new Stream();
+
+    // filter messages by magic value
     this.stream = this.connection.stream
-      .filter(data => Message.getMagic(data) === this.network.magic);
+      .filter(data => Message.getMagic(data) === this.host.magic);
 
     // send data of messages pushed to outgoing
     this.outgoing.on(msg => this.connection.send(msg.data));
+
+    // handle termination
+    this.terminate.first().on(() => {
+      this.outgoing.destroy();
+      this.stream.destroy();
+      this.connection.terminate();
+    });
 
     // attach protocol components
     const handshake = this.import(Handshake);
@@ -65,27 +74,15 @@ module.exports = class Peer {
   import(component, stream = this.stream) {
     return component(
       stream,
-      this.network,
+      this.host,
       this.outgoing,
+      this.init,
       this.terminate,
     );
   }
 
-  init() {
-    const versionMessage = Version.create(
-      this.network.magic,
-      this.network.version,
-      this.network.services,
-      Date.now() / 1000,
-    );
-
-    this.outgoing.next(versionMessage);
-  }
-
-  terminate() {
-    this.outgoing.destroy();
-    this.stream.destroy();
-    this.connection.terminate();
+  initialize() {
+    this.init.next();
   }
 
   id() {

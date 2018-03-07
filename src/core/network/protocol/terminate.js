@@ -24,9 +24,9 @@
 
 'use strict';
 
-module.exports = function (stream, _, __, terminate) {
+module.exports = function (stream, host, outgoing, init, terminate) {
   return stream
     // terminate the connection if nothing received for 10s
     .invert(10000, Date.now)
-    .on(() => terminate());
+    .on(() => terminate.next());
 };

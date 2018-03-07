@@ -27,13 +27,13 @@
 const Ping = require('../message/types/ping.js');
 const Pong = require('../message/types/pong.js');
 
-module.exports = function (stream, network, outgoing) {
+module.exports = function (stream, host, outgoing) {
   // send a ping every 3 seconds if nothing sent or received
   stream.merge(outgoing)
     .invert(3000, Date.now)
     .on(() => {
       outgoing.next(Ping.generic(
-        network.magic,
+        host.magic,
         Ping.COMMAND(),
         Date.now(),
       ));
@@ -47,7 +47,7 @@ module.exports = function (stream, network, outgoing) {
     // pong it
     .on(() => {
       outgoing.next(Pong.generic(
-        network.magic,
+        host.magic,
         Pong.COMMAND(),
         Date.now() / 1000,
       ));

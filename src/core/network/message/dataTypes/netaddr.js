@@ -23,3 +23,39 @@
 // SOFTWARE.
 
 'use strict';
+
+const ErrorType = require('../../../error.js');
+/* eslint-disable no-unused-vars */
+const ByteArray = require('../../../util/byteArray.js');
+/* eslint-enable no-unused-vars */
+
+module.exports = class NetAddress {
+  constructor(data) {
+    if (data.byteLength !== 22) {
+      throw ErrorType.dataLength();
+    }
+    this.data = data;
+  }
+
+  services() {
+    return this.data.getUint32(0);
+  }
+
+  addressIPv6() {
+    return this.data.subarray(4, 20);
+  }
+
+  addressIPv4() {
+    return this.data.subarray(16, 20);
+  }
+
+  port() {
+    return this.data.getUint16(20);
+  }
+
+  static set(data, offset, services, ipv4, port) {
+    data.setUint32(offset + 0, services);
+    data.set(offset + 16, ipv4);
+    data.setUint16(20, port);
+  }
+};

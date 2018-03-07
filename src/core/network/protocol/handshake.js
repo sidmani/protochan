@@ -24,31 +24,41 @@
 
 'use strict';
 
-const Verack = require('../message/types/verack.js');
 const Version = require('../message/types/version.js');
+const Verack = require('../message/types/verack.js');
 
-module.exports = function (stream, network, outgoing) {
+module.exports = function (stream, host, outgoing, init) {
+  init.on(() => {
+    const versionMessage = Version.create(
+      host.magic,
+      host.version,
+      host.services,
+      Date.now() / 1000,
+    );
+
+    outgoing.next(versionMessage);
+  });
+
   return stream
     // get only version messages
     .filter(data => Version.match(data))
     .map(data => new Version(data))
-    // .filter(msg => msg.command() === Version.COMMAND())
     // process the first message only
     .first()
     .map((msg) => {
       // set version to minimum of two versions
       const version = Math.min(
-        network.version,
+        host.version,
         msg.version(),
       );
 
       // set available services to bitmask of both
-      const services = network.services & msg.services();
+      const services = host.services & msg.services();
 
       outgoing.next(Verack.generic(
-        network.magic,
+        host.magic,
         Verack.COMMAND(),
-        network.timestamp,
+        host.timestamp,
       ));
       return { version, services };
     });

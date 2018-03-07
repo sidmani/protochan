@@ -42,17 +42,17 @@ tap.test('Peer', (t) => {
     },
   };
 
-  const network = {
+  const host = {
     magic: 0x13371337,
     services: 0x10000010,
     version: 3,
   };
 
-  const p = new Peer(connection, network);
+  const p = new Peer(connection, host);
 
   stream.next(Ping.generic(0x13371337, Ping.COMMAND(), 5).data);
   t.equal(latest, undefined, 'Peer does not respond to pings before handshake');
-  p.init();
+  p.initialize();
   let msg = new Version(latest);
   t.equal(msg.command(), 0, 'Peer.init sends version message');
   t.equal(msg.version(), 3, 'Peer.init sends correct version');
@@ -67,6 +67,6 @@ tap.test('Peer', (t) => {
   msg = new Pong(latest);
   t.equal(msg.command(), 3, 'Peer responds to ping after handshake is complete');
 
-  p.terminate();
+  p.terminate.next();
   t.end();
 });
