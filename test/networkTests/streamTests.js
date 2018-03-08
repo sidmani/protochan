@@ -72,6 +72,24 @@ tap.test('Stream.after', (t) => {
   t.end();
 });
 
+tap.test('Stream.suppress', (t) => {
+  const str = new Stream();
+  const enable = new Stream();
+
+  const result = [];
+
+  str.suppress(enable).on(obj => result.push(obj));
+
+  str.next(10);
+  str.next(4);
+  enable.next();
+  str.next(5);
+  str.next(2);
+
+  t.strictSame(result, [5, 2], 'Stream.wait suppresses until other stream emits');
+  t.end();
+});
+
 tap.test('Stream.wait', (t) => {
   const str = new Stream();
   const enable = new Stream();
@@ -86,7 +104,7 @@ tap.test('Stream.wait', (t) => {
   str.next(5);
   str.next(2);
 
-  t.strictSame(result, [5, 2], 'Stream.wait suppresses until other stream emits');
+  t.strictSame(result, [4, 5, 2], 'Stream.wait suppresses until other stream emits');
   t.end();
 });
 

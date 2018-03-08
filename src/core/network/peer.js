@@ -29,63 +29,48 @@ const Message = require('./message/message.js');
 
 // protocol components
 const Handshake = require('./protocol/handshake.js');
-const Terminate = require('./protocol/terminate.js');
 const Echo = require('./protocol/echo.js');
 
 module.exports = class Peer {
-  constructor(connection, host) {
+  constructor(connection, magic) {
     this.connection = connection;
-    this.host = host;
     this.outgoing = new Stream();
-
-    this.init = new Stream();
     this.terminate = new Stream();
 
-    // filter messages by magic value
-    this.stream = this.connection.stream
-      .filter(data => Message.getMagic(data) === this.host.magic);
+    // filter data by magic value
+    this.stream = connection.stream
+      .filter(data => Message.getMagic(data) === magic);
 
-    // send data of messages pushed to outgoing
-    this.outgoing.on(msg => this.connection.send(msg.data));
+    // convert { command, payload } to messages and send them
+    this.outgoing
+      .map(({ command, payload }) =>
+        Message.create(magic, command, Date.now() / 1000, payload))
+      .on(data => connection.send(data));
 
-    // handle termination
-    this.terminate.first().on(() => {
+    // perform cleanup on terminate
+    this.terminate.on(() => {
       this.outgoing.destroy();
       this.stream.destroy();
       this.connection.terminate();
     });
+  }
 
-    // attach protocol components
-    const handshake = this.import(Handshake);
+  attach(component) {
+    return component(this.stream, this.outgoing);
+  }
 
-    // update version and services on receipt
-    handshake.on(({ version, services }) => {
-      this.version = version;
-      this.services = services;
-    });
-
+  handshake(localVersion, localServices) {
     // terminate connection if nothing received for 10s
-    this.import(Terminate);
+    this.stream.invert(10000, Date.now).pipe(this.terminate);
 
-    // send and respond to pings
-    this.import(Echo, this.stream.wait(handshake));
-  }
-
-  import(component, stream = this.stream) {
-    return component(
-      stream,
-      this.host,
+    // perform handshake
+    return Handshake(
+      this.stream,
       this.outgoing,
-      this.init,
-      this.terminate,
-    );
-  }
-
-  initialize() {
-    this.init.next();
-  }
-
-  id() {
-    return this.connection.id;
+      localVersion,
+      localServices,
+    ).on(() => {
+      this.attach(Echo);
+    });
   }
 };

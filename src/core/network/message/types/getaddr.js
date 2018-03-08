@@ -28,7 +28,7 @@ const Message = require('../message.js');
 
 module.exports = class Getaddr extends Message {
   static COMMAND() { return 0x00000005; }
-  static PAYLOAD_LENGTH() { return 2; }
+  static PAYLOAD_LENGTH() { return 1; }
 
   static match(data) { return Message.getCommand(data) === Getaddr.COMMAND(); }
 
@@ -36,10 +36,14 @@ module.exports = class Getaddr extends Message {
     super(data, Getaddr.PAYLOAD_LENGTH());
   }
 
+  maxAddr() {
+    return this.data[Message.HEADER_LENGTH()];
+  }
+
   static create(magic, maxAddr, timestamp) {
     const data = new Uint8Array(Message.HEADER_LENGTH() + Getaddr.PAYLOAD_LENGTH());
 
-    data.setUint16(Message.HEADER_LENGTH() + 0, maxAddr);
+    data[Message.HEADER_LENGTH() + 0] = maxAddr;
     Message.set(data, magic, Getaddr.COMMAND(), timestamp);
 
     return new Getaddr(data);

@@ -29,4 +29,6 @@ const Message = require('../message.js');
 module.exports = class Pong extends Message {
   static COMMAND() { return 0x00000003; }
   static match(data) { return Message.getCommand(data) === Pong.COMMAND(); }
+
+  static create() { return new Uint8Array(); }
 };

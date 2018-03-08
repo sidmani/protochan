@@ -26,6 +26,7 @@ const tap = require('tap');
 const Peer = require('../../src/core/network/peer.js');
 const Stream = require('../../src/core/network/stream.js');
 
+const Message = require('../../src/core/network/message/message.js');
 const Ping = require('../../src/core/network/message/types/ping.js');
 const Pong = require('../../src/core/network/message/types/pong.js');
 const Version = require('../../src/core/network/message/types/version.js');
@@ -42,28 +43,26 @@ tap.test('Peer', (t) => {
     },
   };
 
-  const host = {
-    magic: 0x13371337,
-    services: 0x10000010,
-    version: 3,
-  };
+  const p = new Peer(connection, 0x13371337);
 
-  const p = new Peer(connection, host);
-
-  stream.next(Ping.generic(0x13371337, Ping.COMMAND(), 5).data);
+  stream.next({ command: Ping.COMMAND(), payload: Ping.create() });
   t.equal(latest, undefined, 'Peer does not respond to pings before handshake');
-  p.initialize();
+  let v;
+  let s;
+  p.handshake(3, 0x10000010).on(({ version, services }) => {
+    v = version;
+    s = services;
+  });
   let msg = new Version(latest);
-  t.equal(msg.command(), 0, 'Peer.init sends version message');
-  t.equal(msg.version(), 3, 'Peer.init sends correct version');
-  t.equal(msg.services(), 0x10000010, 'Peer.init sends correct service bitmask');
-  stream.next(Version.create(0x13371337, 2, 0x10100000, 11).data);
-  t.equal(p.version, 2, 'Peer sets version to minimum of both clients');
-  t.equal(p.services, 0x10000000, 'Peer sets services to common only');
-  msg = new Verack(latest);
-  t.equal(msg.command(), 1, 'Peer sends verack after receiving version');
-  stream.next(Verack.generic(0x13371337, Verack.COMMAND(), 19).data);
-  stream.next(Ping.generic(0x13371337, Ping.COMMAND(), 5).data);
+  t.equal(msg.command(), 0, 'Peer.handshake sends version message');
+  t.equal(msg.version(), 3, 'Peer.handshake sends correct version');
+  t.equal(msg.services(), 0x10000010, 'Peer.handshake sends correct service bitmask');
+  stream.next(Message.create(0x13371337, Version.COMMAND(), 15, Version.create(2, 0x10100000)));
+  t.equal(v, undefined, 'Peer doesn\'t return version before verack');
+  stream.next(Message.create(0x13371337, Verack.COMMAND(), 15, Verack.create()));
+  t.equal(v, 2, 'Peer sets version to minimum of both clients');
+  t.equal(s, 0x10000000, 'Peer sets services to common only');
+  stream.next(Message.create(0x13371337, Ping.COMMAND(), 5, Ping.create()));
   msg = new Pong(latest);
   t.equal(msg.command(), 3, 'Peer responds to ping after handshake is complete');
 

@@ -68,6 +68,7 @@ module.exports = class Stream {
     return child;
   }
 
+  // operators
   on(fn) {
     return this.attach((obj, next) => {
       fn(obj);
@@ -100,15 +101,36 @@ module.exports = class Stream {
     });
   }
 
-  // wait for stream to emit an event before emitting
-  wait(stream) {
+  // discard until stream emits
+  suppress(stream) {
     let ready = false;
     stream.on(() => { ready = true; });
+
     return this.attach((obj, next) => {
       if (ready) {
         next(obj);
       }
     });
+  }
+
+  // like suppress, except propagates the latest object
+  wait(stream) {
+    let ready = false;
+    let latest;
+    const child = this.attach((obj, next) => {
+      if (ready) {
+        next(obj);
+      } else {
+        latest = obj;
+      }
+    });
+    stream.on(() => {
+      if (!ready) {
+        ready = true;
+        child.next(latest);
+      }
+    });
+    return child;
   }
 
   discard(n = 1) {
@@ -123,6 +145,13 @@ module.exports = class Stream {
 
   map(fn) {
     return this.attach((obj, next) => next(fn(obj)));
+  }
+
+  flatmap(fn) {
+    return this.attach((obj, next) => {
+      // fn returns a stream
+      fn(obj).on(o2 => next(o2));
+    });
   }
 
   first(n = 1) {
@@ -175,11 +204,30 @@ module.exports = class Stream {
     return child;
   }
 
-  static every(interval, obj) {
-    const str = new Stream();
-    setInterval(() => {
-      str.propagate(obj);
-    }, interval);
-    return str;
+  pipe(stream) {
+    this.children.push(stream);
   }
+
+  // propagate to a random child
+  // random(count) {
+  //   return this.attach((obj) => {
+  //     for (let i = 0; i < Math.min(this.children.length, count);)
+  //     const idx = Stream.randInt(0, this.children.length);
+  //     if (this.children[idx]) {
+  //       this.children[idx].next(obj);
+  //     }
+  //   });
+  // }
+
+  static randInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  // static every(interval, obj) {
+  //   const str = new Stream();
+  //   setInterval(() => {
+  //     str.propagate(obj);
+  //   }, interval);
+  //   return str;
+  // }
 };

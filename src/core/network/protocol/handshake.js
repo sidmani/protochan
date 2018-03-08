@@ -27,39 +27,42 @@
 const Version = require('../message/types/version.js');
 const Verack = require('../message/types/verack.js');
 
-module.exports = function (stream, host, outgoing, init) {
-  init.on(() => {
-    const versionMessage = Version.create(
-      host.magic,
-      host.version,
-      host.services,
-      Date.now() / 1000,
-    );
-
-    outgoing.next(versionMessage);
-  });
-
-  return stream
+module.exports = function (stream, outgoing, localVersion, localServices) {
+  const handshake = stream
     // get only version messages
     .filter(data => Version.match(data))
-    .map(data => new Version(data))
     // process the first message only
     .first()
+    // try constructing a version msg from data
+    .map(data => new Version(data))
+
+    // send the verack message
+    .on(() => {
+      outgoing.next({
+        command: Verack.COMMAND(),
+        payload: Verack.create(),
+      });
+    })
+    // resolve the available version and services
     .map((msg) => {
-      // set version to minimum of two versions
       const version = Math.min(
-        host.version,
+        localVersion,
         msg.version(),
       );
 
-      // set available services to bitmask of both
-      const services = host.services & msg.services();
-
-      outgoing.next(Verack.generic(
-        host.magic,
-        Verack.COMMAND(),
-        host.timestamp,
-      ));
+      const services = localServices & msg.services();
       return { version, services };
-    });
+    })
+    // must wait for verack before handshake is complete
+    .wait(stream
+      .filter(data => Verack.match(data))
+      .map(data => new Verack(data)));
+
+  // send version
+  outgoing.next({
+    command: Version.COMMAND(),
+    payload: Version.create(localVersion, localServices),
+  });
+
+  return handshake;
 };

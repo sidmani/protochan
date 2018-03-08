@@ -30,7 +30,7 @@ const ByteArray = require('../../../util/byteArray.js');
 /* eslint-enable no-unused-vars */
 
 module.exports = class Version extends Message {
-  static PAYLOAD_LENGTH() { return 12; }
+  static PAYLOAD_LENGTH() { return 8; }
   static COMMAND() { return 0x00000000; }
 
   static match(data) {
@@ -41,22 +41,18 @@ module.exports = class Version extends Message {
     super(data, Version.PAYLOAD_LENGTH());
   }
 
-  static create(magic, version, services, timestamp) {
-    const data = new Uint8Array(Message.HEADER_LENGTH() + Version.PAYLOAD_LENGTH());
-
-    data.setUint32(Message.HEADER_LENGTH() + 0, version);
-    data.setUint32(Message.HEADER_LENGTH() + 4, services);
-
-    Message.set(data, magic, Version.COMMAND(), timestamp);
-
-    return new Version(data);
-  }
-
   version() {
     return this.data.getUint32(Message.HEADER_LENGTH());
   }
 
   services() {
     return this.data.getUint32(Message.HEADER_LENGTH() + 4);
+  }
+
+  static create(version, services) {
+    const data = new Uint8Array(Version.PAYLOAD_LENGTH());
+    data.setUint32(0, version);
+    data.setUint32(4, services);
+    return data;
   }
 };

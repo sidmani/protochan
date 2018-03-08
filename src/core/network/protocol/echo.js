@@ -27,16 +27,15 @@
 const Ping = require('../message/types/ping.js');
 const Pong = require('../message/types/pong.js');
 
-module.exports = function (stream, host, outgoing) {
+module.exports = function (stream, outgoing) {
   // send a ping every 3 seconds if nothing sent or received
   stream.merge(outgoing)
     .invert(3000, Date.now)
     .on(() => {
-      outgoing.next(Ping.generic(
-        host.magic,
-        Ping.COMMAND(),
-        Date.now(),
-      ));
+      outgoing.next({
+        command: Ping.COMMAND(),
+        payload: Ping.create(),
+      });
     });
 
   stream.filter(data => Ping.match(data))
@@ -46,10 +45,9 @@ module.exports = function (stream, host, outgoing) {
     .map(data => new Ping(data))
     // pong it
     .on(() => {
-      outgoing.next(Pong.generic(
-        host.magic,
-        Pong.COMMAND(),
-        Date.now() / 1000,
-      ));
+      outgoing.next({
+        command: Pong.COMMAND(),
+        payload: Pong.create(),
+      });
     });
 };

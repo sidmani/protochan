@@ -29,4 +29,6 @@ const Message = require('../message.js');
 module.exports = class Ping extends Message {
   static COMMAND() { return 0x00000002; }
   static match(data) { return Message.getCommand(data) === Ping.COMMAND(); }
+
+  static create() { return new Uint8Array(); }
 };

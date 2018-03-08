@@ -74,18 +74,29 @@ module.exports = class Message {
   checksum() {
     return this.data.getUint32(12);
   }
+  //
+  // static set(data, magic, command, timestamp) {
+  //   data.setUint32(0, magic);
+  //   data.setUint32(4, command);
+  //   data.setUint32(8, timestamp);
+  //   const checksum = Hash.digest(data.slice(16)).slice(0, 4);
+  //   data.set(checksum, 12);
+  // }
 
-  static set(data, magic, command, timestamp) {
+  static create(magic, command, timestamp, payload) {
+    const data = new Uint8Array(Message.HEADER_LENGTH() + payload.byteLength);
     data.setUint32(0, magic);
     data.setUint32(4, command);
     data.setUint32(8, timestamp);
-    const checksum = Hash.digest(data.slice(16)).slice(0, 4);
+    const checksum = Hash.digest(payload).slice(0, 4);
     data.set(checksum, 12);
+    data.set(payload, Message.HEADER_LENGTH());
+    return data;
   }
 
-  static generic(magic, command, timestamp) {
-    const data = new Uint8Array(Message.HEADER_LENGTH());
-    Message.set(data, magic, command, timestamp);
-    return new Message(data);
-  }
+  // static generic(magic, command, timestamp) {
+  //   const data = new Uint8Array(Message.HEADER_LENGTH());
+  //   Message.set(data, magic, command, timestamp);
+  //   return new Message(data);
+  // }
 };

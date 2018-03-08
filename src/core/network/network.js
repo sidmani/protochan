@@ -26,19 +26,55 @@
 
 const HashMap = require('../hash/hashMap.js');
 const Peer = require('./peer.js');
+const Stream = require('./stream.js');
 
-module.exports = class PeerController {
+const Getaddr = require('./message/types/getaddr.js');
+
+const KNOWN_NODES = [
+  new Uint8Array([107, 170, 194, 14]), // node.protochan.com
+];
+
+module.exports = class Network {
   static MAX_PEERS() { return 10; }
-  constructor(eventHandler, host) {
+
+  constructor(eventHandler, magic, version, services) {
     this.eventHandler = eventHandler;
-    this.host = host;
+
+    this.magic = magic;
+    this.version = version;
+    this.services = services;
 
     this.peers = new HashMap();
+    this.known = new HashMap();
+
+    this.getBlock = new Stream();
   }
 
   addPeer(connection) {
-    const peer = new Peer(connection, this.host);
-    peer.initialize();
-    this.peers.set(peer, peer.id());
+    const peer = new Peer(connection, this.magic);
+    this.peers.set(peer, connection.id);
+
+    peer.handshake(this.version, this.services).on(() => {
+      peer.attach(this.peerExchange);
+    });
+
+    peer.terminate.on(() => {
+      this.peers.unsetRaw(peer.id());
+    });
   }
+
+  // peerExchange(stream, outgoing) {
+  //   stream
+  //     .filter(data => Getaddr.match(data))
+  //     .map(data => new Getaddr(data).maxAddr())
+  //     .map((maxAddr) => {
+  //       return this.known.enumerate().slice(this.known.count() - maxAddr);
+  //     })
+  //     .map((addresses) => {
+  //       outgoing.next({
+  //         command: 0,
+  //         payload: 0,
+  //       });
+  //     });
+  // }
 };
