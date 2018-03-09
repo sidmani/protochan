@@ -27,9 +27,9 @@
 const Ping = require('../message/types/ping.js');
 const Pong = require('../message/types/pong.js');
 
-module.exports = function (stream, outgoing) {
+module.exports = function ({ incoming, outgoing }) {
   // send a ping every 3 seconds if nothing sent or received
-  stream.merge(outgoing)
+  incoming.merge(outgoing)
     .invert(3000, Date.now)
     .on(() => {
       outgoing.next({
@@ -38,7 +38,7 @@ module.exports = function (stream, outgoing) {
       });
     });
 
-  stream.filter(data => Ping.match(data))
+  incoming.filter(data => Ping.match(data))
     // ignore pings more often than every 2.5s
     .debounce(2500, Date.now)
     // create the message

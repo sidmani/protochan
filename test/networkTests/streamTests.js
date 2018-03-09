@@ -72,61 +72,25 @@ tap.test('Stream.after', (t) => {
   t.end();
 });
 
-tap.test('Stream.suppress', (t) => {
-  const str = new Stream();
-  const enable = new Stream();
-
-  const result = [];
-
-  str.suppress(enable).on(obj => result.push(obj));
-
-  str.next(10);
-  str.next(4);
-  enable.next();
-  str.next(5);
-  str.next(2);
-
-  t.strictSame(result, [5, 2], 'Stream.wait suppresses until other stream emits');
-  t.end();
-});
-
-tap.test('Stream.wait', (t) => {
-  const str = new Stream();
-  const enable = new Stream();
-
-  const result = [];
-
-  str.wait(enable).on(obj => result.push(obj));
-
-  str.next(10);
-  str.next(4);
-  enable.next();
-  str.next(5);
-  str.next(2);
-
-  t.strictSame(result, [4, 5, 2], 'Stream.wait suppresses until other stream emits');
-  t.end();
-});
-
-tap.test('Stream.discard', (t) => {
-  const str = new Stream();
-
-  const result = [];
-
-  str.discard(3)
-    .discard()
-    .on((obj) => { result.push(obj); });
-
-  str.next(2);
-  str.next(4);
-  str.next(5);
-  str.next(4);
-  str.next(7);
-  str.next(1);
-
-  t.strictSame(result, [7, 1], 'Stream.discard ignores first n objects');
-  t.end();
-});
+// tap.test('Stream.discard', (t) => {
+//   const str = new Stream();
+//
+//   const result = [];
+//
+//   str.discard(3)
+//     .discard()
+//     .on((obj) => { result.push(obj); });
+//
+//   str.next(2);
+//   str.next(4);
+//   str.next(5);
+//   str.next(4);
+//   str.next(7);
+//   str.next(1);
+//
+//   t.strictSame(result, [7, 1], 'Stream.discard ignores first n objects');
+//   t.end();
+// });
 
 tap.test('Stream.map', (t) => {
   const str = new Stream();

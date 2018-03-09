@@ -36,20 +36,18 @@ tap.test('Peer', (t) => {
   const stream = new Stream();
   let latest;
   const connection = {
-    stream,
-    send(data) { latest = data; },
-    terminate() {
-      this.stream.destroy();
-    },
+    incoming: stream,
+    outgoing: new Stream().on((data) => { latest = data; }),
+    terminate: new Stream(),
   };
 
   const p = new Peer(connection, 0x13371337);
 
-  stream.next({ command: Ping.COMMAND(), payload: Ping.create() });
+  stream.next(Message.create(0x13371337, Ping.COMMAND(), 5, Ping.create()));
   t.equal(latest, undefined, 'Peer does not respond to pings before handshake');
   let v;
   let s;
-  p.handshake(3, 0x10000010).on(({ version, services }) => {
+  p.init(3, 0x10000010).on(({ version, services }) => {
     v = version;
     s = services;
   });
@@ -66,6 +64,7 @@ tap.test('Peer', (t) => {
   msg = new Pong(latest);
   t.equal(msg.command(), 3, 'Peer responds to ping after handshake is complete');
 
-  p.terminate.next();
+  connection.incoming.destroy();
+  connection.outgoing.destroy();
   t.end();
 });

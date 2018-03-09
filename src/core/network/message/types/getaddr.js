@@ -40,12 +40,10 @@ module.exports = class Getaddr extends Message {
     return this.data[Message.HEADER_LENGTH()];
   }
 
-  static create(magic, maxAddr, timestamp) {
-    const data = new Uint8Array(Message.HEADER_LENGTH() + Getaddr.PAYLOAD_LENGTH());
+  static create(maxAddr) {
+    const payload = new Uint8Array(Getaddr.PAYLOAD_LENGTH());
+    payload[Message.HEADER_LENGTH()] = maxAddr;
 
-    data[Message.HEADER_LENGTH() + 0] = maxAddr;
-    Message.set(data, magic, Getaddr.COMMAND(), timestamp);
-
-    return new Getaddr(data);
+    return payload;
   }
 };

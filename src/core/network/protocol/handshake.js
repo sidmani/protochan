@@ -27,15 +27,14 @@
 const Version = require('../message/types/version.js');
 const Verack = require('../message/types/verack.js');
 
-module.exports = function (stream, outgoing, localVersion, localServices) {
-  const handshake = stream
+module.exports = function (incoming, outgoing, localVersion, localServices) {
+  const handshake = incoming
     // get only version messages
     .filter(data => Version.match(data))
-    // process the first message only
-    .first()
     // try constructing a version msg from data
     .map(data => new Version(data))
-
+    // process the first message only
+    .first()
     // send the verack message
     .on(() => {
       outgoing.next({
@@ -54,9 +53,11 @@ module.exports = function (stream, outgoing, localVersion, localServices) {
       return { version, services };
     })
     // must wait for verack before handshake is complete
-    .wait(stream
+    .flatmap(resolved => incoming
       .filter(data => Verack.match(data))
-      .map(data => new Verack(data)));
+      .map(data => new Verack(data))
+      .first()
+      .map(() => resolved));
 
   // send version
   outgoing.next({

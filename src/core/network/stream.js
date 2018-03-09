@@ -101,47 +101,15 @@ module.exports = class Stream {
     });
   }
 
-  // discard until stream emits
-  suppress(stream) {
-    let ready = false;
-    stream.on(() => { ready = true; });
-
-    return this.attach((obj, next) => {
-      if (ready) {
-        next(obj);
-      }
-    });
-  }
-
-  // like suppress, except propagates the latest object
-  wait(stream) {
-    let ready = false;
-    let latest;
-    const child = this.attach((obj, next) => {
-      if (ready) {
-        next(obj);
-      } else {
-        latest = obj;
-      }
-    });
-    stream.on(() => {
-      if (!ready) {
-        ready = true;
-        child.next(latest);
-      }
-    });
-    return child;
-  }
-
-  discard(n = 1) {
-    let idx = 0;
-    return this.attach((obj, next) => {
-      if (idx >= n) {
-        next(obj);
-      }
-      idx += 1;
-    });
-  }
+  // discard(n = 1) {
+  //   let idx = 0;
+  //   return this.attach((obj, next) => {
+  //     if (idx >= n) {
+  //       next(obj);
+  //     }
+  //     idx += 1;
+  //   });
+  // }
 
   map(fn) {
     return this.attach((obj, next) => next(fn(obj)));

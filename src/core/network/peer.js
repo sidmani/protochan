@@ -31,41 +31,42 @@ const Message = require('./message/message.js');
 const Handshake = require('./protocol/handshake.js');
 const Echo = require('./protocol/echo.js');
 
+
 module.exports = class Peer {
   constructor(connection, magic) {
-    this.connection = connection;
     this.outgoing = new Stream();
-    this.terminate = new Stream();
+    this.incoming = new Stream();
 
     // filter data by magic value
-    this.stream = connection.stream
-      .filter(data => Message.getMagic(data) === magic);
-
+    connection.incoming
+      .filter(data => Message.getMagic(data) === magic)
+      .pipe(this.incoming);
     // convert { command, payload } to messages and send them
     this.outgoing
       .map(({ command, payload }) =>
         Message.create(magic, command, Date.now() / 1000, payload))
-      .on(data => connection.send(data));
+      .pipe(connection.outgoing);
+
+    this.terminate = connection.terminate;
 
     // perform cleanup on terminate
     this.terminate.on(() => {
       this.outgoing.destroy();
-      this.stream.destroy();
-      this.connection.terminate();
+      this.incoming.destroy();
     });
   }
 
   attach(component) {
-    return component(this.stream, this.outgoing);
+    component(this);
   }
 
-  handshake(localVersion, localServices) {
+  init(localVersion, localServices) {
     // terminate connection if nothing received for 10s
-    this.stream.invert(10000, Date.now).pipe(this.terminate);
+    this.incoming.invert(10000, Date.now).pipe(this.terminate);
 
     // perform handshake
     return Handshake(
-      this.stream,
+      this.incoming,
       this.outgoing,
       localVersion,
       localServices,

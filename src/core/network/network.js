@@ -37,8 +37,9 @@ const KNOWN_NODES = [
 module.exports = class Network {
   static MAX_PEERS() { return 10; }
 
-  constructor(eventHandler, magic, version, services) {
-    this.eventHandler = eventHandler;
+  constructor(magic, version, services) {
+    this.incoming = new Stream();
+    this.outgoing = new Stream();
 
     this.magic = magic;
     this.version = version;
@@ -46,16 +47,18 @@ module.exports = class Network {
 
     this.peers = new HashMap();
     this.known = new HashMap();
-
-    this.getBlock = new Stream();
   }
 
   addPeer(connection) {
     const peer = new Peer(connection, this.magic);
     this.peers.set(peer, connection.id);
 
-    peer.handshake(this.version, this.services).on(() => {
-      peer.attach(this.peerExchange);
+
+    peer.init(this.version, this.services).on(() => {
+      // pipe data, peer to incoming
+      peer.incoming
+        .map(data => ({ data, peer }))
+        .pipe(this.incoming);
     });
 
     peer.terminate.on(() => {
@@ -63,18 +66,16 @@ module.exports = class Network {
     });
   }
 
-  // peerExchange(stream, outgoing) {
-  //   stream
-  //     .filter(data => Getaddr.match(data))
-  //     .map(data => new Getaddr(data).maxAddr())
-  //     .map((maxAddr) => {
-  //       return this.known.enumerate().slice(this.known.count() - maxAddr);
-  //     })
-  //     .map((addresses) => {
-  //       outgoing.next({
-  //         command: 0,
-  //         payload: 0,
-  //       });
-  //     });
-  // }
+  peerExchange({ incoming, outgoing }) {
+    incoming
+      .filter(data => Getaddr.match(data))
+      .map(data => new Getaddr(data).maxAddr())
+      .map(maxAddr => this.known.enumerate().slice(this.known.count() - maxAddr))
+      .map((addresses) => {
+        outgoing.next({
+          command: 0,
+          payload: 0,
+        });
+      });
+  }
 };
