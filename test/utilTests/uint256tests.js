@@ -61,12 +61,12 @@ tap.test('Uint256', (t) => {
 
   const exp77 = Uint256.exp2(77);
   const expected = new Uint8Array(32);
-  expected[9] = 0b00100000;
+  expected[22] = 0b00100000;
   t.strictSame(exp77.array, expected, 'Uint256 correctly exponentiates 2');
   const exp78 = new Uint256();
   exp78.addExp2(77);
   exp78.addExp2(77);
-  expected[9] = 0b01000000;
+  expected[22] = 0b01000000;
   t.strictSame(exp78.array, expected, 'Uint256 correctly adds exponent of 2');
 
   t.equal(new Uint256(0xffcbffce).compare(new Uint256(0xffccffce)), -1, 'Uint256.compare (less than)');

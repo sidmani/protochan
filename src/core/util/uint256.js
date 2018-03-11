@@ -69,8 +69,8 @@ module.exports = class Uint256 {
   }
 
   addExp2(exponent) {
-    let carry = 1 << exponent % 8;
-    for (let i = Math.floor(exponent / 8); i >= 0; i -= 1) {
+    let carry = 1 << (exponent % 8);
+    for (let i = 31 - Math.floor(exponent / 8); i >= 0; i -= 1) {
       const sum = this.array[i] + carry;
       this.array[i] = sum;
       carry = Math.floor(sum / 256);
@@ -79,10 +79,10 @@ module.exports = class Uint256 {
     return this;
   }
 
-  static exp2(exponent) {
-    const array = new Uint8Array(32);
-    const posInByte = exponent % 8;
-    array[Math.floor(exponent / 8)] = 1 << posInByte;
-    return new Uint256(array);
+  static exp2(exp) {
+    const int = new Uint256();
+    if (exp > 255) return int;
+    int.array[31 - Math.floor(exp / 8)] = 1 << (exp % 8);
+    return int;
   }
 };
