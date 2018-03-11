@@ -26,11 +26,12 @@
 
 const DataParser = require('./parser.js');
 const Hash = require('../../hash/blake2s.js');
+const HashMap = require('../../hash/hashMap.js');
 
 module.exports = class OriginalPostDataParser extends DataParser {
   constructor(data, offset = 0) {
     super(data, offset);
-    this.hash = Hash.digest(this.data);
+    this.hash = HashMap.uint8ArrToHex(Hash.digest(this.data));
     // Parse thread options here
   }
 };

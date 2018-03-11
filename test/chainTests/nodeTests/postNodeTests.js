@@ -29,15 +29,8 @@ const HashMap = require('../../../src/core/hash/hashMap.js');
 
 tap.test('PostNode constructor and setters', (t) => {
   const header = {
-    hash: new Uint8Array([1, 2, 3, 4]),
-    dataHash() {
-      return new Uint8Array([
-        251, 87, 31, 115, 52, 134, 126, 208,
-        21, 36, 135, 244, 50, 189, 73, 4,
-        30, 63, 182, 141, 192, 181, 70, 91,
-        253, 229, 111, 10, 89, 214, 124, 116,
-      ]);
-    },
+    hash: '01020304',
+    dataHash: 'fb571f7334867ed0152487f432bd49041e3fb68dc0b5465bfde56f0a59d67c74',
     timestamp() { return 12; },
   };
   const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
@@ -62,15 +55,8 @@ tap.test('PostNode constructor and setters', (t) => {
 
 tap.test('PostNode add thread methods', (t) => {
   const header = {
-    hash: new Uint8Array([1, 2, 3, 4]),
-    dataHash() {
-      return new Uint8Array([
-        251, 87, 31, 115, 52, 134, 126, 208,
-        21, 36, 135, 244, 50, 189, 73, 4,
-        30, 63, 182, 141, 192, 181, 70, 91,
-        253, 229, 111, 10, 89, 214, 124, 116,
-      ]);
-    },
+    hash: '01020304',
+    dataHash: 'fb571f7334867ed0152487f432bd49041e3fb68dc0b5465bfde56f0a59d67c74',
     timestamp() { return 12; },
   };
   const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
@@ -88,7 +74,7 @@ tap.test('PostNode add thread methods', (t) => {
   };
   t.throws(() => n.checkThread(thread), ErrorType.timeTravel(), 'PostNode rejects invalid thread timestamp order');
   thread = {
-    hash: new Uint8Array([8, 7, 5]),
+    hash: '080705',
     setThreadHeight(thr, height) {
       this.setThread = thr;
       this.setHeight = height;
@@ -105,15 +91,8 @@ tap.test('PostNode add thread methods', (t) => {
 
 tap.test('PostNode add post methods', (t) => {
   const header = {
-    hash: new Uint8Array([1, 2, 3, 4]),
-    dataHash() {
-      return new Uint8Array([
-        251, 87, 31, 115, 52, 134, 126, 208,
-        21, 36, 135, 244, 50, 189, 73, 4,
-        30, 63, 182, 141, 192, 181, 70, 91,
-        253, 229, 111, 10, 89, 214, 124, 116,
-      ]);
-    },
+    hash: '01020304',
+    dataHash: 'fb571f7334867ed0152487f432bd49041e3fb68dc0b5465bfde56f0a59d67c74',
     timestamp() { return 12; },
   };
   const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
@@ -134,6 +113,7 @@ tap.test('PostNode add post methods', (t) => {
   const child = {
     type() { return 0x03; },
     timestamp() { return 22; },
+    hash: '0B11E7',
     header: {
       difficulty: 19,
     },
@@ -146,7 +126,6 @@ tap.test('PostNode add post methods', (t) => {
     setThread(thr) {
       this.thread = thr;
     },
-    hash: new Uint8Array([11, 17, 231]),
   };
   t.throws(() => { n.addChild(child); }, ErrorType.insufficientDifficulty(), 'Post rejects insufficient difficulty');
   child.header.difficulty = 21;

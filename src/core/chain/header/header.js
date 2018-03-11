@@ -28,6 +28,7 @@
 const Hash = require('../../hash/blake2s.js');
 const Difficulty = require('../../hash/difficulty.js');
 const ErrorType = require('../../error.js');
+const HashMap = require('../../hash/hashMap.js');
 /* eslint-disable no-unused-vars */
 const ByteArray = require('../../util/byteArray.js');
 /* eslint-enable no-unused-vars */
@@ -47,8 +48,13 @@ class Header {
     }
 
     this.data = data;
-    this.hash = Hash.digest(data);
-    this.difficulty = Difficulty.countLeadingZeroes(this.hash);
+
+    const hash = Hash.digest(data);
+    this.hash = HashMap.uint8ArrToHex(hash);
+    this.difficulty = Difficulty.countLeadingZeroes(hash);
+
+    this.dataHash = HashMap.uint8ArrToHex(this.rawDataHash());
+    this.prevHash = HashMap.uint8ArrToHex(this.rawPrevHash());
   }
 
   // Protocol version (uint16)
@@ -72,12 +78,12 @@ class Header {
   }
 
   // 32 bytes
-  prevHash() {
+  rawPrevHash() {
     return this.data.subarray(11, 43);
   }
 
   // 32 bytes
-  dataHash() {
+  rawDataHash() {
     return this.data.subarray(43, 75);
   }
 

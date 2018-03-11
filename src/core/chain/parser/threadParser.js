@@ -56,10 +56,10 @@ module.exports = class ThreadDataParser extends DataParser {
 
     // combine control hash and merkle root to get data hash
     const ctrlHash = Hash.digest(this.data.subarray(0, this.controlLength));
-    this.hash = Hash.digest(Util.concat(
+    this.hash = HashMap.uint8ArrToHex(Hash.digest(Util.concat(
       ctrlHash,
       this.merkleTree.root,
-    ));
+    )));
 
     // number of thread records in the data
     this.numRecords = this.contentLength / 64;

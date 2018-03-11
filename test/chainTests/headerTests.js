@@ -22,8 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const Header = require('../../../src/core/chain/header/header.js');
-const ErrorType = require('../../../src/core/error.js');
+const Header = require('../../src/core/chain/header/header.js');
+const ErrorType = require('../../src/core/error.js');
 
 const tap = require('tap');
 
@@ -32,12 +32,13 @@ tap.test('Header constructor tests', (t) => {
   t.throws(() => new Header(new Uint8Array(56)), ErrorType.dataLength(), 'Header rejects data length < 80');
   t.doesNotThrow(() => { h = new Header(new Uint8Array(80)); }, 'Header accepts valid data');
 
-  t.strictSame(h.hash, new Uint8Array([
-    196, 253, 231, 106, 141, 104, 66, 44,
-    95, 186, 253, 226, 80, 244, 146, 16,
-    159, 178, 154, 198, 103, 83, 41, 46,
-    17, 83, 170, 17, 173, 174, 26, 58,
-  ]));
+  t.equal(h.hash, 'c4fde76a8d68422c5fbafde250f492109fb29ac66753292e1153aa11adae1a3a');
+  // t.strictSame(h.hash, new Uint8Array([
+  //   196, 253, 231, 106, 141, 104, 66, 44,
+  //   95, 186, 253, 226, 80, 244, 146, 16,
+  //   159, 178, 154, 198, 103, 83, 41, 46,
+  //   17, 83, 170, 17, 173, 174, 26, 58,
+  // ]));
   t.equal(h.difficulty, 0);
   t.end();
 });
@@ -93,8 +94,10 @@ tap.test('Header getter methods', (t) => {
   t.equal(h.type(), 0x07, 'Header returns correct block type');
   t.equal(h.timestamp(), 0xffffffff, 'Header returns correct timestamp');
   t.equal(h.nonce(), 777711889, 'Header returns correct nonce');
-  t.strictSame(h.prevHash(), prevHashResult, 'Header returns correct previous hash');
-  t.strictSame(h.dataHash(), dataHashResult, 'Header returns correct data hash');
+  t.strictSame(h.rawPrevHash(), prevHashResult, 'Header returns correct previous hash');
+  t.strictSame(h.rawDataHash(), dataHashResult, 'Header returns correct raw data hash');
+  t.equal(h.dataHash, 'ea38ad19ea38ad19ea38ad19ea38ad19ea38af19ea38ad19ea38ad19ea38ad20', 'Header sets correct string data hash');
+  t.equal(h.prevHash, 'ea38ad19ea38ad19ea38ad19ea38ad19ea38ad19ea38ad19ea38ad19ea38ad19', 'Header sets correct string previous hash');
   t.equal(h.board(), 0x4e5be7e9, 'Header returns correct board ID');
   t.equal(h.reserved(), 0x7c, 'Header returns correct reserved data');
 

@@ -43,14 +43,14 @@ tap.test('GenesisDataParser constructor', (t) => {
   data[18] = 0xEB; // post diff range
   data[19] = 0xEE; // max thread count - 1
   const parser = new GenesisDataParser(data, 14);
-  const expectedHash = new Uint8Array([
-    115, 144, 220, 144, 77, 222, 235, 237,
-    89, 182, 93, 229, 132, 182, 241, 186,
-    216, 30, 198, 236, 83, 146, 14, 80,
-    164, 237, 175, 39, 25, 120, 253, 182,
-  ]);
-
-  t.strictSame(parser.hash, expectedHash, 'GenesisDataParser hashes data');
+  // const expectedHash = new Uint8Array([
+  //   115, 144, 220, 144, 77, 222, 235, 237,
+  //   89, 182, 93, 229, 132, 182, 241, 186,
+  //   216, 30, 198, 236, 83, 146, 14, 80,
+  //   164, 237, 175, 39, 25, 120, 253, 182,
+  // ]);
+  //
+  t.equal(parser.hash, '7390dc904ddeebed59b65de584b6f1bad81ec6ec53920e50a4edaf271978fdb6', 'GenesisDataParser hashes data');
   t.equal(parser.minPostDifficulty, 0x19, 'GenesisDataParser sets minimum post difficulty');
   t.equal(parser.maxPostDifficulty, 0x1D, 'GenesisDataParser sets maximum post difficulty from range');
   t.equal(parser.minThreadDifficulty, 0xAE, 'GenesisDataParser sets minimum thread difficulty');

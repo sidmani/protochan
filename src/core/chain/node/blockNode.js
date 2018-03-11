@@ -25,7 +25,6 @@
 'use strict';
 
 const ErrorType = require('../../error.js');
-const Util = require('../../util/util.js');
 const HashMap = require('../../hash/hashMap.js');
 const Difficulty = require('../../hash/difficulty.js');
 
@@ -36,7 +35,7 @@ module.exports = class BlockNode {
     this.nodeMap = nodeMap;
     this.config = config;
 
-    if (!Util.arrayEquality(this.data.hash, header.dataHash())) {
+    if (this.data.hash !== header.dataHash) {
       throw ErrorType.dataHash();
     }
 
@@ -84,8 +83,8 @@ module.exports = class BlockNode {
   }
 
   addChild(node) {
-    this.nodeMap.set(node); // set first to check duplication
-    this.children.set(true, node.hash);
+    this.nodeMap.setStringified(node, node.hash); // set first to check duplication
+    this.children.setStringified(true, node.hash);
   }
 
   // convenience

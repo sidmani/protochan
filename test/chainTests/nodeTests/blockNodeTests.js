@@ -34,14 +34,12 @@ tap.test('BlockNode', (t) => {
     timestamp() {
       return 0xAB;
     },
-    dataHash() {
-      return new Uint8Array([0, 1, 5]);
-    },
-    hash: new Uint8Array([8, 4, 7, 9]),
+    dataHash: '000105',
+    hash: '08040709',
   };
 
   const data = {
-    hash: new Uint8Array([0, 2]),
+    hash: '0002',
   };
 
   t.throws(
@@ -50,9 +48,9 @@ tap.test('BlockNode', (t) => {
     'BlockNode checks that header.dataHash and data.hash match',
   );
 
-  data.hash = header.dataHash();
+  data.hash = '000105';
   const nodeMap = {
-    set(v) {
+    setStringified(v) {
       this.setObj = v;
     },
   };
@@ -69,64 +67,23 @@ tap.test('BlockNode', (t) => {
   t.strictSame(node.hash, header.hash, 'BlockNode sets hash');
 
   const child = {
-    hash: new Uint8Array([5, 4, 3]),
+    hash: '050403',
   };
   node.addChild(child);
   t.equal(nodeMap.setObj, child, 'BlockNode.addChild inserts into nodeMap');
   t.end();
 });
 
-// t.test('BlockNode.checkPrevHash', t => {
-//   const header = {
-//     type() {
-//       return 0x03;
-//     },
-//     dataHash() {
-//       return new Uint8Array([0, 1, 5]);
-//     },
-//     hash: new Uint8Array([8, 4, 7, 9])
-//   };
-//
-//   const data = {
-//     hash: new Uint8Array([0, 1, 5])
-//   };
-//
-//   const n = new BlockNode(header, data, 'abcd');
-//   t.throws(() => {
-//     const bad = {
-//       header: {
-//         prevHash() { return new Uint8Array([8, 4, 7, 5]); }
-//       }
-//     }
-//     n.checkPrevHash(bad);
-//   }, ErrorType.hashMismatch(), 'BlockNode.checkPrevHash rejects mismatched hashes');
-//
-//   t.doesNotThrow(() => {
-//     const good = {
-//       header: {
-//         prevHash() {
-//           return new Uint8Array([8, 4, 7, 9]);
-//         }
-//       }
-//     }
-//     n.checkPrevHash(good);
-//   }, 'BlockNode.checkPrevHash accepts matched hashes');
-//
-//   t.end();
-// });
-
 tap.test('BlockNode.checkPostDifficulty', (t) => {
   const header = {
-    dataHash() {
-      return new Uint8Array([0, 1, 5]);
-    },
+    dataHash: '000105',
     timestamp() {
       return 5;
     },
   };
 
   const data = {
-    hash: new Uint8Array([0, 1, 5]),
+    hash: '000105',
   };
 
   const n = new BlockNode(header, data, 'abcd', {
@@ -160,16 +117,14 @@ tap.test('BlockNode.checkPostDifficulty', (t) => {
 
 tap.test('BlockNode.checkThreadDifficulty', (t) => {
   const header = {
-    dataHash() {
-      return new Uint8Array([0, 1, 5]);
-    },
+    dataHash: '000105',
     timestamp() {
       return 5;
     },
   };
 
   const data = {
-    hash: new Uint8Array([0, 1, 5]),
+    hash: '000105',
   };
 
   const n = new BlockNode(header, data, 'abcd', {

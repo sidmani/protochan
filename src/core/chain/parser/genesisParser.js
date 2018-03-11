@@ -27,6 +27,7 @@
 const DataParser = require('./parser.js');
 const ErrorType = require('../../error.js');
 const Hash = require('../../hash/blake2s.js');
+const HashMap = require('../../hash/hashMap.js');
 
 module.exports = class GenesisDataParser extends DataParser {
   constructor(data, offset = 0) {
@@ -44,6 +45,6 @@ module.exports = class GenesisDataParser extends DataParser {
     // to extend the protocol with board options, store additional
     // bytes in the post block's data and parse them here
 
-    this.hash = Hash.digest(this.data);
+    this.hash = HashMap.uint8ArrToHex(Hash.digest(this.data));
   }
 };

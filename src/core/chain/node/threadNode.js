@@ -60,6 +60,7 @@ module.exports = class ThreadNode extends BlockNode {
         this.checkPost(node);
 
         const index = node.header.reserved();
+        // XXX: these aren't the same type (string/uint8arr)
         const hash = index === 0 ? this.hash : this.data.getThread(index);
         node.setThread(hash);
         node.setSegmentHeight(1);
@@ -126,7 +127,7 @@ module.exports = class ThreadNode extends BlockNode {
       switch (latestNode.type()) {
         case BlockType.THREAD:
           // if the node is a thread, it must be this thread block
-          if (!Util.arrayEquality(latestNode.hash, this.hash)) {
+          if (latestNode.hash !== this.hash) {
             throw ErrorType.hashMismatch();
           }
           break;

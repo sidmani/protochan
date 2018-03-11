@@ -33,19 +33,19 @@ module.exports = class Pool {
   }
 
   addDependent(dependentNode, dependencyHash) {
-    if (this.pool.contains(dependencyHash)) {
-      this.pool.get(dependencyHash).push(dependentNode);
+    if (this.pool.containsStringified(dependencyHash)) {
+      this.pool.getStringified(dependencyHash).push(dependentNode);
     } else {
-      this.pool.set([dependentNode], dependencyHash);
+      this.pool.setStringified([dependentNode], dependencyHash);
     }
   }
 
   getDependents(hash) {
-    return this.pool.get(hash) || [];
+    return this.pool.getStringified(hash) || [];
   }
 
   clearDependents(hash) {
-    this.pool.unsetRaw(hash);
+    this.pool.unsetStringified(hash);
   }
 
   recursivelyClearDependents(node) {

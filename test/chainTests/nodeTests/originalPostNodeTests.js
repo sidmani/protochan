@@ -29,15 +29,8 @@ const HashMap = require('../../../src/core/hash/hashMap.js');
 
 tap.test('OriginalPostNode constructor', (t) => {
   const header = {
-    hash: new Uint8Array([1, 2, 3, 4]),
-    dataHash() {
-      return new Uint8Array([
-        251, 87, 31, 115, 52, 134, 126, 208,
-        21, 36, 135, 244, 50, 189, 73, 4,
-        30, 63, 182, 141, 192, 181, 70, 91,
-        253, 229, 111, 10, 89, 214, 124, 116,
-      ]);
-    },
+    hash: '01020304',
+    dataHash: 'fb571f7334867ed0152487f432bd49041e3fb68dc0b5465bfde56f0a59d67c74',
     timestamp() { return 12; },
   };
   const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
@@ -55,15 +48,8 @@ tap.test('OriginalPostNode constructor', (t) => {
 
 tap.test('OriginalPostNode addChild methods', (t) => {
   const header = {
-    hash: new Uint8Array([1, 2, 3, 4]),
-    dataHash() {
-      return new Uint8Array([
-        251, 87, 31, 115, 52, 134, 126, 208,
-        21, 36, 135, 244, 50, 189, 73, 4,
-        30, 63, 182, 141, 192, 181, 70, 91,
-        253, 229, 111, 10, 89, 214, 124, 116,
-      ]);
-    },
+    hash: '01020304',
+    dataHash: 'fb571f7334867ed0152487f432bd49041e3fb68dc0b5465bfde56f0a59d67c74',
     timestamp() { return 12; },
   };
   const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
@@ -82,14 +68,14 @@ tap.test('OriginalPostNode addChild methods', (t) => {
       this.setThread = thr;
       this.setHeight = height;
     },
-    hash: new Uint8Array([4, 5, 8]),
+    hash: '040508',
   };
   t.throws(() => n.checkThread(thread), ErrorType.timeTravel(), 'checkThread rejects equal timestamps');
   thread.timestamp = () => 13;
   t.doesNotThrow(() => n.checkThread(thread), 'checkThread accepts valid timestamp');
   n.insertThread(thread);
-  t.strictSame(thread.setThread, new Uint8Array([4, 5, 8]), 'PostNode sets height of thread in thread block for own hash');
-  t.strictSame(thread.setHeight, 0, 'PostNode sets zero height for thread in thread block');
-  t.equal(n.children.get(new Uint8Array([4, 5, 8])), true, 'PostNode sets thread as child');
+  t.strictSame(thread.setThread, '040508', 'OriginalPostNode sets height of thread in thread block for own hash');
+  t.strictSame(thread.setHeight, 0, 'OriginalPostNode sets zero height for thread in thread block');
+  t.equal(n.children.get(new Uint8Array([4, 5, 8])), true, 'OriginalPostNode sets thread as child');
   t.end();
 });

@@ -49,12 +49,12 @@ module.exports = class Chain {
       this.config,
     );
 
-    this.nodeMap.set(this.root);
+    this.nodeMap.setStringified(this.root, this.root.hash);
   }
 
-  get(blockHash) {
-    return this.nodeMap.get(blockHash);
-  }
+  // get(blockHash) {
+  //   return this.nodeMap.get(blockHash);
+  // }
 
   createNode(header, data) {
     switch (header.type()) {
@@ -91,7 +91,7 @@ module.exports = class Chain {
   }
 
   addChild(node) {
-    const prevNode = this.get(node.header.prevHash());
+    const prevNode = this.getStringified(node.header.prevHash);
     if (!prevNode) {
       throw ErrorType.missingReference(prevNode.hash);
     }

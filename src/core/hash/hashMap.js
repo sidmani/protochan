@@ -33,8 +33,13 @@ module.exports = class HashMap {
 
   set(obj, hash = obj.hash, overwrite = false) {
     const str = HashMap.uint8ArrToHex(hash);
-    if (this.map.has(str) && !overwrite) throw ErrorType.duplicateKey();
-    this.map.set(str, obj);
+    this.setStringified(obj, str, overwrite);
+  }
+
+  setStringified(obj, hash, overwrite = false) {
+    if (typeof hash !== 'string') { throw Error(); }
+    if (this.map.has(hash) && !overwrite) throw ErrorType.duplicateKey();
+    this.map.set(hash, obj);
   }
 
   unset(obj) {
@@ -45,8 +50,16 @@ module.exports = class HashMap {
     this.map.delete(HashMap.uint8ArrToHex(hash));
   }
 
+  unsetStringified(hash) {
+    this.map.delete(hash);
+  }
+
   get(hash) {
     return this.map.get(HashMap.uint8ArrToHex(hash));
+  }
+
+  getStringified(hash) {
+    return this.map.get(hash);
   }
 
   enumerate() {
@@ -70,14 +83,14 @@ module.exports = class HashMap {
     return this.map.has(HashMap.uint8ArrToHex(hash));
   }
 
-  containsStringifiedKey(keyStr) {
+  containsStringified(keyStr) {
     return this.map.has(keyStr);
   }
 
   difference(otherMap, filter = () => true) {
     return Array.from(this.map.keys())
-      .filter(key => !otherMap.containsStringifiedKey(key))
-      .filter(key => filter(key, this.map.get(key)))
+      .filter(key => !otherMap.containsStringified(key) &&
+        filter(key, this.map.get(key)))
       .map(strKey => HashMap.hexToUint8Arr(strKey));
   }
 

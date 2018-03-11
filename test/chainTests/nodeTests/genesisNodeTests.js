@@ -29,15 +29,8 @@ const HashMap = require('../../../src/core/hash/hashMap.js');
 
 tap.test('GenesisNode constructor', (t) => {
   const header = {
-    hash: new Uint8Array([1, 2, 3, 4]),
-    dataHash() {
-      return new Uint8Array([
-        251, 87, 31, 115, 52, 134, 126, 208,
-        21, 36, 135, 244, 50, 189, 73, 4,
-        30, 63, 182, 141, 192, 181, 70, 91,
-        253, 229, 111, 10, 89, 214, 124, 116,
-      ]);
-    },
+    hash: '01020304',
+    dataHash: 'fb571f7334867ed0152487f432bd49041e3fb68dc0b5465bfde56f0a59d67c74',
     timestamp() { return 12; },
   };
   const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
@@ -55,15 +48,8 @@ tap.test('GenesisNode constructor', (t) => {
 
 tap.test('GenesisNode.checkThread', (t) => {
   const header = {
-    hash: new Uint8Array([1, 2, 3, 4]),
-    dataHash() {
-      return new Uint8Array([
-        251, 87, 31, 115, 52, 134, 126, 208,
-        21, 36, 135, 244, 50, 189, 73, 4,
-        30, 63, 182, 141, 192, 181, 70, 91,
-        253, 229, 111, 10, 89, 214, 124, 116,
-      ]);
-    },
+    hash: '01020304',
+    dataHash: 'fb571f7334867ed0152487f432bd49041e3fb68dc0b5465bfde56f0a59d67c74',
     timestamp() { return 12; },
   };
   const data = new Uint8Array([6, 0, 0, 0, 0, 0]);
@@ -85,7 +71,7 @@ tap.test('GenesisNode.checkThread', (t) => {
     header: {
       difficulty: 44,
     },
-    hash: new Uint8Array([1, 2, 5, 9]),
+    hash: '01020509',
     type() { return 0x01; },
     timestamp() { return 312; },
     setHeight(height) { this.height = height; },
@@ -142,8 +128,8 @@ tap.test('GenesisNode.checkThread', (t) => {
   t.doesNotThrow(() => { n.addChild(thread); }, 'GenesisNode adds child thread');
   t.assert(opInsertedThread, 'addChild inserts on original post');
   t.equal(thread.height, 1, 'addChild sets thread height to one');
-  t.equal(nodeMap.get(thread.hash), thread, 'addChild adds to node map');
-  t.equal(n.children.get(thread.hash), true, 'addChild adds to children');
+  t.equal(nodeMap.getStringified(thread.hash), thread, 'addChild adds to node map');
+  t.equal(n.children.getStringified(thread.hash), true, 'addChild adds to children');
   t.end();
 });
 

@@ -27,12 +27,12 @@ const Pool = require('../../src/core/chain/pool.js');
 
 tap.test('Pool', (t) => {
   const p = new Pool();
-  t.strictSame(p.getDependents(new Uint8Array([5])), [], 'Pool returns empty array if no dependents');
-  const node1 = { hash: new Uint8Array([1]) };
-  const node2 = { hash: new Uint8Array([2]) };
-  const node3 = { hash: new Uint8Array([3]) };
-  const node4 = { hash: new Uint8Array([4]) };
-  const baseNode = { hash: new Uint8Array([255]) };
+  t.strictSame(p.getDependents('05'), [], 'Pool returns empty array if no dependents');
+  const node1 = { hash: '01' };
+  const node2 = { hash: '02' };
+  const node3 = { hash: '03' };
+  const node4 = { hash: '04' };
+  const baseNode = { hash: 'ff' };
   // node1 and node 2 depend on hash [255]
   p.addDependent(node1, baseNode.hash);
   p.addDependent(node2, baseNode.hash);
@@ -42,7 +42,7 @@ tap.test('Pool', (t) => {
   p.addDependent(node4, node1.hash);
 
   // dependents of [255] are node1, node2
-  t.strictSame(p.getDependents(new Uint8Array([255])), [node1, node2]);
+  t.strictSame(p.getDependents('ff'), [node1, node2]);
 
   // test a simple traversal (no reassignment)
   const simpleTraversal = [];
