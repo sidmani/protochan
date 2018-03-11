@@ -36,16 +36,19 @@ module.exports = class ThreadDataParser extends DataParser {
     super(data, offset);
 
     // content contains pairs of 32-byte hashes
-    if (this.contentLength % 64 !== 0 || this.contentLength === 0) {
+    if (this.contentLength < 64) {
       throw ErrorType.dataLength();
     }
 
     this.indexMap = new HashMap();
     const dataArray = Util.split(
       this.data,
-      32,
+      64,
       offset + this.controlLength,
-      (hash, idx) => this.indexMap.set(idx, hash),
+      (pair, idx) => {
+        this.indexMap.set(2 * idx, pair.subarray(0, 32));
+        this.indexMap.set((2 * idx) + 1, pair.subarray(32));
+      },
     );
 
     // since the first array must be zero, just replace it

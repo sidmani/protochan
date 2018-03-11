@@ -66,5 +66,6 @@ tap.test('Peer', (t) => {
 
   connection.incoming.destroy();
   connection.outgoing.destroy();
+  connection.terminate.next();
   t.end();
 });

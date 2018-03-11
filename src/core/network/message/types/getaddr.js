@@ -42,7 +42,7 @@ module.exports = class Getaddr extends Message {
 
   static create(maxAddr) {
     const payload = new Uint8Array(Getaddr.PAYLOAD_LENGTH());
-    payload[Message.HEADER_LENGTH()] = maxAddr;
+    payload[0] = maxAddr;
 
     return payload;
   }

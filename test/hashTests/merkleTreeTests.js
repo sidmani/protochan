@@ -26,11 +26,8 @@ const MerkleTree = require('../../src/core/hash/merkleTree.js');
 const Hash = require('../../src/core/hash/blake2s.js');
 
 const tap = require('tap');
-const ErrorType = require('../../src/core/error.js');
 
 tap.test('MerkleTree', (t) => {
-  t.throws(() => new MerkleTree([]), ErrorType.dataLength(), 'Merkle tree rejects zero length array');
-
   const data = new Uint8Array(192);
   data.fill(1, 0, 32);
   data.fill(2, 32, 64);

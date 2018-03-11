@@ -30,15 +30,9 @@ const ErrorType = require('../../../src/core/error.js');
 
 tap.test('ThreadDataParser constructor', (t) => {
   t.throws(() => {
-    const arr = new Uint8Array(71);
+    const arr = new Uint8Array(62);
     return new ThreadDataParser(arr);
-  }, ErrorType.dataLength(), 'ThreadDataParser rejects zero content length');
-
-  t.throws(() => {
-    const arr = new Uint8Array(71);
-    arr[0] = 0x06; // 71 - 6 = 65
-    return new ThreadDataParser(arr);
-  }, ErrorType.dataLength(), 'ThreadDataParser rejects length not divisible by 64');
+  }, ErrorType.dataLength(), 'ThreadDataParser rejects content length less than 64');
 
   t.doesNotThrow(() => {
     const arr = new Uint8Array(71);

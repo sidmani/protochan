@@ -32,11 +32,7 @@ tap.test('HashMap functions', (t) => {
   map.set(block);
   t.equal(map.get(block.hash), block, 'HashMap sets and gets block');
   t.throws(() => { map.set(block); }, ErrorType.duplicateKey(), 'HashMap refuses to set same object twice');
-  map.unset(block);
-  t.equal(map.get(block.hash), undefined, 'HashMap.unset removes object');
-
-  map.set(block);
-  map.unsetRaw(block.hash);
+  map.unset(block.hash);
   t.equal(map.get(block.hash), undefined, 'HashMap.unset removes object');
 
   t.strictSame(HashMap.hexToUint8Arr(''), new Uint8Array());
@@ -87,7 +83,7 @@ tap.test('HashMap set functions', (t) => {
   t.equal(diff.length, 1, 'HashMap.difference length is correct');
   t.strictSame(diff[0], new Uint8Array([5, 7, 8]), 'HashMap.difference contents are correct');
 
-  map2.unsetRaw(new Uint8Array([6, 2, 1]));
+  map2.unset(new Uint8Array([6, 2, 1]));
 
   const diff2 = map.difference(map2, key => key === '060201');
   t.equal(diff2.length, 1, 'HashMap.difference filtered length is correct');

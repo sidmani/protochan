@@ -33,14 +33,7 @@ const HashMap = require('../../hash/hashMap.js');
 const ByteArray = require('../../util/byteArray.js');
 /* eslint-enable no-unused-vars */
 
-/**
- * The block header.
- */
-class Header {
-  /**
-   * Create a header from an 80-byte ArrayBuffer.
-   * @param {ArrayBuffer} buffer - The source buffer.
-   */
+module.exports = class Header {
   constructor(data) {
     // check length is at least 80 bytes
     if (data.byteLength < 80) {
@@ -108,7 +101,6 @@ class Header {
     reserved,
   ) {
     const data = new Uint8Array(80);
-    // const data = new DataView(buffer);
     data.setUint16(0, protocolVersion);
     data[2] = blockType;
     data.setUint32(3, timestamp);
@@ -129,6 +121,4 @@ class Header {
   static deserialize(data) {
     return new Header(data);
   }
-}
-
-module.exports = Header;
+};

@@ -29,7 +29,7 @@ tap.test('Stream.on', (t) => {
   const str = new Stream();
 
   const result = [];
-  str.on((obj) => { result.push(obj); });
+  str.on((obj) => { result.push(obj); }).map(() => 'abcd');
   str.next('foo');
   str.next('bar');
   str.next('baz');
@@ -53,44 +53,6 @@ tap.test('Stream.filter', (t) => {
   t.strictSame(result, [3, 557], 'Stream.filter excludes objects based on condition');
   t.end();
 });
-
-tap.test('Stream.after', (t) => {
-  const str = new Stream();
-
-  const result = [];
-  // ignore all until both even and odd have been received
-  str.after(obj => obj % 2 === 1, obj => obj % 2 === 0)
-    .on((obj) => { result.push(obj); });
-
-  str.next(2);
-  str.next(4);
-  str.next(5);
-  str.next(4);
-  str.next(7);
-
-  t.strictSame(result, [5, 4, 7], 'Stream.after ignores objects until conditionals are met');
-  t.end();
-});
-
-// tap.test('Stream.discard', (t) => {
-//   const str = new Stream();
-//
-//   const result = [];
-//
-//   str.discard(3)
-//     .discard()
-//     .on((obj) => { result.push(obj); });
-//
-//   str.next(2);
-//   str.next(4);
-//   str.next(5);
-//   str.next(4);
-//   str.next(7);
-//   str.next(1);
-//
-//   t.strictSame(result, [7, 1], 'Stream.discard ignores first n objects');
-//   t.end();
-// });
 
 tap.test('Stream.map', (t) => {
   const str = new Stream();

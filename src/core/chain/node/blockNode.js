@@ -43,43 +43,26 @@ module.exports = class BlockNode {
     this.children = new HashMap();
   }
 
-  checkPostDifficulty(post) {
+  checkDifficulty(node, fn) {
     // get the time difference
-    const deltaT = post.timestamp() - this.timestamp();
+    const deltaT = node.timestamp() - this.timestamp();
 
     // if new block is older than the previous block, error
     if (deltaT <= 0) throw ErrorType.timeTravel();
 
-    // get required difficulty
-    const reqDiff = Difficulty.requiredPostDifficulty(
-      deltaT,
-      this.config,
-    );
+    const reqDiff = fn(deltaT, this.config);
 
-    // if new block doesn't have the required difficulty, error
-    if (post.header.difficulty < reqDiff) {
+    if (node.header.difficulty < reqDiff) {
       throw ErrorType.insufficientDifficulty();
     }
   }
 
+  checkPostDifficulty(post) {
+    this.checkDifficulty(post, Difficulty.post);
+  }
+
   checkThreadDifficulty(thread, numPosts) {
-    // get the time difference
-    const deltaT = thread.timestamp() - this.timestamp();
-
-    // if new block is older than the previous block, error
-    if (deltaT <= 0) throw ErrorType.timeTravel();
-
-    // get required difficulty
-    const reqDiff = Difficulty.requiredThreadDifficulty(
-      deltaT,
-      numPosts,
-      this.config,
-    );
-
-    // if new block doesn't have the required difficulty, error
-    if (thread.header.difficulty < reqDiff) {
-      throw ErrorType.insufficientDifficulty();
-    }
+    this.checkDifficulty(thread, (deltaT, conf) => Difficulty.thread(deltaT, numPosts, conf));
   }
 
   addChild(node) {

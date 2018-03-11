@@ -35,9 +35,7 @@ module.exports = class Stream {
   }
 
   nextError(error) {
-    this.children.forEach((child) => {
-      if (child) child.nextError(error);
-    });
+    this.children.forEach(child => child.nextError(error));
   }
 
   next(obj) {
@@ -55,9 +53,7 @@ module.exports = class Stream {
   }
 
   destroy() {
-    this.children.forEach((child) => {
-      child.destroy();
-    });
+    this.children.forEach(child => child.destroy());
     this.destructor();
     this.children = [];
   }
@@ -84,33 +80,6 @@ module.exports = class Stream {
     });
   }
 
-  after(...conditionals) {
-    const evaluated = [];
-    return this.attach((obj, next) => {
-      const result = conditionals.reduce((tot, cond, idx) => {
-        if (evaluated[idx] || cond(obj)) {
-          evaluated[idx] = true;
-          return tot;
-        }
-        return false;
-      }, true);
-
-      if (result) {
-        next(obj);
-      }
-    });
-  }
-
-  // discard(n = 1) {
-  //   let idx = 0;
-  //   return this.attach((obj, next) => {
-  //     if (idx >= n) {
-  //       next(obj);
-  //     }
-  //     idx += 1;
-  //   });
-  // }
-
   map(fn) {
     return this.attach((obj, next) => next(fn(obj)));
   }
@@ -118,7 +87,7 @@ module.exports = class Stream {
   flatmap(fn) {
     return this.attach((obj, next) => {
       // fn returns a stream
-      fn(obj).on(o2 => next(o2));
+      fn(obj).on(next);
     });
   }
 
@@ -140,6 +109,12 @@ module.exports = class Stream {
         next(obj);
         last = now;
       }
+    });
+  }
+
+  iterate() {
+    return this.attach((obj, next) => {
+      obj.forEach(next);
     });
   }
 
@@ -173,29 +148,19 @@ module.exports = class Stream {
   }
 
   pipe(stream) {
-    this.children.push(stream);
+    this.attach(obj => stream.next(obj));
+    // this.next = obj => this.fn(obj, o => stream.next(o));
   }
 
-  // propagate to a random child
-  // random(count) {
-  //   return this.attach((obj) => {
-  //     for (let i = 0; i < Math.min(this.children.length, count);)
-  //     const idx = Stream.randInt(0, this.children.length);
-  //     if (this.children[idx]) {
-  //       this.children[idx].next(obj);
-  //     }
-  //   });
-  // }
-
-  static randInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
+  static every(interval, obj) {
+    let id;
+    const str = new Stream(
+      (o, next) => next(o),
+      () => clearInterval(id),
+    );
+    id = setInterval(() => {
+      str.next(obj);
+    }, interval);
+    return str;
   }
-
-  // static every(interval, obj) {
-  //   const str = new Stream();
-  //   setInterval(() => {
-  //     str.propagate(obj);
-  //   }, interval);
-  //   return str;
-  // }
 };

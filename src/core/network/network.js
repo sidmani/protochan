@@ -28,54 +28,86 @@ const HashMap = require('../hash/hashMap.js');
 const Peer = require('./peer.js');
 const Stream = require('./stream.js');
 
-const Getaddr = require('./message/types/getaddr.js');
+const Netaddr = require('./message/dataTypes/netaddr.js');
+const Exchange = require('./exchange.js');
 
-const KNOWN_NODES = [
-  new Uint8Array([107, 170, 194, 14]), // node.protochan.com
+const KNOWN_NETADDR = [
+  new Netaddr([
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x6B, 0xAA, 0xC2, 0x0E, 0x00, 0x00]),
 ];
 
 module.exports = class Network {
-  static MAX_PEERS() { return 10; }
+  static MAX_PEERS() { return 32; }
 
   constructor(magic, version, services) {
     this.incoming = new Stream();
     this.outgoing = new Stream();
+    this.scan = new Stream();
 
     this.magic = magic;
     this.version = version;
     this.services = services;
 
-    this.peers = new HashMap();
-    this.known = new HashMap();
-  }
+    this.peers = new HashMap(); // IPv6 to Peer
+    this.known = new HashMap(); // IPv6 to NetAddr
 
-  addPeer(connection) {
-    const peer = new Peer(connection, this.magic);
-    this.peers.set(peer, connection.id);
-
-
-    peer.init(this.version, this.services).on(() => {
-      // pipe data, peer to incoming
-      peer.incoming
-        .map(data => ({ data, peer }))
-        .pipe(this.incoming);
-    });
-
-    peer.terminate.on(() => {
-      this.peers.unsetRaw(peer.id());
+    KNOWN_NETADDR.forEach((address) => {
+      this.known.set(address, address.IPv6());
     });
   }
 
-  peerExchange({ incoming, outgoing }) {
-    incoming
-      .filter(data => Getaddr.match(data))
-      .map(data => new Getaddr(data).maxAddr())
-      .map(maxAddr => this.known.enumerate().slice(this.known.count() - maxAddr))
-      .map((addresses) => {
-        outgoing.next({
-          command: 0,
-          payload: 0,
+  attach(component) {
+    component(this);
+  }
+
+  init() {
+    // handle getaddr and addr messages
+    this.attach(Exchange);
+    this.scan
+      // only scan when we we need more peers
+      .filter(this.peers.size() < Network.MAX_PEERS())
+      // get known peers that are not connected
+      .map(() => this.known.difference(this.peers))
+      // get n peers from end of available list
+      .map(available => available.slice(this.peers.size() - Network.MAX_PEERS()))
+      // iterate over array
+      .iterate()
+      // get netaddr from ipv6 address
+      .map(ipv6 => this.known.get(ipv6))
+      // try to connect to the peer
+      .flatmap(netaddr => this.connect(netaddr))
+      // create peer
+      .on((connection) => {
+        const peer = new Peer(connection, this.magic);
+        this.peers.set(peer, connection.address.IPv6());
+
+        peer.init(this.version, this.services).on(() => {
+          // pipe data, peer to incoming
+          peer.incoming
+            .map(data => ({ data, peer }))
+            .pipe(this.incoming);
+        });
+
+        peer.terminate.on(() => {
+          // remove the peer
+          this.peers.unset(peer.id());
+          // scan for more peers
+          this.scan.next();
         });
       });
+    //
+
+  }
+
+  connect(netaddr) {
+    // first bit of services means that the node is running a websocket server
+    if (netaddr.services.socketHost()) {
+      // can directly connect to the address
+    } else {
+      // idk
+      throw new Error();
+    }
   }
 };

@@ -24,33 +24,36 @@
 
 'use strict';
 
-const ErrorType = require('../../../error.js');
+const Services = require('./services.js');
 /* eslint-disable no-unused-vars */
 const ByteArray = require('../../../util/byteArray.js');
 /* eslint-enable no-unused-vars */
 
 module.exports = class NetAddress {
-  constructor(data) {
-    if (data.byteLength !== 22) {
-      throw ErrorType.dataLength();
-    }
+  static BYTE_LENGTH() {
+    return 22;
+  }
+
+  constructor(data, offset = 0) {
     this.data = data;
+    this.offset = offset;
+    this.services = new Services(this.rawServices());
   }
 
-  services() {
-    return this.data.getUint32(0);
+  rawServices() {
+    return this.data.getUint32(this.offset + 0);
   }
 
-  addressIPv6() {
-    return this.data.subarray(4, 20);
+  IPv6() {
+    return this.data.subarray(this.offset + 4, this.offset + 20);
   }
 
-  addressIPv4() {
-    return this.data.subarray(16, 20);
+  IPv4() {
+    return this.data.subarray(this.offset + 16, this.offset + 20);
   }
 
   port() {
-    return this.data.getUint16(20);
+    return this.data.getUint16(this.offset + 20);
   }
 
   static set(data, offset, services, ipv4, port) {

@@ -24,16 +24,13 @@
 
 'use strict';
 
-const ErrorType = require('../error.js');
 const Hash = require('./blake2s.js');
+const Util = require('../util/util.js');
 
 module.exports = class MerkleTree {
   constructor(dataArr) {
     // array of uint8arrays
     let builtArray = dataArr;
-
-    if (dataArr.length === 0) throw ErrorType.dataLength();
-
     this.depth = 1;
 
     do {
@@ -46,11 +43,8 @@ module.exports = class MerkleTree {
         // TODO: optimize so it doesn't hash the same thing twice
         const item1 = Hash.digest(builtArray[i * 2]);
         const item2 = Hash.digest(builtArray[(i * 2) + 1] || builtArray[(i * 2)]);
-        const concat = new Uint8Array(64);
-        concat.set(item1, 0);
-        concat.set(item2, 32);
 
-        newArray.push(concat);
+        newArray.push(Util.concat(item1, item2));
       }
 
       // builtArray now represents the next level of the tree

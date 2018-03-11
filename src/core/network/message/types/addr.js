@@ -24,33 +24,39 @@
 
 'use strict';
 
-module.exports.arrayEquality = function (arr1, arr2) {
-  if (arr1.byteLength !== arr2.byteLength) return false;
-  for (let i = 0; i < arr1.byteLength; i += 1) {
-    if (arr1[i] !== arr2[i]) return false;
+const Message = require('../message.js');
+const Netaddr = require('../dataTypes/netaddr.js');
+
+module.exports = class Addr extends Message {
+  static COMMAND() { return 0x00000006; }
+
+  static match(data) { return Message.getCommand(data) === Addr.COMMAND(); }
+
+  constructor(data) {
+    super(data, 1 + (data[Message.HEADER_LENGTH()] * Netaddr.BYTE_LENGTH()));
   }
-  return true;
-};
 
-module.exports.concat = function (arr1, arr2) {
-  const newArr = new Uint8Array(arr1.byteLength + arr2.byteLength);
-  newArr.set(arr1, 0);
-  newArr.set(arr2, arr1.byteLength);
-  return newArr;
-};
-
-module.exports.split = function (arr, len, offset, forEach = () => {}) {
-  const newArr = [];
-  const count = Math.floor(arr.byteLength / len);
-
-  for (let i = 0; i < count; i += 1) {
-    // each post and thread is an item
-    const subarr = arr.subarray(
-      offset + (i * len),
-      offset + ((i + 1) * len),
-    );
-    newArr.push(subarr);
-    forEach(subarr, i);
+  addressCount() {
+    return this.data[Message.HEADER_LENGTH()];
   }
-  return newArr;
+
+  address(index) {
+    return new Netaddr(this.data, 1 + (index * Netaddr.BYTE_LENGTH()));
+  }
+
+  forEach(fn) {
+    const count = this.addressCount();
+    for (let i = 0; i < count; i += 1) {
+      fn(this.address(i));
+    }
+  }
+
+  static create(addresses) {
+    const payload = new Uint8Array(1 + (addresses.length * Netaddr.BYTE_LENGTH()));
+    payload[0] = addresses.length;
+    for (let i = 0; i < addresses.length; i += 1) {
+      payload.set(1 + (Netaddr.BYTE_LENGTH() * i), addresses[i].data);
+    }
+    return payload;
+  }
 };

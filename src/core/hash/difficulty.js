@@ -47,7 +47,7 @@ module.exports.countLeadingZeroes = countLeadingZeroes;
 // If someone wants to post every 5 seconds, they have to do about
 // 128 times as much work as someone who posts every 10 seconds.
 
-module.exports.requiredPostDifficulty = function (deltaT, config) {
+module.exports.post = function (deltaT, config) {
   const minDiff = config.MIN_POST_DIFFICULTY;
   const maxDiff = config.MAX_POST_DIFFICULTY;
   const interval = maxDiff - minDiff;
@@ -68,7 +68,7 @@ module.exports.requiredPostDifficulty = function (deltaT, config) {
 // f(300, maxThreads) = max_t/2
 // f(∞, ∞) = min_t
 
-module.exports.requiredThreadDifficulty = function (deltaT, numPosts, config) {
+module.exports.thread = function (deltaT, numPosts, config) {
   const maxThreads = config.MAX_THREAD_COUNT;
   const minDiff = config.MIN_THREAD_DIFFICULTY;
   const maxDiff = config.MAX_THREAD_DIFFICULTY;

@@ -32,8 +32,7 @@ module.exports = class HashMap {
   }
 
   set(obj, hash = obj.hash, overwrite = false) {
-    const str = HashMap.uint8ArrToHex(hash);
-    this.setStringified(obj, str, overwrite);
+    this.setStringified(obj, HashMap.uint8ArrToHex(hash), overwrite);
   }
 
   setStringified(obj, hash, overwrite = false) {
@@ -42,11 +41,7 @@ module.exports = class HashMap {
     this.map.set(hash, obj);
   }
 
-  unset(obj) {
-    this.unsetRaw(obj.hash);
-  }
-
-  unsetRaw(hash) {
+  unset(hash) {
     this.map.delete(HashMap.uint8ArrToHex(hash));
   }
 
