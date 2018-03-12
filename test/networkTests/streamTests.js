@@ -71,43 +71,6 @@ tap.test('Stream.map', (t) => {
   t.end();
 });
 
-tap.test('Stream.first', (t) => {
-  const str = new Stream();
-
-  const result = [];
-
-  str.first(4)
-    .on((obj) => { result.push(obj); });
-
-  str.next(2);
-  str.next(4);
-  str.next(5);
-  str.next(6);
-  str.next(7);
-  str.next(1);
-
-  t.strictSame(result, [2, 4, 5, 6], 'Stream.first passes first n objects');
-  t.end();
-});
-
-tap.test('Stream.accumulate', (t) => {
-  const str = new Stream();
-
-  const result = [];
-
-  str.accumulate(result).on(({ acc, obj }) => acc.push(obj));
-
-  str.next(2);
-  str.next(3);
-  str.next(4);
-  str.next(6);
-  str.next(7);
-  str.next(1);
-
-  t.strictSame(result, [2, 3, 4, 6, 7, 1], 'Stream.accumulate accumulates objects');
-  t.end();
-});
-
 tap.test('Stream.flatmap', (t) => {
   const str = new Stream();
   const str2 = new Stream();
@@ -142,6 +105,25 @@ tap.test('Stream.flatmap', (t) => {
   t.end();
 });
 
+tap.test('Stream.first', (t) => {
+  const str = new Stream();
+
+  const result = [];
+
+  str.first(4)
+    .on((obj) => { result.push(obj); });
+
+  str.next(2);
+  str.next(4);
+  str.next(5);
+  str.next(6);
+  str.next(7);
+  str.next(1);
+
+  t.strictSame(result, [2, 4, 5, 6], 'Stream.first passes first n objects');
+  t.end();
+});
+
 tap.test('Stream.debounce', (t) => {
   const str = new Stream();
 
@@ -150,7 +132,7 @@ tap.test('Stream.debounce', (t) => {
   let now = 1200;
 
   str.debounce(1000, () => now)
-    .on((obj) => { result.push(obj); });
+    .on(obj => result.push(obj));
 
   str.next(5);
   str.next(6);
@@ -162,6 +144,59 @@ tap.test('Stream.debounce', (t) => {
   now = 6000;
   str.next(10);
   t.strictSame(result, [5, 8, 10], 'Stream.first allows only one object per time interval');
+  t.end();
+});
+
+tap.test('Stream.iterate', (t) => {
+  const str = new Stream();
+  const result = [];
+
+  str.iterate().on(obj => result.push(obj));
+  str.next([8, 7, 42]);
+
+  t.strictSame(result, [8, 7, 42], 'Stream.iterate works');
+  t.end();
+});
+
+tap.test('Stream.accumulate', (t) => {
+  const str = new Stream();
+
+  const result = [];
+
+  str.accumulate(result).on(({ acc, obj }) => acc.push(obj));
+
+  str.next(2);
+  str.next(3);
+  str.next(4);
+  str.next(6);
+  str.next(7);
+  str.next(1);
+
+  t.strictSame(result, [2, 3, 4, 6, 7, 1], 'Stream.accumulate accumulates objects');
+  t.end();
+});
+
+tap.test('Stream.queue', (t) => {
+  const str = new Stream();
+  const result = [];
+  const dispense = new Stream();
+
+  str.queue(dispense).on(obj => result.push(obj));
+
+  str.next(5);
+  str.next(8);
+  str.next(1);
+
+  t.strictSame(result, [], 'Stream.queue doesn\'t propagate without dispense');
+
+  dispense.next(2);
+  t.strictSame(result, [5, 8], 'Stream.queue dispenses objects');
+  dispense.next(3);
+  t.strictSame(result, [5, 8, 1], 'Stream.queue dispenses up to queue size');
+  str.next(11);
+  str.next(12);
+  str.next(14);
+  t.strictSame(result, [5, 8, 1, 11, 12], 'Stream.queue clears backlog when possible');
   t.end();
 });
 
