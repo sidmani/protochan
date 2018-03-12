@@ -29,7 +29,8 @@ const Peer = require('./peer.js');
 const Stream = require('./stream.js');
 
 const Netaddr = require('./message/dataTypes/netaddr.js');
-const Exchange = require('./exchange.js');
+const Exchange = require('./protocol/exchange.js');
+const Addr = require('./message/types/addr.js');
 
 const KNOWN_NETADDR = [
   new Netaddr([
@@ -44,18 +45,14 @@ module.exports = class Network {
   constructor(magic, version, services) {
     this.incoming = new Stream();
     this.outgoing = new Stream();
-    this.scan = new Stream();
 
     this.magic = magic;
     this.version = version;
     this.services = services;
 
-    this.peers = new HashMap(); // IPv6 to Peer
-    this.known = new HashMap(); // IPv6 to NetAddr
-
-    KNOWN_NETADDR.forEach((address) => {
-      this.known.set(address, address.IPv6());
-    });
+    // KNOWN_NETADDR.forEach((address) => {
+    //   this.known.set(address, address.IPv6());
+    // });
   }
 
   attach(component) {
@@ -63,25 +60,41 @@ module.exports = class Network {
   }
 
   init() {
-    // handle getaddr and addr messages
-    this.attach(Exchange);
-    this.scan
-      // only scan when we we need more peers
-      .filter(this.peers.size() < Network.MAX_PEERS())
-      // get known peers that are not connected
-      .map(() => this.known.difference(this.peers))
-      // get n peers from end of available list
-      .map(available => available.slice(this.peers.size() - Network.MAX_PEERS()))
-      // iterate over array
+    const address = this.incoming
+      // handle addr messages
+      .filter(({ data }) => Addr.match(data))
+      // create the message
+      .map(({ data }) => new Addr(data))
+      // iterate over netaddr in addr
       .iterate()
-      // get netaddr from ipv6 address
-      .map(ipv6 => this.known.get(ipv6))
-      // try to connect to the peer
-      .flatmap(netaddr => this.connect(netaddr))
-      // create peer
-      .on((connection) => {
-        const peer = new Peer(connection, this.magic);
-        this.peers.set(peer, connection.address.IPv6());
+      // create an accumulator for known addresses
+      .accumulate(new HashMap())
+      // set known addresses ignoring duplicates
+      .on(({ obj, acc }) => acc.set(obj, obj.IPv6()));
+
+    address
+      // create accumulator for target addresses
+      .accumulate(new HashMap())
+      // don't add to targets unless we're lacking peers
+      .filter(({ acc }) => acc.size() < Network.MAX_PEERS())
+      // set the latest address in the target hashmap
+      .map(({ acc: targets, obj: { obj: addr, acc: known } }) => {
+        targets.set(addr, addr.IPv6());
+        return { addr, targets, known };
+      })
+      // attempt to connect to the latest peer
+      .flatmap(({ addr, targets, known }) => this.connect(addr)
+        .map(conn => ({ conn, targets }))
+        .error(() => {
+          targets.unset(addr.IPv6());
+          known.unset(addr.IPv6());
+        }))
+      .on(({ conn, targets }) => {
+        const peer = new Peer(conn, this.magic);
+
+        peer.terminate.on(() => {
+          targets.unset(conn.address.IPv6());
+        });
 
         peer.init(this.version, this.services).on(() => {
           // pipe data, peer to incoming
@@ -89,25 +102,16 @@ module.exports = class Network {
             .map(data => ({ data, peer }))
             .pipe(this.incoming);
         });
-
-        peer.terminate.on(() => {
-          // remove the peer
-          this.peers.unset(peer.id());
-          // scan for more peers
-          this.scan.next();
-        });
       });
-    //
-
   }
 
-  connect(netaddr) {
-    // first bit of services means that the node is running a websocket server
-    if (netaddr.services.socketHost()) {
-      // can directly connect to the address
-    } else {
-      // idk
-      throw new Error();
-    }
-  }
+  // connect(netaddr) {
+  //   // first bit of services means that the node is running a websocket server
+  //   if (netaddr.services.socketHost()) {
+  //     // can directly connect to the address
+  //   } else {
+  //     // idk
+  //     throw new Error();
+  //   }
+  // }
 };

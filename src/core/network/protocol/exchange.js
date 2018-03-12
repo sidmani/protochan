@@ -24,9 +24,9 @@
 
 'use strict';
 
-const Getaddr = require('./message/types/getaddr.js');
-const Addr = require('./message/types/addr.js');
-const Stream = require('./stream.js');
+const Getaddr = require('../message/types/getaddr.js');
+const Addr = require('../message/types/addr.js');
+const Stream = require('../stream.js');
 
 const BROADCAST_COUNT = 256;
 
@@ -53,8 +53,10 @@ module.exports = function ({ incoming, outgoing, known }) {
     .map(({ data }) => new Addr(data))
     // iterate over netaddr in addr
     .iterate()
-    // add the address to known addresses
-    .on(address => known.set(address, address.IPv6(), true));
+    .accumulate(new HashMap(), (map, addr) => map.set(addr, addr.IPv6()))
+    .on((known) => {
+      
+    })
 
   // broadcast latest addresses every 30 seconds
   Stream

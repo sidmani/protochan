@@ -61,8 +61,8 @@ module.exports = class Peer {
   }
 
   init(localVersion, localServices) {
-    // terminate connection if nothing received for 10s
-    this.incoming.invert(10000, Date.now).pipe(this.terminate);
+    // terminate connection if nothing received for 30s
+    this.incoming.invert(30000, Date.now).pipe(this.terminate);
 
     // perform handshake
     return Handshake(

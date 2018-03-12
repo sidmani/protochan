@@ -41,9 +41,13 @@ module.exports = class Stream {
   next(obj) {
     try {
       // execute fn on obj, and leave further calls up to fn
-      this.fn(obj, o => this.propagate(o));
+      this.fn(
+        obj,
+        o => this.propagate(o),
+        e => this.nextError(e),
+      );
     } catch (error) {
-      this.children.forEach(child => child.nextError(error));
+      this.nextError(error);
     }
   }
 
@@ -85,9 +89,9 @@ module.exports = class Stream {
   }
 
   flatmap(fn) {
-    return this.attach((obj, next) => {
+    return this.attach((obj, next, err) => {
       // fn returns a stream
-      fn(obj).on(next);
+      fn(obj).on(next).error(err);
     });
   }
 
@@ -118,9 +122,16 @@ module.exports = class Stream {
     });
   }
 
+  accumulate(acc) {
+    return this.attach((obj, next) => {
+      next({ obj, acc });
+    });
+  }
+
   error(fn) {
-    const child = this.attach(() => {});
+    const child = this.attach((obj, next) => next(obj));
     child.nextError = fn;
+    return child;
   }
 
   merge(...streams) {

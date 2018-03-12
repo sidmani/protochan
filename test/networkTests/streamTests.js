@@ -90,6 +90,58 @@ tap.test('Stream.first', (t) => {
   t.end();
 });
 
+tap.test('Stream.accumulate', (t) => {
+  const str = new Stream();
+
+  const result = [];
+
+  str.accumulate(result).on(({ acc, obj }) => acc.push(obj));
+
+  str.next(2);
+  str.next(3);
+  str.next(4);
+  str.next(6);
+  str.next(7);
+  str.next(1);
+
+  t.strictSame(result, [2, 3, 4, 6, 7, 1], 'Stream.accumulate accumulates objects');
+  t.end();
+});
+
+tap.test('Stream.flatmap', (t) => {
+  const str = new Stream();
+  const str2 = new Stream();
+
+  const result = [];
+
+  str.flatmap(() => str2).on(obj => result.push(obj));
+
+  str.next();
+  str.next();
+  str2.next(2);
+  str2.next(3);
+  str2.next(4);
+  str2.next(6);
+  str2.next(7);
+  str2.next(1);
+
+  t.strictSame(result, [2, 2, 3, 3, 4, 4, 6, 6, 7, 7, 1, 1], 'Stream.flatmap');
+
+  let errored;
+  str.flatmap(() => { throw Error(); }).error(() => { errored = true; });
+  str.next();
+  t.assert(errored, 'Flatmap propagates errors from outer stream');
+
+  let innerErrored;
+  str.flatmap(() => str2.map(() => { throw Error(); }))
+    .error(() => { innerErrored = true; });
+  str.next();
+  str2.next();
+  t.assert(innerErrored, 'Flatmap propagates errors from inner stream');
+
+  t.end();
+});
+
 tap.test('Stream.debounce', (t) => {
   const str = new Stream();
 
@@ -116,16 +168,15 @@ tap.test('Stream.debounce', (t) => {
 tap.test('Stream.error', (t) => {
   const str = new Stream();
 
-  let error;
-  /* eslint-disable no-throw-literal */
+  let errored;
   str.filter(() => true)
-    .on(() => { throw 'abcdef'; })
+    .on(() => { throw Error(); })
+    .map(() => 'foo')
     .filter(() => true)
-    .error((e) => { error = e; });
-  /* eslint-enable no-throw-literal */
+    .error(() => { errored = true; });
 
   str.next(5);
-  t.equal(error, 'abcdef', 'Stream.error catches error');
+  t.assert(errored, 'Stream.error catches error');
   t.end();
 });
 
