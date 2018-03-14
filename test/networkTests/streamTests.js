@@ -200,6 +200,27 @@ tap.test('Stream.queue', (t) => {
   t.end();
 });
 
+tap.test('Stream.zip', (t) => {
+  const str = new Stream();
+  const str2 = new Stream();
+  const str3 = new Stream();
+
+  const result = [];
+  str.zip(str2, str3)
+    .on(obj => result.push(obj));
+
+  str2.next(5);
+  str2.next(3);
+  str3.next(4);
+  str.next(1);
+  str.next(8);
+  str3.next(11);
+  str.next(2);
+
+  t.strictSame(result, [[1, 3, 4], [8, 3, 4], [2, 3, 11]], 'Stream.zip combines latest into array');
+  t.end();
+});
+
 tap.test('Stream.error', (t) => {
   const str = new Stream();
 
@@ -215,24 +236,24 @@ tap.test('Stream.error', (t) => {
   t.end();
 });
 
-tap.test('Stream.merge', (t) => {
-  const str1 = new Stream();
-  const str2 = new Stream();
-  const str3 = new Stream();
-
-  const result = [];
-  str1.merge(str2, str3)
-    .on((obj) => { result.push(obj); });
-
-  str2.next(5);
-  str1.next(7);
-  str2.next(4);
-  str3.next(18);
-  str1.next(13);
-
-  t.strictSame(result, [5, 7, 4, 18, 13], 'Stream.merge combines streams');
-  t.end();
-});
+// tap.test('Stream.merge', (t) => {
+//   const str1 = new Stream();
+//   const str2 = new Stream();
+//   const str3 = new Stream();
+//
+//   const result = [];
+//   str1.merge(str2, str3)
+//     .on((obj) => { result.push(obj); });
+//
+//   str2.next(5);
+//   str1.next(7);
+//   str2.next(4);
+//   str3.next(18);
+//   str1.next(13);
+//
+//   t.strictSame(result, [5, 7, 4, 18, 13], 'Stream.merge combines streams');
+//   t.end();
+// });
 
 tap.test('Stream.invert', (t) => {
   const str = new Stream();
@@ -256,4 +277,19 @@ tap.test('Stream.invert', (t) => {
     t.end();
   }, 200);
   clearInterval(id);
+});
+
+tap.test('Stream.pipe', (t) => {
+  const str = new Stream();
+  const str2 = new Stream();
+
+  const result = [];
+  str.on(obj => result.push(obj));
+  str2.pipe(str);
+
+  str2.next(5);
+  str2.next(4);
+
+  t.strictSame(result, [5, 4], 'Stream.pipe propagates objects to destination stream');
+  t.end();
 });

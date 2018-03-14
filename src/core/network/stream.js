@@ -170,12 +170,12 @@ module.exports = class Stream {
     return child;
   }
 
-  merge(...streams) {
-    for (let i = 0; i < streams.length; i += 1) {
-      streams[i].on(obj => this.next(obj));
-    }
-    return this;
-  }
+  // merge(...streams) {
+  //   for (let i = 0; i < streams.length; i += 1) {
+  //     streams[i].on(obj => this.next(obj));
+  //   }
+  //   return this;
+  // }
 
   // emit if the source does not emit every interval
   invert(interval, time) {
