@@ -25,7 +25,7 @@
 'use strict';
 
 const Message = require('../message.js');
-const Netaddr = require('../dataTypes/netaddr.js');
+const Netaddr = require('../data/netaddr.js');
 
 module.exports = class Addr extends Message {
   static COMMAND() { return 0x00000006; }
@@ -41,7 +41,12 @@ module.exports = class Addr extends Message {
   }
 
   address(index) {
-    return new Netaddr(this.data, 1 + (index * Netaddr.BYTE_LENGTH()));
+    return new Netaddr(
+      this.data,
+      Message.HEADER_LENGTH()
+       + 1
+       + (index * Netaddr.BYTE_LENGTH()),
+    );
   }
 
   forEach(fn) {
@@ -55,7 +60,11 @@ module.exports = class Addr extends Message {
     const payload = new Uint8Array(1 + (addresses.length * Netaddr.BYTE_LENGTH()));
     payload[0] = addresses.length;
     for (let i = 0; i < addresses.length; i += 1) {
-      payload.set(1 + (Netaddr.BYTE_LENGTH() * i), addresses[i].data);
+      const addressData = addresses[i].data.subarray(
+        addresses[i].offset,
+        addresses[i].offset + Netaddr.BYTE_LENGTH(),
+      );
+      payload.set(addressData, 1 + (Netaddr.BYTE_LENGTH() * i));
     }
     return payload;
   }

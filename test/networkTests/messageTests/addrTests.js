@@ -23,32 +23,53 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const Message = require('../../../src/core/network/message/message.js');
+const Addr = require('../../../src/core/network/message/types/addr.js');
 const ErrorType = require('../../../src/core/error.js');
 
 tap.test('Message', (t) => {
+  t.equal(Addr.COMMAND(), 0x00000006, 'Addr.COMMAND is unchanged');
+
   const data = new Uint8Array([
+    // header
     0x13, 0x37, 0x13, 0x37,
-    0x00, 0x00, 0x00, 0x02,
+    0x00, 0x00, 0x00, 0x05,
     0xAF, 0x49, 0xC8, 0x9E,
-    0x68, 0x21, 0x7A, 0x30,
+    0xDE, 0x6A, 0xA4, 0x7D,
+    // payload
+    0x02, // address count
+    // address 1
+    0x00, 0x00, 0x00, 0x01,
+    0xAB, 0xDD, 0xFE, 0x1A,
+    0x79, 0x64, 0x78, 0x9A,
+    0x33, 0xB7, 0xE5, 0xE9,
+    0xEE, 0xF7, 0xA1, 0xD4,
+    0x13, 0x37,
+    // address 2
+    0x00, 0x00, 0x00, 0x03,
+    0x33, 0xB7, 0xE5, 0xE9,
+    0x79, 0x64, 0x78, 0x9A,
+    0xAB, 0xDD, 0xFE, 0x1A,
+    0xEE, 0xF7, 0xA1, 0xD4,
+    0x13, 0x37,
   ]);
-  t.equal(Message.HEADER_LENGTH(), 16, 'HEADER_LENGTH is unchanged');
-  t.equal(Message.getMagic(data), 0x13371337, 'Static getMagic works');
-  t.equal(Message.getCommand(data), 0x00000002, 'Static getCommand works');
 
-  t.throws(() => new Message(data, 1), ErrorType.dataLength(), 'Message rejects data of insufficient length');
-  t.throws(() => new Message(data), ErrorType.dataHash(), 'Message rejects mismatched checksum');
-  let m;
-  data[12] = 0x69; // correct value
-  t.doesNotThrow(() => { m = new Message(data); }, 'Message accepts valid data');
+  t.assert(!Addr.match(data), 'Addr.match returns false for non-matching data');
 
-  t.equal(m.magic(), 0x13371337, 'Message.magic returns magic value');
-  t.equal(m.command(), 0x00000002, 'Message.command returns command');
-  t.equal(m.timestamp(), 0xAF49C89E, 'Message.timestamp returns timestamp');
-  t.equal(m.checksum(), 0x69217A30, 'Message.checksum returns checksum');
+  data[7] = 0x06;
+  t.assert(Addr.match(data), 'Addr.match returns true for matching data');
 
-  t.strictSame(Message.create(0x13371337, 0x00000002, 0xAF49C89E, new Uint8Array()), m.data, 'Message.create works');
+  t.throws(() => new Addr(data.subarray(0, 30)), ErrorType.dataLength(), 'Addr rejects insufficient data length based on address count');
 
+  let a;
+  t.doesNotThrow(() => { a = new Addr(data); }, 'Addr accepts valid data');
+
+  t.equal(a.addressCount(), 2, 'Addr gets address count');
+  t.equal(a.address(1).offset, 39, 'Addr gets address at index');
+
+  const forEach = [];
+  a.forEach(addr => forEach.push(addr));
+  t.strictSame(forEach.map(addr => addr.offset), [17, 39], 'Addr.forEach iterates over all addresses');
+
+  t.strictSame(Addr.create(forEach), data.subarray(16), 'Addr.create works');
   t.end();
 });

@@ -24,12 +24,42 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
+const Services = require('./services.js');
+/* eslint-disable no-unused-vars */
+const ByteArray = require('../../../util/byteArray.js');
+/* eslint-enable no-unused-vars */
+
+module.exports = class NetAddress {
+  static BYTE_LENGTH() {
+    return 22;
   }
 
-  socketHost() {
-    return (this.mask & 1) === 1;
+  constructor(data, offset = 0) {
+    this.data = data;
+    this.offset = offset;
+    this.services = new Services(this.rawServices());
+  }
+
+  rawServices() {
+    return this.data.getUint32(this.offset + 0);
+  }
+
+  IPv6() {
+    return this.data.subarray(this.offset + 4, this.offset + 20);
+  }
+
+  IPv4() {
+    return this.data.subarray(this.offset + 16, this.offset + 20);
+  }
+
+  port() {
+    return this.data.getUint16(this.offset + 20);
+  }
+
+  static set(data, offset, services, ipv4, port) {
+    data.setUint32(offset + 0, services);
+    data.setUint16(offset + 14, 0xFFFF);
+    data.set(ipv4, offset + 16);
+    data.setUint16(offset + 20, port);
   }
 };

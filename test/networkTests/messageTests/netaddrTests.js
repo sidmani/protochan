@@ -23,32 +23,47 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const Message = require('../../../src/core/network/message/message.js');
-const ErrorType = require('../../../src/core/error.js');
+const Netaddr = require('../../../src/core/network/message/data/netaddr.js');
 
-tap.test('Message', (t) => {
+tap.test('Netaddr', (t) => {
+  t.equal(Netaddr.BYTE_LENGTH(), 22, 'Netaddr.BYTE_LENGTH returns 22');
+
   const data = new Uint8Array([
-    0x13, 0x37, 0x13, 0x37,
-    0x00, 0x00, 0x00, 0x02,
-    0xAF, 0x49, 0xC8, 0x9E,
-    0x68, 0x21, 0x7A, 0x30,
+    0xAB, // offset this
+    0x00, 0x00, 0x00, 0x01, // services
+    0xAB, 0xDD, 0xFE, 0x1A,
+    0x79, 0x64, 0x78, 0x9A,
+    0x33, 0xB7, 0xE5, 0xE9,
+    0xEE, 0xF7, 0xA1, 0xD4,
+    0x13, 0x37,
   ]);
-  t.equal(Message.HEADER_LENGTH(), 16, 'HEADER_LENGTH is unchanged');
-  t.equal(Message.getMagic(data), 0x13371337, 'Static getMagic works');
-  t.equal(Message.getCommand(data), 0x00000002, 'Static getCommand works');
 
-  t.throws(() => new Message(data, 1), ErrorType.dataLength(), 'Message rejects data of insufficient length');
-  t.throws(() => new Message(data), ErrorType.dataHash(), 'Message rejects mismatched checksum');
-  let m;
-  data[12] = 0x69; // correct value
-  t.doesNotThrow(() => { m = new Message(data); }, 'Message accepts valid data');
+  const n = new Netaddr(data, 1);
+  t.assert(n.services.socketHost(), 'Netaddr sets services');
+  t.equal(n.rawServices(), 0x00000001, 'Netaddr.rawServices returns services as uint32');
+  t.strictSame(n.IPv6(), new Uint8Array([
+    0xAB, 0xDD, 0xFE, 0x1A,
+    0x79, 0x64, 0x78, 0x9A,
+    0x33, 0xB7, 0xE5, 0xE9,
+    0xEE, 0xF7, 0xA1, 0xD4,
+  ]), 'Netaddr.IPv6 works');
+  t.strictSame(n.IPv4(), new Uint8Array([
+    0xEE, 0xF7, 0xA1, 0xD4,
+  ]), 'Netaddr.IPv4 works');
+  t.equal(n.port(), 0x1337, 'Netaddr.port works');
 
-  t.equal(m.magic(), 0x13371337, 'Message.magic returns magic value');
-  t.equal(m.command(), 0x00000002, 'Message.command returns command');
-  t.equal(m.timestamp(), 0xAF49C89E, 'Message.timestamp returns timestamp');
-  t.equal(m.checksum(), 0x69217A30, 'Message.checksum returns checksum');
-
-  t.strictSame(Message.create(0x13371337, 0x00000002, 0xAF49C89E, new Uint8Array()), m.data, 'Message.create works');
-
+  const setData = new Uint8Array(24);
+  Netaddr.set(setData, 2, 0xABCDEF44, new Uint8Array([
+    0xEE, 0x78, 0xD2, 0x3B,
+  ]), 0x1337);
+  t.strictSame(setData, new Uint8Array([
+    0x00, 0x00,
+    0xAB, 0xCD, 0xEF, 0x44,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xFF, 0xFF,
+    0xEE, 0x78, 0xD2, 0x3B,
+    0x13, 0x37,
+  ]), 'Netaddr.set works');
   t.end();
 });

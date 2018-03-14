@@ -22,56 +22,55 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
+// 'use strict';
 
-const Stream = require('./stream.js');
-const Message = require('./message/message.js');
-
-// protocol components
-const Handshake = require('./protocol/handshake.js');
-const Echo = require('./protocol/echo.js');
-
-
-module.exports = class Peer {
-  constructor(connection, magic) {
-    this.outgoing = new Stream();
-    this.incoming = new Stream();
-
-    // filter data by magic value
-    connection.incoming
-      .filter(data => Message.getMagic(data) === magic)
-      .pipe(this.incoming);
-    // convert { command, payload } to messages and send them
-    this.outgoing
-      .map(({ command, payload }) =>
-        Message.create(magic, command, Date.now() / 1000, payload))
-      .pipe(connection.outgoing);
-
-    this.terminate = connection.terminate;
-
-    // perform cleanup on terminate
-    this.terminate.on(() => {
-      this.outgoing.destroy();
-      this.incoming.destroy();
-    });
-  }
-
-  attach(component) {
-    component(this);
-  }
-
-  init(localVersion, localServices) {
-    // terminate connection if nothing received for 30s
-    this.incoming.invert(30000, Date.now).pipe(this.terminate);
-
-    // perform handshake
-    return Handshake(
-      this.incoming,
-      this.outgoing,
-      localVersion,
-      localServices,
-    ).on(() => {
-      this.attach(Echo);
-    });
-  }
-};
+// const Stream = require('./stream.js');
+// const Message = require('./message/message.js');
+//
+// // protocol components
+// const Handshake = require('./protocol/handshake.js');
+// const Echo = require('./protocol/echo.js');
+//
+// module.exports = class Peer {
+//   constructor(connection, magic) {
+//     this.outgoing = new Stream();
+//     this.incoming = new Stream();
+//
+//     // filter data by magic value
+//     connection.incoming
+//       .filter(data => Message.getMagic(data) === magic)
+//       .pipe(this.incoming);
+//     // convert { command, payload } to messages and send them
+//     this.outgoing
+//       .map(({ command, payload }) =>
+//         Message.create(magic, command, Date.now() / 1000, payload))
+//       .pipe(connection.outgoing);
+//
+//     this.terminate = connection.terminate;
+//
+//     // perform cleanup on terminate
+//     this.terminate.on(() => {
+//       this.outgoing.destroy();
+//       this.incoming.destroy();
+//     });
+//   }
+//
+//   attach(component) {
+//     component(this);
+//   }
+//
+//   init(localVersion, localServices) {
+//     // terminate connection if nothing received for 30s
+//     // this.incoming.invert(30000, Date.now).pipe(this.terminate);
+//
+//     // perform handshake
+//     return Handshake(
+//       this.incoming,
+//       this.outgoing,
+//       localVersion,
+//       localServices,
+//     ).on(() => {
+//       this.attach(Echo);
+//     });
+//   }
+// };
