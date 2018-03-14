@@ -22,26 +22,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
+const tap = require('tap');
+const Ping = require('../../../src/core/network/message/types/ping.js');
+const Pong = require('../../../src/core/network/message/types/pong.js');
+const Verack = require('../../../src/core/network/message/types/verack.js');
 
-const Message = require('../message.js');
+tap.test('Generic message tests', (t) => {
+  t.equal(Verack.COMMAND(), 0x00000001, 'Verack.COMMAND is unchanged');
+  t.equal(Ping.COMMAND(), 0x00000002, 'Ping.COMMAND is unchanged');
+  t.equal(Pong.COMMAND(), 0x00000003, 'Pong.COMMAND is unchanged');
 
-module.exports = class Getaddr extends Message {
-  static COMMAND() { return 0x00000005; }
-  static PAYLOAD_LENGTH() { return 1; }
-
-  constructor(data) {
-    super(data, Getaddr.PAYLOAD_LENGTH());
-  }
-
-  maxAddr() {
-    return this.data[Message.HEADER_LENGTH()];
-  }
-
-  static create(maxAddr) {
-    const payload = new Uint8Array(Getaddr.PAYLOAD_LENGTH());
-    payload[0] = maxAddr;
-
-    return payload;
-  }
-};
+  t.end();
+});

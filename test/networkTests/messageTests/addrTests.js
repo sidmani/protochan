@@ -26,13 +26,13 @@ const tap = require('tap');
 const Addr = require('../../../src/core/network/message/types/addr.js');
 const ErrorType = require('../../../src/core/error.js');
 
-tap.test('Message', (t) => {
+tap.test('Addr', (t) => {
   t.equal(Addr.COMMAND(), 0x00000006, 'Addr.COMMAND is unchanged');
 
   const data = new Uint8Array([
     // header
     0x13, 0x37, 0x13, 0x37,
-    0x00, 0x00, 0x00, 0x05,
+    0x00, 0x00, 0x00, 0x06,
     0xAF, 0x49, 0xC8, 0x9E,
     0xDE, 0x6A, 0xA4, 0x7D,
     // payload
@@ -52,11 +52,6 @@ tap.test('Message', (t) => {
     0xEE, 0xF7, 0xA1, 0xD4,
     0x13, 0x37,
   ]);
-
-  t.assert(!Addr.match(data), 'Addr.match returns false for non-matching data');
-
-  data[7] = 0x06;
-  t.assert(Addr.match(data), 'Addr.match returns true for matching data');
 
   t.throws(() => new Addr(data.subarray(0, 30)), ErrorType.dataLength(), 'Addr rejects insufficient data length based on address count');
 

@@ -25,27 +25,25 @@
 'use strict';
 
 const Message = require('../message.js');
+const Services = require('../data/services.js');
 /* eslint-disable no-unused-vars */
 const ByteArray = require('../../../util/byteArray.js');
 /* eslint-enable no-unused-vars */
 
 module.exports = class Version extends Message {
-  static PAYLOAD_LENGTH() { return 8; }
   static COMMAND() { return 0x00000000; }
-
-  static match(data) {
-    return Message.getCommand(data) === Version.COMMAND();
-  }
+  static PAYLOAD_LENGTH() { return 8; }
 
   constructor(data) {
     super(data, Version.PAYLOAD_LENGTH());
+    this.services = new Services(this.rawServices());
   }
 
   version() {
     return this.data.getUint32(Message.HEADER_LENGTH());
   }
 
-  services() {
+  rawServices() {
     return this.data.getUint32(Message.HEADER_LENGTH() + 4);
   }
 

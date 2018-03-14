@@ -28,7 +28,4 @@ const Message = require('../message.js');
 
 module.exports = class Verack extends Message {
   static COMMAND() { return 0x00000001; }
-  static match(data) { return Message.getCommand(data) === Verack.COMMAND(); }
-
-  static create() { return new Uint8Array(); }
 };

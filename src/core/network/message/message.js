@@ -75,7 +75,7 @@ module.exports = class Message {
     return this.data.getUint32(12);
   }
 
-  static create(magic, command, timestamp, payload) {
+  static create(magic, command, timestamp, payload = new Uint8Array()) {
     const data = new Uint8Array(Message.HEADER_LENGTH() + payload.byteLength);
     data.setUint32(0, magic);
     data.setUint32(4, command);

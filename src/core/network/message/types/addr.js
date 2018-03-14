@@ -30,8 +30,6 @@ const Netaddr = require('../data/netaddr.js');
 module.exports = class Addr extends Message {
   static COMMAND() { return 0x00000006; }
 
-  static match(data) { return Message.getCommand(data) === Addr.COMMAND(); }
-
   constructor(data) {
     super(data, 1 + (data[Message.HEADER_LENGTH()] * Netaddr.BYTE_LENGTH()));
   }
