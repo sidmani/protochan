@@ -51,5 +51,4 @@ module.exports = class _Error extends Error {
   static parameterType() { return new _Error('Parameter type is incorrect.', 'PARAMETER_TYPE_INVALID'); }
   static insufficientDifficulty() { return new _Error('Data does not meet difficulty threshold.', 'DIFFICULTY_INSUFFICIENT'); }
   static duplicateKey() { return new _Error('Value is already set for that key.', 'HASHMAP_DUPLICATE_KEY'); }
-  static internalConsistency() { return new _Error('Internal consistency exception.', 'INTERNAL_CONSISTENCY_EXCEPTION'); }
 };

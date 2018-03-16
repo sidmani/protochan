@@ -36,6 +36,7 @@
     "tap": "^11.1.0"
   },
   "dependencies": {
+    "isomorphic-ws": "^4.0.0",
     "npm": "^5.7.1",
     "ws": "^4.1.0"
   }

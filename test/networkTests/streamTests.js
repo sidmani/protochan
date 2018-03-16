@@ -236,24 +236,24 @@ tap.test('Stream.error', (t) => {
   t.end();
 });
 
-// tap.test('Stream.merge', (t) => {
-//   const str1 = new Stream();
-//   const str2 = new Stream();
-//   const str3 = new Stream();
-//
-//   const result = [];
-//   str1.merge(str2, str3)
-//     .on((obj) => { result.push(obj); });
-//
-//   str2.next(5);
-//   str1.next(7);
-//   str2.next(4);
-//   str3.next(18);
-//   str1.next(13);
-//
-//   t.strictSame(result, [5, 7, 4, 18, 13], 'Stream.merge combines streams');
-//   t.end();
-// });
+tap.test('Stream.merge', (t) => {
+  const str1 = new Stream();
+  const str2 = new Stream();
+  const str3 = new Stream();
+
+  const result = [];
+  str1.merge(str2, str3)
+    .on((obj) => { result.push(obj); });
+
+  str2.next(5);
+  str1.next(7);
+  str2.next(4);
+  str3.next(18);
+  str1.next(13);
+
+  t.strictSame(result, [5, 7, 4, 18, 13], 'Stream.merge combines streams');
+  t.end();
+});
 
 tap.test('Stream.invert', (t) => {
   const str = new Stream();

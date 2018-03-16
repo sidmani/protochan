@@ -36,4 +36,8 @@ module.exports = class Services {
   bootstrap() {
     return (this.mask & 2) === 2;
   }
+
+  index(i) {
+    return (this.mask & (1 << i)) === 1 << i;
+  }
 };

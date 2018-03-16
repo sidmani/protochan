@@ -26,7 +26,8 @@ const tap = require('tap');
 const Services = require('../../../src/core/network/message/data/services.js');
 
 tap.test('Services', (t) => {
-  t.assert(new Services(0xffffff00 | 0b00000001).socketHost(), 'Services.socketHost works');
-  t.assert(new Services(0xffffff00 | 0b00000010).bootstrap(), 'Services.bootstrap works');
+  t.assert(new Services(0xffffff00 | 0b00000001).socketHost(), 'Services.socketHost');
+  t.assert(new Services(0xffffff00 | 0b00000010).bootstrap(), 'Services.bootstrap');
+  t.assert(new Services(0xffffff00 | 0b10000000).index(7), 'Services.index');
   t.end();
 });

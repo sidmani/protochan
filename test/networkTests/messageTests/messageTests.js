@@ -49,6 +49,7 @@ tap.test('Message', (t) => {
   t.equal(m.checksum(), 0x69217A30, 'Message.checksum returns checksum');
 
   t.strictSame(Message.create(0x13371337, 0x00000002, 0xAF49C89E, new Uint8Array()), m.data, 'Message.create works');
+  t.strictSame(Message.create(0x13371337, 0x00000002, 0xAF49C89E), m.data, 'Message.create fills in undefined payload');
 
   t.end();
 });
