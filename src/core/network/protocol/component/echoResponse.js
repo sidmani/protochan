@@ -24,20 +24,22 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
+const Ping = require('../../message/types/ping.js');
+const Pong = require('../../message/types/pong.js');
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
+module.exports = class EchoResponse {
+  static id() { return 'ECHO_RESPONSE'; }
+  static inputs() { return ['INCOMING']; }
 
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
-
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
+  static attach({ INCOMING: incoming }) {
+    incoming
+      .filter(({ data }) =>
+        Ping.getCommand(data) === Ping.COMMAND())
+      // create the message
+      .map(({ data, connection }) => ({ msg: new Ping(data), connection }))
+      // respond
+      .on(({ connection }) => {
+        connection.outgoing.next({ command: Pong.COMMAND() });
+      });
   }
 };

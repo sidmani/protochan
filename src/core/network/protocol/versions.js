@@ -24,20 +24,16 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
-
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
-
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
-
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
-  }
+// loaded by every network
+module.exports.global = {
+  0: [
+    'RECEIVER', // wraps connections from socket server
+    'CONNECTOR', // manages # of incoming connections
+    'TRANSLATOR', // handles magic filtering and message creation
+    'HANDSHAKE', // executes handshake
+    'INCOMING', // maps { connection } to { connection, data }
+    'TERMINATOR', // terminates connection if silent for 30s
+    'ECHO_RESPONSE', // return pong on receiving ping
+    'ECHO_REQUEST', // send ping if connection is silent for 15s
+  ],
 };

@@ -24,20 +24,23 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
+const Ping = require('../../message/types/ping.js');
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
+module.exports = class EchoRequest {
+  static id() { return 'ECHO_REQUEST'; }
+  static inputs() { return ['HANDSHAKE']; }
 
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
-
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
+  static attach({ HANDSHAKE: handshake }) {
+    // send a ping every 15 seconds if nothing sent or received
+    handshake.on(({ incoming, outgoing }) => {
+      incoming
+        .merge(outgoing)
+        .invert(15000, Date.now)
+        .on(() => {
+          outgoing.next({
+            command: Ping.COMMAND(),
+          });
+        });
+    });
   }
 };

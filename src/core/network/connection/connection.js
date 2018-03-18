@@ -24,20 +24,19 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
+const Stream = require('../stream.js');
+
+module.exports = class Connection {
+  constructor(ip, port) {
+    this.ip = ip; // as string e.g. '127.0.0.1'
+    this.port = port; // as number
+
+    this.incoming = new Stream();
+    this.outgoing = new Stream();
+    this.terminate = new Stream();
   }
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
-
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
-
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
+  address() {
+    return `${this.ip}${this.port}`;
   }
 };

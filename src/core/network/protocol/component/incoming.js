@@ -24,20 +24,15 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
+module.exports = class Incoming {
+  static id() { return 'INCOMING'; }
+  static inputs() { return ['HANDSHAKE']; }
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
-
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
-
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
+  static attach({ HANDSHAKE: handshake }) {
+    // do some black magic
+    return handshake
+      .flatmap(({ connection }) =>
+        connection.incoming.map(data =>
+          ({ connection, data })));
   }
 };

@@ -24,20 +24,28 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
+const Stream = require('../../stream.js');
+const Message = require('../../message/message.js');
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
+module.exports = class Translator {
+  static id() { return 'TRANSLATOR'; }
+  static inputs() { return ['CONNECTOR']; }
 
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
-
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
+  static attach({ CONNECTOR: connector }, _, { magic }) {
+    return connector
+      .map(connection => ({
+        incoming: connection.incoming
+          // allow only data with correct magic value
+          .filter(data => Message.getMagic(data) === magic),
+        outgoing: new Stream()
+          // convert { command, payload } to message data
+          .map(({ command, payload }) => Message.create(
+            magic,
+            command,
+            Date.now() / 1000,
+            payload,
+          ))
+          .pipe(connection.outgoing),
+      }));
   }
 };

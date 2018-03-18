@@ -24,20 +24,25 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
+const SocketConnection = require('../../../connection/connection.js');
+const Stream = require('../../../stream.js');
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
+module.exports = class Receiver {
+  static id() { return 'RECEIVER'; }
+  static inputs() { return []; }
 
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
+  static attach(_, {
+    SOCKET_HOST: socketHost,
+    // TODO: RTC_HOST: rtcHost
+  }) {
+    const connectionStream = new Stream();
 
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
+    if (socketHost) {
+      socketHost
+        .map(socket => new SocketConnection(socket))
+        .pipe(connectionStream);
+    }
+
+    return connectionStream;
   }
 };

@@ -24,20 +24,16 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
+module.exports = class Terminator {
+  static id() { return 'TERMINATOR'; }
+  static inputs() { return ['CONNECTOR']; }
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
-
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
-
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
+  static attach({ CONNECTOR: connector }) {
+    return connector.on((connection) => {
+      // terminate if nothing received for 30s
+      connection.incoming
+        .invert(30000)
+        .on(() => connection.terminate.next());
+    });
   }
 };

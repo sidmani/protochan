@@ -6,7 +6,7 @@
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
+// in the Software dwithout restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
@@ -24,20 +24,24 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
+const Connection = require('./connection.js');
+
+module.exports = class SocketConnection extends Connection {
+  constructor(socket) {
+    /* eslint-disable no-underscore-dangle */
+    super(
+      socket._socket.remoteAddress,
+      socket._socket.remotePort,
+    );
+
+    this.socket = socket;
+    // data transfer
+    socket.onmessage(data => this.incoming.next(data));
+    this.outgoing.on(data => socket.send(data));
+    // socket.onclose(() => this.terminate.next());
   }
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
-
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
-
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
+  onopen(fn) {
+    this.socket.onopen(fn);
   }
 };

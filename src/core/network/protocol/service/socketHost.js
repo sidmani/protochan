@@ -24,20 +24,25 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
+const WebSocket = require('ws');
+const Stream = require('../../stream.js');
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
+module.exports = class SocketHost {
+  static id() { return 'SOCKET_HOST'; }
+  static index() { return 0; }
 
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
+  static attach() {
+    const stream = new Stream();
 
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
+    const server = new WebSocket.Server({
+      port: 8080,
+    });
+
+    server.on('connection', (socket) => {
+      // call next after socket.onopen?
+      stream.next(socket);
+    });
+
+    return stream;
   }
 };

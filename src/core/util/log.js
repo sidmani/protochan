@@ -24,20 +24,42 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
+/* eslint-disable no-console */
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
+const MIN_LOG_LEVEL = 1;
+const levels = {
+  0: 'VERBOSE',
+  1: 'INFO',
+  2: 'WARNING',
+  3: 'ERROR',
+  4: 'FATAL',
+};
 
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
+function timestamp() {
+  return new Date().toISOString().replace('T', ' ').substr(0, 19);
+}
 
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
-  }
+function log(str, level) {
+  if (MIN_LOG_LEVEL > level) { return; }
+  console.log(`${timestamp()} | ${levels[level]} | ${str}`);
+}
+
+module.exports.verbose = function (str) {
+  log(str, 0);
+};
+
+module.exports.info = function (str) {
+  log(str, 1);
+};
+
+module.exports.warning = function (str) {
+  log(str, 2);
+};
+
+module.exports.error = function (str) {
+  log(str, 3);
+};
+
+module.exports.fatal = function (str) {
+  log(str, 4);
 };

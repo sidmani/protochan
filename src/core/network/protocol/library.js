@@ -24,20 +24,31 @@
 
 'use strict';
 
-module.exports = class Services {
-  constructor(mask) {
-    this.mask = mask;
-  }
+/* eslint-disable global-require */
 
-  socketHost() {
-    return (this.mask & 1) === 1;
-  }
+const COMPONENTS = {};
 
-  bootstrap() {
-    return (this.mask & 2) === 2;
-  }
+[
+  require('./component/connector/receiver.js'),
+  require('./component/connector/connector.js'),
+  require('./component/translator.js'),
+  require('./component/handshake.js'),
+  require('./component/incoming.js'),
+  require('./component/terminator.js'),
+  // require('./component/exchange.js'),
+  // require('./component/known.js'),
+  require('./component/echoRequest.js'),
+  require('./component/echoResponse.js'),
+].forEach((component) => {
+  COMPONENTS[component.id()] = component;
+});
 
-  index(i) {
-    return ((this.mask >> i) & 1) === 1;
-  }
-};
+const SERVICES = {};
+[
+  require('./service/socketHost.js'),
+].forEach((service) => {
+  SERVICES[service.index()] = service;
+});
+
+module.exports.components = COMPONENTS;
+module.exports.services = SERVICES;
