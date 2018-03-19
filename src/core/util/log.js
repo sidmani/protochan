@@ -26,7 +26,7 @@
 
 /* eslint-disable no-console */
 
-const MIN_LOG_LEVEL = 1;
+const MIN_LOG_LEVEL = 0;
 const levels = {
   0: 'VERBOSE',
   1: 'INFO',
@@ -63,3 +63,7 @@ module.exports.error = function (str) {
 module.exports.fatal = function (str) {
   log(str, 4);
 };
+
+module.exports.hex = function (value, nibbles = 0) {
+  return `0x${value.toString(16).padStart(nibbles, '0')}`;
+}

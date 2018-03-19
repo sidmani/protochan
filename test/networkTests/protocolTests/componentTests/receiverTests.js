@@ -22,17 +22,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
+const tap = require('tap');
+const Receiver = require('../../../../src/core/network/protocol/component/receiver.js');
+const Stream = require('../../../../src/core/network/stream.js');
 
-module.exports = class Incoming {
-  static id() { return 'INCOMING'; }
-  static inputs() { return ['HANDSHAKE']; }
+tap.test('Receiver', (t) => {
+  t.equal(Receiver.id(), 'RECEIVER', 'id');
+  t.strictSame(Receiver.inputs(), ['HANDSHAKE'], 'inputs');
 
-  static attach({ HANDSHAKE: handshake }) {
-    // do some black magic
-    return handshake
-      .flatmap(({ connection }) =>
-        connection.incoming.map(data =>
-          ({ connection, data })));
-  }
-};
+  const hs = new Stream();
+
+  const result = [];
+  Receiver.attach({ HANDSHAKE: hs }).on(r => result.push(r));
+
+  const connection1 = {
+    incoming: new Stream(),
+  };
+
+  const connection2 = {
+    incoming: new Stream(),
+  };
+
+  hs.next({ connection: connection1, services: {}, version: 1 });
+  hs.next({ connection: connection2, services: {}, version: 1 });
+
+  connection2.incoming.next('foo');
+  connection1.incoming.next('bar');
+
+  t.strictSame(
+    result,
+    [{ connection: connection2, data: 'foo' }, { connection: connection1, data: 'bar' }],
+    'Receiver joins incoming data with source connection',
+  );
+
+  t.end();
+});

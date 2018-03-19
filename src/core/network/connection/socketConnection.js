@@ -29,8 +29,12 @@ const Connection = require('./connection.js');
 module.exports = class SocketConnection extends Connection {
   constructor(socket) {
     /* eslint-disable no-underscore-dangle */
+    const ip = socket._socket.remoteAddress
+      .split('.')
+      .map(s => parseInt(s, 10));
+
     super(
-      socket._socket.remoteAddress,
+      new Uint8Array(ip),
       socket._socket.remotePort,
     );
 

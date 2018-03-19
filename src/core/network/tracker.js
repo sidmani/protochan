@@ -24,31 +24,22 @@
 
 'use strict';
 
-/* eslint-disable global-require */
+const HashMap = require('../hash/hashMap.js');
+const Stream = require('./stream.js');
 
-const COMPONENTS = {};
+module.exports = class Tracker {
+  constructor() {
+    this.known = new HashMap();
+    // this.connections = new HashMap();
+    this.received = new Stream();
+  }
 
-[
-  require('./component/receiver.js'),
-  require('./component/connector/connector.js'),
-  require('./component/translator.js'),
-  require('./component/handshake.js'),
-  require('./component/connector/incoming.js'),
-  require('./component/terminator.js'),
-  require('./component/exchange.js'),
-  require('./component/echoRequest.js'),
-  require('./component/echoResponse.js'),
-  require('./component/known.js'),
-].forEach((component) => {
-  COMPONENTS[component.id()] = component;
-});
+  getAddresses(n = 1) {
+    return this.known.enumerate().slice(this.known.size() - n);
+  }
 
-const SERVICES = {};
-[
-  require('./service/socketHost.js'),
-].forEach((service) => {
-  SERVICES[service.index()] = service;
-});
-
-module.exports.components = COMPONENTS;
-module.exports.services = SERVICES;
+  addKnown(address) {
+    this.known.set(address, address.IPv4URL());
+    this.received.next(address);
+  }
+};

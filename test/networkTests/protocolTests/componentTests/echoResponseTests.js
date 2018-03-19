@@ -22,33 +22,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
+const tap = require('tap');
+const EchoResponse = require('../../../../src/core/network/protocol/component/echoResponse.js');
+const Stream = require('../../../../src/core/network/stream.js');
 
-/* eslint-disable global-require */
+tap.test('Echo response', (t) => {
+  t.equal(EchoResponse.id(), 'ECHO_RESPONSE', 'id');
+  t.strictSame(EchoResponse.inputs(), ['RECEIVER'], 'inputs');
 
-const COMPONENTS = {};
+  const receiver = new Stream();
+  const result = [];
 
-[
-  require('./component/receiver.js'),
-  require('./component/connector/connector.js'),
-  require('./component/translator.js'),
-  require('./component/handshake.js'),
-  require('./component/connector/incoming.js'),
-  require('./component/terminator.js'),
-  require('./component/exchange.js'),
-  require('./component/echoRequest.js'),
-  require('./component/echoResponse.js'),
-  require('./component/known.js'),
-].forEach((component) => {
-  COMPONENTS[component.id()] = component;
+  EchoResponse.attach({ RECEIVER: receiver });
+  const connection = {
+    outgoing: new Stream(),
+  };
+
+  connection.outgoing.on(obj => result.push(obj));
+
+  receiver.next({
+    data: new Uint8Array([
+      0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x02,
+      0x00, 0x00, 0x00, 0x00,
+      0x69, 0x21, 0x7A, 0x30,
+    ]),
+    connection,
+  });
+
+  t.strictSame(
+    result,
+    [{ command: 0x00000003 }],
+    'EchoResponse returns pong on receiving ping',
+  );
+
+  t.end();
 });
-
-const SERVICES = {};
-[
-  require('./service/socketHost.js'),
-].forEach((service) => {
-  SERVICES[service.index()] = service;
-});
-
-module.exports.components = COMPONENTS;
-module.exports.services = SERVICES;

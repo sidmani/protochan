@@ -22,18 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
+const tap = require('tap');
+const Connection = require('../../../src/core/network/connection/connection.js');
 
-// loaded by every network
-module.exports.global = {
-  0: [
-    'RECEIVER', // wraps connections from socket server
-    'CONNECTOR', // manages # of incoming connections
-    'TRANSLATOR', // handles magic filtering and message creation
-    'HANDSHAKE', // executes handshake
-    'INCOMING', // maps { connection } to { connection, data }
-    'TERMINATOR', // terminates connection if silent for 30s
-    'ECHO_RESPONSE', // return pong on receiving ping
-    'ECHO_REQUEST', // send ping if connection is silent for 15s
-  ],
-};
+tap.test('Connection', (t) => {
+  const c = new Connection(new Uint8Array([127, 0, 1, 2]), 8333);
+
+  t.equal(c.address(), '127.0.1.2:8333', 'Connection formats ip and port correctly');
+  t.end();
+});

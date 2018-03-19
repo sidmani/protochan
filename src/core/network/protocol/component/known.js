@@ -24,31 +24,30 @@
 
 'use strict';
 
-/* eslint-disable global-require */
+const Addr = require('../../message/types/addr.js');
+const Netaddr = require('../../message/data/netaddr.js');
 
-const COMPONENTS = {};
+module.exports = class KnownAccumulator {
+  static id() { return 'KNOWN_ACCUMULATOR'; }
+  static inputs() { return ['RECEIVER', 'HANDSHAKE']; }
 
-[
-  require('./component/receiver.js'),
-  require('./component/connector/connector.js'),
-  require('./component/translator.js'),
-  require('./component/handshake.js'),
-  require('./component/connector/incoming.js'),
-  require('./component/terminator.js'),
-  require('./component/exchange.js'),
-  require('./component/echoRequest.js'),
-  require('./component/echoResponse.js'),
-  require('./component/known.js'),
-].forEach((component) => {
-  COMPONENTS[component.id()] = component;
-});
+  static attach({ RECEIVER: receiver, HANDSHAKE: handshake }, _, { tracker }) {
+    receiver
+      // handle addr messages
+      .filter(({ data }) => Addr.getCommand(data) === Addr.COMMAND())
+      // create the message
+      .map(({ data }) => new Addr(data))
+      // iterate over netaddr in addr
+      .iterate()
+      .on(addr => tracker.addKnown(addr));
 
-const SERVICES = {};
-[
-  require('./service/socketHost.js'),
-].forEach((service) => {
-  SERVICES[service.index()] = service;
-});
-
-module.exports.components = COMPONENTS;
-module.exports.services = SERVICES;
+    handshake
+      // add the addresses of incoming connections to known
+      .map(({ connection, services }) => {
+        const data = new Uint8Array(22);
+        Netaddr.set(data, 0, services.mask, connection.ip, connection.port);
+        return new Netaddr(data);
+      })
+      .on(addr => tracker.addKnown(addr));
+  }
+};

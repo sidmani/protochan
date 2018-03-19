@@ -27,8 +27,8 @@
 const SocketConnection = require('../../../connection/connection.js');
 const Stream = require('../../../stream.js');
 
-module.exports = class Receiver {
-  static id() { return 'RECEIVER'; }
+module.exports = class Incoming {
+  static id() { return 'INCOMING'; }
   static inputs() { return []; }
 
   static attach(_, {

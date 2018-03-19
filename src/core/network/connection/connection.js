@@ -28,8 +28,8 @@ const Stream = require('../stream.js');
 
 module.exports = class Connection {
   constructor(ip, port) {
-    this.ip = ip; // as string e.g. '127.0.0.1'
-    this.port = port; // as number
+    this.ip = ip; // as uint8array
+    this.port = port; // as number (uint16)
 
     this.incoming = new Stream();
     this.outgoing = new Stream();
@@ -37,6 +37,6 @@ module.exports = class Connection {
   }
 
   address() {
-    return `${this.ip}${this.port}`;
+    return `${this.ip.join('.')}:${this.port}`;
   }
 };

@@ -24,31 +24,31 @@
 
 'use strict';
 
-/* eslint-disable global-require */
+const WebSocket = require('isomorphic-ws');
+const Stream = require('../../../stream.js');
+const SocketConnection = require('../../../connection/socketConnection.js');
 
-const COMPONENTS = {};
+// XXX: global
+const MAX_OUTGOING_CONNECTIONS = 5;
 
-[
-  require('./component/receiver.js'),
-  require('./component/connector/connector.js'),
-  require('./component/translator.js'),
-  require('./component/handshake.js'),
-  require('./component/connector/incoming.js'),
-  require('./component/terminator.js'),
-  require('./component/exchange.js'),
-  require('./component/echoRequest.js'),
-  require('./component/echoResponse.js'),
-  require('./component/known.js'),
-].forEach((component) => {
-  COMPONENTS[component.id()] = component;
-});
+module.exports = class Outgoing {
+  static id() { return 'OUTGOING'; }
+  static inputs() { return []; }
 
-const SERVICES = {};
-[
-  require('./service/socketHost.js'),
-].forEach((service) => {
-  SERVICES[service.index()] = service;
-});
-
-module.exports.components = COMPONENTS;
-module.exports.services = SERVICES;
+  static attach(_, __, { tracker }) {
+    const dispense = new Stream();
+    // tracker.received guarantees unique addresses
+    const t = tracker.recieved
+      .queue(dispense)
+      .map((address) => {
+        if (address.services.socketHost()) {
+          const url = `ws://${address.IPv4URL()}`;
+          const socket = new WebSocket(url);
+          return new SocketConnection(socket);
+        }
+        throw Error('Non-socket connections are not yet implemented.');
+      });
+    dispense.next(MAX_OUTGOING_CONNECTIONS);
+    return t;
+  }
+};

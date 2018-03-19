@@ -24,31 +24,15 @@
 
 'use strict';
 
-/* eslint-disable global-require */
+module.exports = class Receiver {
+  static id() { return 'RECEIVER'; }
+  static inputs() { return ['HANDSHAKE']; }
 
-const COMPONENTS = {};
-
-[
-  require('./component/receiver.js'),
-  require('./component/connector/connector.js'),
-  require('./component/translator.js'),
-  require('./component/handshake.js'),
-  require('./component/connector/incoming.js'),
-  require('./component/terminator.js'),
-  require('./component/exchange.js'),
-  require('./component/echoRequest.js'),
-  require('./component/echoResponse.js'),
-  require('./component/known.js'),
-].forEach((component) => {
-  COMPONENTS[component.id()] = component;
-});
-
-const SERVICES = {};
-[
-  require('./service/socketHost.js'),
-].forEach((service) => {
-  SERVICES[service.index()] = service;
-});
-
-module.exports.components = COMPONENTS;
-module.exports.services = SERVICES;
+  static attach({ HANDSHAKE: handshake }) {
+    // do some black magic
+    return handshake
+      .flatmap(({ connection }) =>
+        connection.incoming.map(data =>
+          ({ connection, data })));
+  }
+};

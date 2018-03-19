@@ -26,18 +26,19 @@
 
 const HashMap = require('../../../../hash/hashMap.js');
 
+// XXX: global
 const MAX_INCOMING_CONNECTIONS = 100;
+const MAX_OUTGOING_CONNECTIONS = 5;
 
 module.exports = class Connector {
   static id() { return 'CONNECTOR'; }
-  static inputs() { return ['RECEIVER']; }
+  static inputs() { return ['INCOMING']; }
 
   static attach({
-    RECEIVER: receiver,
+    INCOMING: incoming,
   }) {
     // receive connection
-    // if max connections not exceeded, pipe it to output
-    return receiver
+    return incoming
       // accumulate connections into hashmap
       .accumulate(new HashMap())
       // only add if we haven't hit connection limit
@@ -51,33 +52,5 @@ module.exports = class Connector {
 
         connection.terminate.on(() => acc.unsetStringified(connection.address()));
       });
-
-    // every 3 seconds, if max outgoing connections not exceeded
-    // connect to a random connection in known
-    // const dispense = new Stream();
-    // known.queue(dispense).on((addr) => {
-    //   const connection = Connector.connect(addr);
-    //   numConnections += 1;
-    //   connection.terminate.on(() => {
-    //     numConnections -= 1;
-    //     dispense.next();
-    //   });
-    //   connectionStream.next(connection);
-    // });
-    // dispense.next(8);
   }
-
-  // static connect(addr) {
-  //   if (addr.services.socketHost()) {
-  //     const url = `ws://${addr.IPv4URL()}`;
-  //     const socket = new WebSocket(url);
-  //     return new SocketConnection(socket);
-  //   }
-  //   throw Error('Non-socket connections are not yet implemented.');
-  //   // cannot initiate socket connection
-  //   // case 1: this is socketHost
-  //   // begin RTC signaling process?
-  //   // case 2: both !socketHost
-  //   // begin RTC signaling process
-  // }
 };

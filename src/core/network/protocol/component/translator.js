@@ -33,11 +33,11 @@ module.exports = class Translator {
 
   static attach({ CONNECTOR: connector }, _, { magic }) {
     return connector
-      .map(connection => ({
-        incoming: connection.incoming
+      .on((connection) => {
+        connection.incoming = connection.incoming
           // allow only data with correct magic value
-          .filter(data => Message.getMagic(data) === magic),
-        outgoing: new Stream()
+          .filter(data => Message.getMagic(data) === magic);
+        connection.outgoing = new Stream()
           // convert { command, payload } to message data
           .map(({ command, payload }) => Message.create(
             magic,
@@ -45,7 +45,7 @@ module.exports = class Translator {
             Date.now() / 1000,
             payload,
           ))
-          .pipe(connection.outgoing),
-      }));
+          .pipe(connection.outgoing);
+      });
   }
 };

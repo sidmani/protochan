@@ -24,6 +24,12 @@
 
 'use strict';
 
-module.exports = class Protochan {
+const Network = require('./core/network/network.js');
 
-};
+class Protochan {
+  constructor() {
+    this.network = new Network(0x13371337, 1, 0x00000001);
+  }
+}
+
+const p = new Protochan();

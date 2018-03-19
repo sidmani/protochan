@@ -29,10 +29,10 @@ const Pong = require('../../message/types/pong.js');
 
 module.exports = class EchoResponse {
   static id() { return 'ECHO_RESPONSE'; }
-  static inputs() { return ['INCOMING']; }
+  static inputs() { return ['RECEIVER']; }
 
-  static attach({ INCOMING: incoming }) {
-    incoming
+  static attach({ RECEIVER: receiver }) {
+    return receiver
       .filter(({ data }) =>
         Ping.getCommand(data) === Ping.COMMAND())
       // create the message

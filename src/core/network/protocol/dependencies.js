@@ -24,31 +24,16 @@
 
 'use strict';
 
-/* eslint-disable global-require */
-
-const COMPONENTS = {};
-
-[
-  require('./component/receiver.js'),
-  require('./component/connector/connector.js'),
-  require('./component/translator.js'),
-  require('./component/handshake.js'),
-  require('./component/connector/incoming.js'),
-  require('./component/terminator.js'),
-  require('./component/exchange.js'),
-  require('./component/echoRequest.js'),
-  require('./component/echoResponse.js'),
-  require('./component/known.js'),
-].forEach((component) => {
-  COMPONENTS[component.id()] = component;
-});
-
-const SERVICES = {};
-[
-  require('./service/socketHost.js'),
-].forEach((service) => {
-  SERVICES[service.index()] = service;
-});
-
-module.exports.components = COMPONENTS;
-module.exports.services = SERVICES;
+// loaded by every network
+module.exports = [
+  'INCOMING', // wraps connections from socket server
+  'CONNECTOR', // manages # of incoming connections
+  'TRANSLATOR', // handles magic filtering and message creation
+  'HANDSHAKE', // executes handshake
+  'RECEIVER', // maps { connection } to { connection, data }
+  'TERMINATOR', // terminates connection if silent for 30s
+  'ECHO_RESPONSE', // return pong on receiving ping
+  'ECHO_REQUEST', // send ping if connection is silent for 15s
+  'EXCHANGE', // send addresses when requested with getaddr
+  'KNOWN_ACCUMULATOR', // track incoming connections and addresses
+];

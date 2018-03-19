@@ -59,7 +59,7 @@ module.exports = class Handshake {
           connection,
           // set version to minimum of both peers
           version: Math.min(msg.version(), version),
-          services: msg.services(),
+          services: msg.services,
         })));
   }
 };
