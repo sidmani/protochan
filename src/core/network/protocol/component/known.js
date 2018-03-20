@@ -48,6 +48,6 @@ module.exports = class KnownAccumulator {
         Netaddr.set(data, 0, services.mask, connection.ip, connection.port);
         return new Netaddr(data);
       })
-      .on(addr => tracker.addKnown(addr));
+      .on(addr => tracker.addConnection(addr));
   }
 };

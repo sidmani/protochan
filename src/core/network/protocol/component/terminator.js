@@ -24,16 +24,20 @@
 
 'use strict';
 
+const Log = require('../../../util/log.js');
+
 module.exports = class Terminator {
   static id() { return 'TERMINATOR'; }
   static inputs() { return ['CONNECTOR']; }
 
   static attach({ CONNECTOR: connector }) {
-    return connector.on((connection) => {
-      // terminate if nothing received for 30s
+    // terminate if nothing received for 30s
+    return connector.flatmap(connection =>
       connection.incoming
-        .invert(30000)
-        .on(() => connection.terminate.next());
-    });
+        .invert(120000, Date.now)
+        .on(() => connection.close())
+        .merge(connection.terminate)
+        .on(() => Log.warning(`TERMINATOR@${connection.address()}: Terminating due to timeout.`)))
+      .error(e => Log.error(e));
   }
 };

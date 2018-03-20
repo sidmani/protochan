@@ -22,19 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
+const tap = require('tap');
+const Translator = require('../../../../src/core/network/protocol/component/translator.js');
 
-// loaded by every network
-module.exports = [
-  'OUTGOING', // creates connections to known peers
-  'INCOMING', // wraps connections from socket server
-  'CONNECTOR', // manages # of incoming connections
-  'TRANSLATOR', // handles magic filtering and message creation
-  'HANDSHAKE', // executes handshake
-  'RECEIVER', // maps { connection } to { connection, data }
-  'TERMINATOR', // terminates connection if silent for 30s
-  'ECHO_RESPONSE', // return pong on receiving ping
-  'ECHO_REQUEST', // send ping if connection is silent for 15s
-  'EXCHANGE', // send addresses when requested with getaddr
-  'KNOWN_ACCUMULATOR', // track incoming connections and addresses
-];
+tap.test('Translator', (t) => {
+  t.equal(Translator.id(), 'TRANSLATOR', 'id');
+  t.strictSame(Translator.inputs(), ['CONNECTOR'], 'inputs');
+
+  t.end();
+});

@@ -53,22 +53,3 @@ module.exports = class Exchange {
       });
   }
 };
-//
-// module.exports = function (incoming, maxConnections, connect) {
-//   const dispense = new Stream();
-//   const connectionStream = incoming
-//     // enqueue addresses with dispense trigger
-//     .queue(dispense)
-//     // attempt to connect to the latest peer
-//     .flatmap(({ obj: addr, acc: known }) => connect(addr)
-//       .error(() => {
-//         // if connection failed, remove peer
-//         known.unset(addr.IPv6());
-//         // dispense next queued address
-//         dispense.next();
-//       }))
-//     // dispense another address when the connection terminates
-//     .on(conn => conn.terminate.pipe(dispense));
-//   dispense.next(maxConnections);
-//   return connectionStream;
-// };

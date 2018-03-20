@@ -24,17 +24,28 @@
 
 'use strict';
 
-// loaded by every network
-module.exports = [
-  'OUTGOING', // creates connections to known peers
-  'INCOMING', // wraps connections from socket server
-  'CONNECTOR', // manages # of incoming connections
-  'TRANSLATOR', // handles magic filtering and message creation
-  'HANDSHAKE', // executes handshake
-  'RECEIVER', // maps { connection } to { connection, data }
-  'TERMINATOR', // terminates connection if silent for 30s
-  'ECHO_RESPONSE', // return pong on receiving ping
-  'ECHO_REQUEST', // send ping if connection is silent for 15s
-  'EXCHANGE', // send addresses when requested with getaddr
-  'KNOWN_ACCUMULATOR', // track incoming connections and addresses
-];
+const Ping = require('../../../message/types/ping.js');
+const Log = require('../../../../util/log.js');
+
+module.exports = class EchoRequest {
+  static id() { return 'ECHO_REQUEST'; }
+  static inputs() { return ['HANDSHAKE']; }
+
+  static attach({ HANDSHAKE: handshake }) {
+    // adjust the period randomly to prevent syncing
+    const random = Math.floor(Math.random() * 10000) - 5000;
+
+    // send a ping every 20 seconds if nothing sent or received
+    handshake.on(({ connection }) => {
+      connection.incoming
+        .merge(connection.outgoing)
+        .invert(20000 + random, Date.now)
+        .on(() => Log.verbose(`ECHO@${connection.address()}: PING`))
+        .on(() => {
+          connection.outgoing.next({
+            command: Ping.COMMAND(),
+          });
+        });
+    });
+  }
+};

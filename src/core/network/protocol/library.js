@@ -29,15 +29,16 @@
 const COMPONENTS = {};
 
 [
-  require('./component/receiver.js'),
+  require('./component/connector/outgoing.js'),
+  require('./component/connector/incoming.js'),
   require('./component/connector/connector.js'),
   require('./component/translator.js'),
   require('./component/handshake.js'),
-  require('./component/connector/incoming.js'),
+  require('./component/receiver.js'),
   require('./component/terminator.js'),
   require('./component/exchange.js'),
-  require('./component/echoRequest.js'),
-  require('./component/echoResponse.js'),
+  require('./component/echo/echoRequest.js'),
+  require('./component/echo/echoResponse.js'),
   require('./component/known.js'),
 ].forEach((component) => {
   COMPONENTS[component.id()] = component;

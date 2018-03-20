@@ -27,6 +27,7 @@
 const WebSocket = require('isomorphic-ws');
 const Stream = require('../../../stream.js');
 const SocketConnection = require('../../../connection/socketConnection.js');
+const Log = require('../../../../util/log.js');
 
 // XXX: global
 const MAX_OUTGOING_CONNECTIONS = 5;
@@ -38,17 +39,37 @@ module.exports = class Outgoing {
   static attach(_, __, { tracker }) {
     const dispense = new Stream();
     // tracker.received guarantees unique addresses
-    const t = tracker.recieved
-      .queue(dispense)
+    const queue = tracker.received
+      .queue(dispense);
+
+    // if queue returns connected addr, dispense next
+    queue
+      .filter(a => tracker.connectedTo(a.IPv4URL()))
+      .on(() => dispense.next());
+
+    const outgoing = queue
+      // don't connect to the same address twice
+      .filter(a => !tracker.connectedTo(a.IPv4URL()))
       .map((address) => {
+        // if the address is a socket server
         if (address.services.socketHost()) {
+          Log.verbose(`OUTGOING: Attempting connection to ${address.IPv4URL()}.`);
           const url = `ws://${address.IPv4URL()}`;
           const socket = new WebSocket(url);
-          return new SocketConnection(socket);
+          const conn = new SocketConnection(socket, address);
+
+          tracker.addConnection(address);
+          conn.terminate.on(() => {
+            tracker.removeConnection(address);
+            dispense.next();
+          });
+          return conn;
         }
         throw Error('Non-socket connections are not yet implemented.');
       });
+
+
     dispense.next(MAX_OUTGOING_CONNECTIONS);
-    return t;
+    return outgoing;
   }
 };

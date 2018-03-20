@@ -27,25 +27,28 @@
 const Connection = require('./connection.js');
 
 module.exports = class SocketConnection extends Connection {
-  constructor(socket) {
+  constructor(socket, address) {
     /* eslint-disable no-underscore-dangle */
-    const ip = socket._socket.remoteAddress
-      .split('.')
-      .map(s => parseInt(s, 10));
-
-    super(
-      new Uint8Array(ip),
-      socket._socket.remotePort,
-    );
+    if (address) {
+      super(address.IPv4(), address.port(), true);
+    } else {
+      const a = socket._socket.remoteAddress;
+      const port = socket._socket.remotePort;
+      const ipv4 = new Uint8Array(a.slice(7)
+        .split('.')
+        .map(s => parseInt(s, 10)));
+      super(ipv4, port, false);
+    }
 
     this.socket = socket;
     // data transfer
-    socket.onmessage(data => this.incoming.next(data));
+    this.socket.onmessage = event => this.incoming.next(event.data);
+    this.socket.onclose = super.close;
     this.outgoing.on(data => socket.send(data));
-    // socket.onclose(() => this.terminate.next());
   }
 
-  onopen(fn) {
-    this.socket.onopen(fn);
+  close() {
+    this.socket.close();
+    super.close();
   }
 };

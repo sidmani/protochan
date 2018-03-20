@@ -24,17 +24,24 @@
 
 'use strict';
 
-// loaded by every network
-module.exports = [
-  'OUTGOING', // creates connections to known peers
-  'INCOMING', // wraps connections from socket server
-  'CONNECTOR', // manages # of incoming connections
-  'TRANSLATOR', // handles magic filtering and message creation
-  'HANDSHAKE', // executes handshake
-  'RECEIVER', // maps { connection } to { connection, data }
-  'TERMINATOR', // terminates connection if silent for 30s
-  'ECHO_RESPONSE', // return pong on receiving ping
-  'ECHO_REQUEST', // send ping if connection is silent for 15s
-  'EXCHANGE', // send addresses when requested with getaddr
-  'KNOWN_ACCUMULATOR', // track incoming connections and addresses
-];
+const Network = require('./core/network/network.js');
+const Netaddr = require('./core/network/message/data/netaddr.js');
+class Protochan {
+  constructor(port) {
+    this.network = new Network(0x13371337, 1, 0x00000001, port);
+  }
+}
+
+const KNOWN_NETADDR1 = [
+  [
+    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x7F, 0x00, 0x00, 0x01, 0x1F, 0x90,
+  ],
+].map(arr => new Netaddr(new Uint8Array(arr)));
+
+const p2 = new Protochan(8081);
+
+// setTimeout(() => {
+//   p2.network.seed(KNOWN_NETADDR1);
+// }, 5000);

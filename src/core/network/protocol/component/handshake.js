@@ -24,8 +24,10 @@
 
 'use strict';
 
+const Log = require('../../../util/log.js');
 const Version = require('../../message/types/version.js');
 const Verack = require('../../message/types/verack.js');
+const Stream = require('../../stream.js');
 
 module.exports = class Handshake {
   static id() { return 'HANDSHAKE'; }
@@ -33,33 +35,42 @@ module.exports = class Handshake {
 
   static attach({ TRANSLATOR: translator }, _, { version, services }) {
     return translator
-      // send version command
-      .on(({ outgoing }) => outgoing.next({
-        command: Version.COMMAND(),
-        payload: Version.create(version, services.mask),
+      // send version message
+      .on(connection => Stream.every(1000, 3).on(() => {
+        connection.outgoing.next({
+          command: Version.COMMAND(),
+          payload: Version.create(version, services.mask, 0),
+        });
       }))
-      // handle version command
+      // handle version message
       .flatmap(connection => connection.incoming
         .filter(data => Version.getCommand(data) === Version.COMMAND())
         // try constructing a version msg from data
         .map(data => new Version(data))
         // process the first version message only
         .first()
-        // send the verack message
-        .on(() => connection.outgoing.next({
-          command: Verack.COMMAND(),
-        }))
         .map(msg => ({ connection, msg })))
+      // log version reception
+      .on(({ connection, msg }) => Log.verbose(`HANDSHAKE@${connection.address()}: VERSION=${msg.version()}, SERVICES=${Log.hex(msg.services.mask, 8)}`))
+      // send verack message
+      .on(({ connection }) => Stream.every(1000, 1).on(() => {
+        connection.outgoing.next({
+          command: Verack.COMMAND(),
+        });
+      }))
       // handle verack
       .flatmap(({ connection, msg }) => connection.incoming
         .filter(data => Verack.getCommand(data) === Verack.COMMAND())
         .map(data => new Verack(data))
         .first()
-        .map(() => ({
-          connection,
-          // set version to minimum of both peers
-          version: Math.min(msg.version(), version),
-          services: msg.services,
-        })));
+        .map(() => ({ connection, msg })))
+      .on(({ connection }) => Log.verbose(`HANDSHAKE@${connection.address()}: Received VERACK.`))
+      .map(({ connection, msg }) => ({
+        connection,
+        // set version to minimum of both peers
+        version: Math.min(msg.version(), version),
+        services: msg.services,
+      }))
+      .error(e => Log.error(e));
   }
 };

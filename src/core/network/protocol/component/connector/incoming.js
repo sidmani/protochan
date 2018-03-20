@@ -24,8 +24,11 @@
 
 'use strict';
 
-const SocketConnection = require('../../../connection/connection.js');
+const SocketConnection = require('../../../connection/socketConnection.js');
 const Stream = require('../../../stream.js');
+const Log = require('../../../../util/log.js');
+
+const MAX_INCOMING_CONNECTIONS = 100;
 
 module.exports = class Incoming {
   static id() { return 'INCOMING'; }
@@ -34,7 +37,7 @@ module.exports = class Incoming {
   static attach(_, {
     SOCKET_HOST: socketHost,
     // TODO: RTC_HOST: rtcHost
-  }) {
+  }, { tracker }) {
     const connectionStream = new Stream();
 
     if (socketHost) {
@@ -43,6 +46,19 @@ module.exports = class Incoming {
         .pipe(connectionStream);
     }
 
-    return connectionStream;
+    // terminate illegal connections
+    connectionStream
+      .filter(connection =>
+        // if we're already connected
+        tracker.connectedTo(connection.address()) ||
+        // or if reached incoming connection limit
+        tracker.connections.size() >= MAX_INCOMING_CONNECTIONS)
+      .on(connection => connection.close());
+
+    return connectionStream
+      .filter(c =>
+        !tracker.connectedTo(c.address()) &&
+        tracker.connections.size() < MAX_INCOMING_CONNECTIONS)
+      .on(c => Log.verbose(`INCOMING: Accepted connection from ${c.address()}`));
   }
 };

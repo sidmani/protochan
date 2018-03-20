@@ -24,33 +24,15 @@
 
 'use strict';
 
-const HashMap = require('../../../../hash/hashMap.js');
-
-// XXX: global
-const MAX_INCOMING_CONNECTIONS = 100;
-const MAX_OUTGOING_CONNECTIONS = 5;
-
 module.exports = class Connector {
   static id() { return 'CONNECTOR'; }
-  static inputs() { return ['INCOMING']; }
+  static inputs() { return ['INCOMING', 'OUTGOING']; }
 
   static attach({
     INCOMING: incoming,
+    OUTGOING: outgoing,
   }) {
     // receive connection
-    return incoming
-      // accumulate connections into hashmap
-      .accumulate(new HashMap())
-      // only add if we haven't hit connection limit
-      .filter(({ acc }) => acc.size() < MAX_INCOMING_CONNECTIONS)
-      .on(({ obj: connection, acc }) => {
-        // checks duplicates
-        acc.setStringified(
-          connection,
-          connection.address(),
-        );
-
-        connection.terminate.on(() => acc.unsetStringified(connection.address()));
-      });
+    return incoming.merge(outgoing);
   }
 };

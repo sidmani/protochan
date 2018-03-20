@@ -31,12 +31,10 @@ module.exports = class SocketHost {
   static id() { return 'SOCKET_HOST'; }
   static index() { return 0; }
 
-  static attach() {
+  static attach({ port }) {
     const stream = new Stream();
 
-    const server = new WebSocket.Server({
-      port: 8080,
-    });
+    const server = new WebSocket.Server({ port });
 
     server.on('connection', (socket) => {
       // call next after socket.onopen?
