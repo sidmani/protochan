@@ -32,7 +32,7 @@ const ByteArray = require('../../../util/byteArray.js');
 
 module.exports = class Version extends Message {
   static COMMAND() { return 0x00000000; }
-  static PAYLOAD_LENGTH() { return 8; }
+  static PAYLOAD_LENGTH() { return 12; }
 
   constructor(data) {
     super(data, Version.PAYLOAD_LENGTH());
@@ -47,10 +47,15 @@ module.exports = class Version extends Message {
     return this.data.getUint32(Message.HEADER_LENGTH() + 4);
   }
 
-  static create(version, services) {
+  nonce() {
+    return this.data.getUint32(Message.HEADER_LENGTH() + 8);
+  }
+
+  static create(version, services, nonce) {
     const data = new Uint8Array(Version.PAYLOAD_LENGTH());
     data.setUint32(0, version);
     data.setUint32(4, services);
+    data.setUint32(8, nonce);
     return data;
   }
 };

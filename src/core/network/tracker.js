@@ -30,7 +30,7 @@ const Stream = require('./stream.js');
 module.exports = class Tracker {
   constructor() {
     this.known = new HashMap();
-    // this.connections = new HashMap();
+    this.connections = new HashMap();
     this.received = new Stream();
   }
 
@@ -39,7 +39,20 @@ module.exports = class Tracker {
   }
 
   addKnown(address) {
-    this.known.set(address, address.IPv4URL());
+    this.known.setStringified(address, address.IPv4URL());
     this.received.next(address);
+  }
+
+  addConnection(address) {
+    this.connections.setStringified(address, address.IPv4URL());
+    this.known.setStringified(address, address.IPv4URL(), true);
+  }
+
+  removeConnection(address) {
+    this.connections.unsetStringified(address.IPv4URL());
+  }
+
+  connectedTo(address) {
+    return this.connections.containsStringified(address);
   }
 };

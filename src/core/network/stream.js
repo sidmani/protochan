@@ -151,18 +151,18 @@ module.exports = class Stream {
 
     return child;
   }
-
-  zip(...streams) {
-    const latest = [];
-
-    streams.forEach((stream, idx) => {
-      stream.on((obj) => { latest[idx] = obj; });
-    });
-
-    return this.attach((obj, next) => {
-      next([obj, ...latest]);
-    });
-  }
+  // 
+  // zip(...streams) {
+  //   const latest = [];
+  //
+  //   streams.forEach((stream, idx) => {
+  //     stream.on((obj) => { latest[idx] = obj; });
+  //   });
+  //
+  //   return this.attach((obj, next) => {
+  //     next([obj, ...latest]);
+  //   });
+  // }
 
   error(fn) {
     const child = this.attach((obj, next) => next(obj));
@@ -171,10 +171,11 @@ module.exports = class Stream {
   }
 
   merge(...streams) {
+    const child = this.attach((obj, next) => next(obj));
     for (let i = 0; i < streams.length; i += 1) {
-      streams[i].on(obj => this.next(obj));
+      streams[i].on(obj => child.next(obj));
     }
-    return this;
+    return child;
   }
 
   // emit if the source does not emit every interval
@@ -199,14 +200,22 @@ module.exports = class Stream {
     // this.next = obj => this.fn(obj, o => stream.next(o));
   }
 
-  static every(interval, obj) {
+  static every(interval, count) {
     let id;
+    let n = count;
     const str = new Stream(
       (o, next) => next(o),
       () => clearInterval(id),
     );
     id = setInterval(() => {
-      str.next(obj);
+      str.next();
+      if (n !== undefined) {
+        n -= 1;
+      }
+      if (n <= 0) {
+        clearInterval(id);
+        str.destroy();
+      }
     }, interval);
     return str;
   }

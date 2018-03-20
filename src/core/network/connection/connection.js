@@ -39,4 +39,11 @@ module.exports = class Connection {
   address() {
     return `${this.ip.join('.')}:${this.port}`;
   }
+
+  close() {
+    this.terminate.next();
+    this.incoming.destroy();
+    this.outgoing.destroy();
+    this.terminate.destroy();
+  }
 };

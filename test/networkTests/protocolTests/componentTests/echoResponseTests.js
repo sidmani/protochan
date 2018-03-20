@@ -23,7 +23,7 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const EchoResponse = require('../../../../src/core/network/protocol/component/echoResponse.js');
+const EchoResponse = require('../../../../src/core/network/protocol/component/echo/echoResponse.js');
 const Stream = require('../../../../src/core/network/stream.js');
 
 tap.test('Echo response', (t) => {
@@ -36,6 +36,7 @@ tap.test('Echo response', (t) => {
   EchoResponse.attach({ RECEIVER: receiver });
   const connection = {
     outgoing: new Stream(),
+    address: () => '111.222.333.444:5555',
   };
 
   connection.outgoing.on(obj => result.push(obj));

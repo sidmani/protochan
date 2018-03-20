@@ -26,7 +26,7 @@ const tap = require('tap');
 const Loader = require('../../../src/core/network/protocol/loader.js');
 
 tap.test('Loader.enableServices', (t) => {
-  const loader = new Loader();
+  const loader = new Loader({ foo: 'bar' });
 
   let attachParams;
   const testService0 = {};
@@ -56,7 +56,7 @@ tap.test('Loader.enableServices', (t) => {
   t.equal(loader.services.SERVICE_3, 5, 'Loader loads enabled service');
   t.equal(loader.services.SERVICE_0, undefined, 'Loader does not load disabled service');
 
-  t.equal(attachParams, undefined, 'Loader does not pass any parameters to service.attach');
+  t.strictSame(attachParams, { foo: 'bar' }, 'Loader passes constants to service.attach');
   t.end();
 });
 

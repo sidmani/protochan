@@ -38,7 +38,7 @@ module.exports = class Loader {
     Log.verbose(`LOADER: enabling services ${Log.hex(services.mask, 8)}.`);
     for (let i = 0; i < 32; i += 1) {
       if (services.index(i)) {
-        this.services[library[i].id()] = library[i].attach();
+        this.services[library[i].id()] = library[i].attach(this.constants);
         Log.verbose(`LOADER: attached service ${library[i].id()} (0x${(1 << i).toString(16).padStart(8, '0')})`);
       }
     }
@@ -76,6 +76,7 @@ module.exports = class Loader {
         this.services,
         this.constants,
       );
+
       Log.verbose(`LOADER: attached ${dependencyID} to network.`);
     });
   }

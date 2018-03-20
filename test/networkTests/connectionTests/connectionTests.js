@@ -28,6 +28,18 @@ const Connection = require('../../../src/core/network/connection/connection.js')
 tap.test('Connection', (t) => {
   const c = new Connection(new Uint8Array([127, 0, 1, 2]), 8333);
 
+  const arr = [];
+
   t.equal(c.address(), '127.0.1.2:8333', 'Connection formats ip and port correctly');
+
+  c.terminate.on(() => arr.push(1));
+  c.incoming.on(() => arr.push(2));
+  c.outgoing.on(() => arr.push(3));
+  c.close();
+  c.incoming.next();
+  c.outgoing.next();
+  c.terminate.next();
+  t.strictSame(arr, [1], 'Connection.close triggers terminate and destroys all streams');
+
   t.end();
 });

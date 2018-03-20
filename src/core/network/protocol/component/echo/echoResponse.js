@@ -24,23 +24,24 @@
 
 'use strict';
 
-const Ping = require('../../message/types/ping.js');
+const Ping = require('../../../message/types/ping.js');
+const Pong = require('../../../message/types/pong.js');
+const Log = require('../../../../util/log.js');
 
-module.exports = class EchoRequest {
-  static id() { return 'ECHO_REQUEST'; }
-  static inputs() { return ['HANDSHAKE']; }
+module.exports = class EchoResponse {
+  static id() { return 'ECHO_RESPONSE'; }
+  static inputs() { return ['RECEIVER']; }
 
-  static attach({ HANDSHAKE: handshake }) {
-    // send a ping every 15 seconds if nothing sent or received
-    handshake.on(({ incoming, outgoing }) => {
-      incoming
-        .merge(outgoing)
-        .invert(15000, Date.now)
-        .on(() => {
-          outgoing.next({
-            command: Ping.COMMAND(),
-          });
-        });
-    });
+  static attach({ RECEIVER: receiver }) {
+    return receiver
+      .filter(({ data }) =>
+        Ping.getCommand(data) === Ping.COMMAND())
+      // create the message
+      .map(({ data, connection }) => ({ msg: new Ping(data), connection }))
+      // respond
+      .on(({ connection }) => {
+        Log.verbose(`ECHO@${connection.address()}: PONG`);
+        connection.outgoing.next({ command: Pong.COMMAND() });
+      });
   }
 };
