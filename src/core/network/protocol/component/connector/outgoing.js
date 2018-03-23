@@ -36,7 +36,7 @@ module.exports = class Outgoing {
   static id() { return 'OUTGOING'; }
   static inputs() { return []; }
 
-  static attach(c, s, { tracker, magic }) {
+  static attach(c, s, { tracker, magic, port }) {
     const dispense = new Stream();
     // tracker.received guarantees unique addresses
     const queue = tracker.received
@@ -54,7 +54,7 @@ module.exports = class Outgoing {
         // if the address is a socket server
         if (address.services.socketHost()) {
           Log.verbose(`OUTGOING: Attempting connection to ${address.IPv4URL()}.`);
-          const url = `ws://${address.IPv4URL()}`;
+          const url = `ws://${address.IPv4()}:${port}`;
           const socket = new WebSocket(url);
           const conn = new SocketConnection(socket, magic);
           tracker.addConnection(address);

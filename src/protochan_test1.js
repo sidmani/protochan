@@ -40,7 +40,7 @@ const KNOWN_NETADDR1 = [
   ],
 ].map(arr => new Netaddr(new Uint8Array(arr)));
 
-const p2 = new Protochan(8081);
+const p2 = new Protochan(8337);
 
 // setTimeout(() => {
 //   p2.network.seed(KNOWN_NETADDR1);
