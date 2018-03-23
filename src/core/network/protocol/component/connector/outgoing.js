@@ -54,7 +54,7 @@ module.exports = class Outgoing {
         // if the address is a socket server
         if (address.services.socketHost()) {
           Log.verbose(`OUTGOING: Attempting connection to ${address.IPv4URL()}.`);
-          const url = `ws://${address.IPv4()}:${port}`;
+          const url = `ws://${address.IPv4().join('.')}:${port}`;
           const socket = new WebSocket(url);
           const conn = new SocketConnection(socket, magic);
           tracker.addConnection(address);

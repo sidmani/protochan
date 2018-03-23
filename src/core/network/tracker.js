@@ -39,20 +39,20 @@ module.exports = class Tracker {
   }
 
   addKnown(address) {
-    this.known.setStringified(address, address.IPv4URL());
+    this.known.set(address, address.IPv4());
     this.received.next(address);
   }
 
   addConnection(address) {
-    this.connections.setStringified(address, address.IPv4URL());
-    this.known.setStringified(address, address.IPv4URL(), true);
+    this.connections.set(address, address.IPv4());
+    this.known.set(address, address.IPv4(), true);
   }
 
   removeConnection(address) {
-    this.connections.unsetStringified(address.IPv4URL());
+    this.connections.unset(address.IPv4());
   }
 
   connectedTo(address) {
-    return this.connections.containsStringified(address);
+    return this.connections.contains(address.IPv4());
   }
 };
