@@ -60,6 +60,7 @@ module.exports = class Outgoing {
           tracker.addConnection(address);
           conn.terminate.on(() => {
             tracker.removeConnection(address);
+            Log.warning(`OUTGOING@${address.IPv4URL()}: Connection terminated.`);
             dispense.next();
           });
           return conn;

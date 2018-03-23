@@ -57,7 +57,7 @@ module.exports = class NetAddress {
   }
 
   timestamp() {
-    return this.data.getUint16(this.offset + 22);
+    return this.data.getUint32(this.offset + 22);
   }
 
   IPv4URL() {

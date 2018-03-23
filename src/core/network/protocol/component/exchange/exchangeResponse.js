@@ -47,7 +47,6 @@ module.exports = class ExchangeResponse {
         Log.verbose(`EXCHANGE@${connection.address()}: <=GETADDR ${count}`);
         // get n addresses
         const addresses = tracker.getAddresses(count);
-
         connection.outgoing.next({
           command: Addr.COMMAND(),
           payload: Addr.create(addresses),

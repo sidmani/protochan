@@ -53,12 +53,12 @@ tap.test('Netaddr', (t) => {
   ]), 'Netaddr.IPv4 works');
   t.equal(n.port(), 0x1337, 'Netaddr.port works');
   t.equal(n.IPv4URL(), '238.247.161.212:4919', 'Netaddr.IPv4URL works');
-
+  t.equal(n.timestamp(), 0xAFDEBC89, 'Netaddr.timestamp works');
 
   const setData = new Uint8Array(28);
   Netaddr.set(setData, 2, 0xABCDEF44, new Uint8Array([
     0xEE, 0x78, 0xD2, 0x3B,
-  ]), 0x1337, 0xAFDEBC89);
+  ]), 0x1337, 0xAFDEBC83);
   t.strictSame(setData, new Uint8Array([
     0x00, 0x00,
     0xAB, 0xCD, 0xEF, 0x44,
@@ -67,7 +67,7 @@ tap.test('Netaddr', (t) => {
     0x00, 0x00, 0xFF, 0xFF,
     0xEE, 0x78, 0xD2, 0x3B,
     0x13, 0x37,
-    0xAF, 0xDE, 0xBC, 0x89,
+    0xAF, 0xDE, 0xBC, 0x83,
   ]), 'Netaddr.set works');
   t.end();
 });
