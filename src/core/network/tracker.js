@@ -53,6 +53,6 @@ module.exports = class Tracker {
   }
 
   connectedTo(address) {
-    return this.connections.contains(address.IPv4());
+    return this.connections.containsStringified(address);
   }
 };

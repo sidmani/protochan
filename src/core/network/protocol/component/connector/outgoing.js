@@ -65,7 +65,7 @@ module.exports = class Outgoing {
           return conn;
         }
         throw Error('Non-socket connections are not yet implemented.');
-      });
+      }).error(e => Log.error(`OUTGOING: ${e}`));
 
 
     dispense.next(MAX_OUTGOING_CONNECTIONS);
