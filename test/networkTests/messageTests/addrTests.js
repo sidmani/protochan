@@ -24,6 +24,8 @@
 
 const tap = require('tap');
 const Addr = require('../../../src/core/network/message/types/addr.js');
+const H = require('../../../src/core/hash/blake2s.js');
+
 const ErrorType = require('../../../src/core/error.js');
 
 tap.test('Addr', (t) => {
@@ -34,7 +36,7 @@ tap.test('Addr', (t) => {
     0x13, 0x37, 0x13, 0x37,
     0x00, 0x00, 0x00, 0x06,
     0xAF, 0x49, 0xC8, 0x9E,
-    0xDE, 0x6A, 0xA4, 0x7D,
+    0xD1, 0x9C, 0x87, 0x56,
     // payload
     0x02, // address count
     // address 1
@@ -44,6 +46,7 @@ tap.test('Addr', (t) => {
     0x33, 0xB7, 0xE5, 0xE9,
     0xEE, 0xF7, 0xA1, 0xD4,
     0x13, 0x37,
+    0xAB, 0xE3, 0xE4, 0xE5,
     // address 2
     0x00, 0x00, 0x00, 0x03,
     0x33, 0xB7, 0xE5, 0xE9,
@@ -51,6 +54,7 @@ tap.test('Addr', (t) => {
     0xAB, 0xDD, 0xFE, 0x1A,
     0xEE, 0xF7, 0xA1, 0xD4,
     0x13, 0x37,
+    0xAB, 0xE3, 0xE4, 0xE5,
   ]);
 
   t.throws(() => new Addr(data.subarray(0, 30)), ErrorType.dataLength(), 'Addr rejects insufficient data length based on address count');
@@ -59,11 +63,11 @@ tap.test('Addr', (t) => {
   t.doesNotThrow(() => { a = new Addr(data); }, 'Addr accepts valid data');
 
   t.equal(a.addressCount(), 2, 'Addr gets address count');
-  t.equal(a.address(1).offset, 39, 'Addr gets address at index');
+  t.equal(a.address(1).offset, 43, 'Addr gets address at index');
 
   const forEach = [];
   a.forEach(addr => forEach.push(addr));
-  t.strictSame(forEach.map(addr => addr.offset), [17, 39], 'Addr.forEach iterates over all addresses');
+  t.strictSame(forEach.map(addr => addr.offset), [17, 43], 'Addr.forEach iterates over all addresses');
 
   t.strictSame(Addr.create(forEach), data.subarray(16), 'Addr.create works');
   t.end();

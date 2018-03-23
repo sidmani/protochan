@@ -26,7 +26,7 @@ const tap = require('tap');
 const Netaddr = require('../../../src/core/network/message/data/netaddr.js');
 
 tap.test('Netaddr', (t) => {
-  t.equal(Netaddr.BYTE_LENGTH(), 22, 'Netaddr.BYTE_LENGTH returns 22');
+  t.equal(Netaddr.BYTE_LENGTH(), 26, 'Netaddr.BYTE_LENGTH is 26');
 
   const data = new Uint8Array([
     0xAB, // offset this
@@ -36,6 +36,7 @@ tap.test('Netaddr', (t) => {
     0x33, 0xB7, 0xE5, 0xE9,
     0xEE, 0xF7, 0xA1, 0xD4,
     0x13, 0x37,
+    0xAF, 0xDE, 0xBC, 0x89,
   ]);
 
   const n = new Netaddr(data, 1);
@@ -54,10 +55,10 @@ tap.test('Netaddr', (t) => {
   t.equal(n.IPv4URL(), '238.247.161.212:4919', 'Netaddr.IPv4URL works');
 
 
-  const setData = new Uint8Array(24);
+  const setData = new Uint8Array(28);
   Netaddr.set(setData, 2, 0xABCDEF44, new Uint8Array([
     0xEE, 0x78, 0xD2, 0x3B,
-  ]), 0x1337);
+  ]), 0x1337, 0xAFDEBC89);
   t.strictSame(setData, new Uint8Array([
     0x00, 0x00,
     0xAB, 0xCD, 0xEF, 0x44,
@@ -66,6 +67,7 @@ tap.test('Netaddr', (t) => {
     0x00, 0x00, 0xFF, 0xFF,
     0xEE, 0x78, 0xD2, 0x3B,
     0x13, 0x37,
+    0xAF, 0xDE, 0xBC, 0x89,
   ]), 'Netaddr.set works');
   t.end();
 });

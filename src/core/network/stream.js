@@ -151,7 +151,7 @@ module.exports = class Stream {
 
     return child;
   }
-  // 
+  //
   // zip(...streams) {
   //   const latest = [];
   //
@@ -207,7 +207,7 @@ module.exports = class Stream {
       (o, next) => next(o),
       () => clearInterval(id),
     );
-    id = setInterval(() => {
+    const fn = () => {
       str.next();
       if (n !== undefined) {
         n -= 1;
@@ -216,6 +216,10 @@ module.exports = class Stream {
         clearInterval(id);
         str.destroy();
       }
+    };
+    fn();
+    id = setInterval(() => {
+      fn();
     }, interval);
     return str;
   }

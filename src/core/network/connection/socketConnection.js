@@ -25,26 +25,36 @@
 'use strict';
 
 const Connection = require('./connection.js');
+const Log = require('../../util/log.js');
 
 module.exports = class SocketConnection extends Connection {
-  constructor(socket, address) {
+  constructor(socket, magic) {
     /* eslint-disable no-underscore-dangle */
-    if (address) {
-      super(address.IPv4(), address.port(), true);
+    let ipv4;
+    let port;
+    if (socket.url) {
+      [ipv4, port] = socket.url.slice(5).split(':');
+      port = parseInt(port, 10);
     } else {
-      const a = socket._socket.remoteAddress;
-      const port = socket._socket.remotePort;
-      const ipv4 = new Uint8Array(a.slice(7)
-        .split('.')
-        .map(s => parseInt(s, 10)));
-      super(ipv4, port, false);
+      ipv4 = socket._socket.remoteAddress.slice(7);
+      port = socket._socket.remotePort;
     }
+
+    ipv4 = new Uint8Array(ipv4
+      .split('.')
+      .map(s => parseInt(s, 10)));
+
+    super(ipv4, port, magic);
 
     this.socket = socket;
     // data transfer
     this.socket.onmessage = event => this.incoming.next(event.data);
-    this.socket.onclose = super.close;
-    this.outgoing.on(data => socket.send(data));
+    this.socket.onclose = () => super.close();
+    this.socket.onerror = e => Log.error(`SOCKET@${this.address()}: ${e.message}`);
+  }
+
+  send(data) {
+    this.socket.send(data);
   }
 
   close() {

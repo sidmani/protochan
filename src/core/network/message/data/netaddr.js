@@ -31,7 +31,7 @@ const ByteArray = require('../../../util/byteArray.js');
 
 module.exports = class NetAddress {
   static BYTE_LENGTH() {
-    return 22;
+    return 26;
   }
 
   constructor(data, offset = 0) {
@@ -56,16 +56,21 @@ module.exports = class NetAddress {
     return this.data.getUint16(this.offset + 20);
   }
 
+  timestamp() {
+    return this.data.getUint16(this.offset + 22);
+  }
+
   IPv4URL() {
     const ip = this.IPv4().join('.');
     const port = this.port();
     return `${ip}:${port}`;
   }
 
-  static set(data, offset, services, ipv4, port) {
+  static set(data, offset, services, ipv4, port, timestamp) {
     data.setUint32(offset + 0, services);
     data.setUint16(offset + 14, 0xFFFF);
     data.set(ipv4, offset + 16);
     data.setUint16(offset + 20, port);
+    data.setUint32(offset + 22, timestamp);
   }
 };

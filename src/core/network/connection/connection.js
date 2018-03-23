@@ -25,14 +25,32 @@
 'use strict';
 
 const Stream = require('../stream.js');
+const Message = require('../message/message.js');
 
 module.exports = class Connection {
-  constructor(ip, port) {
+  constructor(ip, port, magic) {
     this.ip = ip; // as uint8array
     this.port = port; // as number (uint16)
+    this.incoming = new Stream()
+      // create uint8array from native array
+      .map(arr => new Uint8Array(arr))
+      // pass only messages with valid magic value
+      .filter(data => Message.getMagic(data) === magic);
 
-    this.incoming = new Stream();
     this.outgoing = new Stream();
+    this.outgoing
+      // convert { command, payload } to uint8array
+      .map(({ command, payload }) => Message.create(
+        magic,
+        command,
+        Date.now() / 1000,
+        payload,
+      ))
+      // convert uint8arr to native array
+      .map(uint8array => Array.from(uint8array))
+      // send the data
+      .on(data => this.send(data));
+
     this.terminate = new Stream();
   }
 

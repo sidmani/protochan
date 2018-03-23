@@ -29,12 +29,12 @@ module.exports = [
   'OUTGOING', // creates connections to known peers
   'INCOMING', // wraps connections from socket server
   'CONNECTOR', // manages # of incoming connections
-  'TRANSLATOR', // handles magic filtering and message creation
   'HANDSHAKE', // executes handshake
   'RECEIVER', // maps { connection } to { connection, data }
   'TERMINATOR', // terminates connection if silent for 30s
   'ECHO_RESPONSE', // return pong on receiving ping
   'ECHO_REQUEST', // send ping if connection is silent for 15s
-  'EXCHANGE', // send addresses when requested with getaddr
+  'EXCHANGE_RESPONSE', // send addresses when requested with getaddr
+  'EXCHANGE_REQUEST',
   'KNOWN_ACCUMULATOR', // track incoming connections and addresses
 ];

@@ -36,16 +36,16 @@ module.exports = class EchoRequest {
     const random = Math.floor(Math.random() * 10000) - 5000;
 
     // send a ping every 20 seconds if nothing sent or received
-    handshake.on(({ connection }) => {
+    handshake.flatmap(({ connection }) =>
       connection.incoming
         .merge(connection.outgoing)
         .invert(20000 + random, Date.now)
-        .on(() => Log.verbose(`ECHO@${connection.address()}: PING`))
-        .on(() => {
-          connection.outgoing.next({
-            command: Ping.COMMAND(),
-          });
+        .map(() => connection))
+      .on((connection) => {
+        Log.verbose(`ECHO@${connection.address()}: =>PING`);
+        connection.outgoing.next({
+          command: Ping.COMMAND(),
         });
-    });
+      });
   }
 };

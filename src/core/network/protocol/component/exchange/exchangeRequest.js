@@ -22,12 +22,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-const Translator = require('../../../../src/core/network/protocol/component/translator.js');
+'use strict';
 
-tap.test('Translator', (t) => {
-  t.equal(Translator.id(), 'TRANSLATOR', 'id');
-  t.strictSame(Translator.inputs(), ['CONNECTOR'], 'inputs');
+const Getaddr = require('../../../message/types/getaddr.js');
+const Log = require('../../../../util/log.js');
 
-  t.end();
-});
+module.exports = class Exchange {
+  static id() { return 'EXCHANGE_REQUEST'; }
+  static inputs() {
+    return ['HANDSHAKE'];
+  }
+
+  static attach({ HANDSHAKE: handshake }) {
+    handshake
+      .on(({ connection }) => {
+        Log.verbose(`EXCHANGE@${connection.address()}: =>GETADDR 255 `);
+        connection.outgoing.next({
+          command: Getaddr.COMMAND(),
+          payload: Getaddr.create(0xFF),
+        });
+      });
+  }
+};

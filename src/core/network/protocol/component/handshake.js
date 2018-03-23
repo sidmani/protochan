@@ -31,15 +31,21 @@ const Stream = require('../../stream.js');
 
 module.exports = class Handshake {
   static id() { return 'HANDSHAKE'; }
-  static inputs() { return ['TRANSLATOR']; }
+  static inputs() { return ['CONNECTOR']; }
 
-  static attach({ TRANSLATOR: translator }, _, { version, services }) {
-    return translator
+  static attach({ CONNECTOR: connector }, _, { version, services }) {
+    const nonce = Math.floor(Math.random() * 0xFFFFFFFF);
+
+    return connector
       // send version message
-      .on(connection => Stream.every(1000, 3).on(() => {
+      .on(connection => Stream.every(2000, 3).on(() => {
         connection.outgoing.next({
           command: Version.COMMAND(),
-          payload: Version.create(version, services.mask, 0),
+          payload: Version.create(
+            version,
+            services.mask,
+            nonce,
+          ),
         });
       }))
       // handle version message
@@ -50,10 +56,18 @@ module.exports = class Handshake {
         // process the first version message only
         .first()
         .map(msg => ({ connection, msg })))
+      .filter(({ msg, connection }) => {
+        if (msg.nonce() === nonce) {
+          Log.verbose(`HANDSHAKE@${connection.address()}: Connection is with self, closing...`);
+          connection.close();
+          return false;
+        }
+        return true;
+      })
       // log version reception
-      .on(({ connection, msg }) => Log.verbose(`HANDSHAKE@${connection.address()}: VERSION=${msg.version()}, SERVICES=${Log.hex(msg.services.mask, 8)}`))
+      .on(({ connection, msg }) => Log.verbose(`HANDSHAKE@${connection.address()}: <=VERSION=${msg.version()}, SERVICES=${Log.hex(msg.services.mask, 8)}`))
       // send verack message
-      .on(({ connection }) => Stream.every(1000, 1).on(() => {
+      .on(({ connection }) => Stream.every(200, 1).on(() => {
         connection.outgoing.next({
           command: Verack.COMMAND(),
         });
@@ -64,7 +78,7 @@ module.exports = class Handshake {
         .map(data => new Verack(data))
         .first()
         .map(() => ({ connection, msg })))
-      .on(({ connection }) => Log.verbose(`HANDSHAKE@${connection.address()}: Received VERACK.`))
+      .on(({ connection }) => Log.verbose(`HANDSHAKE@${connection.address()}: <=VERACK.`))
       .map(({ connection, msg }) => ({
         connection,
         // set version to minimum of both peers

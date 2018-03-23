@@ -37,12 +37,12 @@ module.exports = class Incoming {
   static attach(_, {
     SOCKET_HOST: socketHost,
     // TODO: RTC_HOST: rtcHost
-  }, { tracker }) {
+  }, { tracker, magic }) {
     const connectionStream = new Stream();
 
     if (socketHost) {
       socketHost
-        .map(socket => new SocketConnection(socket))
+        .map(socket => new SocketConnection(socket, magic))
         .pipe(connectionStream);
     }
 

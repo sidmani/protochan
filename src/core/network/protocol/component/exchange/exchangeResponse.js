@@ -24,31 +24,36 @@
 
 'use strict';
 
-const Stream = require('../../stream.js');
-const Message = require('../../message/message.js');
+const Getaddr = require('../../../message/types/getaddr.js');
+const Addr = require('../../../message/types/addr.js');
+const Log = require('../../../../util/log.js');
 
-module.exports = class Translator {
-  static id() { return 'TRANSLATOR'; }
-  static inputs() { return ['CONNECTOR']; }
+module.exports = class ExchangeResponse {
+  static id() { return 'EXCHANGE_RESPONSE'; }
+  static inputs() {
+    return ['RECEIVER'];
+  }
 
-  static attach({ CONNECTOR: connector }, _, { magic }) {
-    // I am aware that this code is very bad
-    return connector
-      .on((connection) => {
-        connection.incoming = connection.incoming
-          // allow only data with correct magic value
-          .filter(data => Message.getMagic(data) === magic);
+  static attach({ RECEIVER: receiver }, _, { tracker }) {
+    return receiver
+      // handle getaddr messages
+      .filter(({ data }) => Getaddr.getCommand(data) === Getaddr.COMMAND())
+      // create the message
+      .map(({ data, connection }) => ({
+        count: new Getaddr(data).maxAddr(),
+        connection,
+      }))
+      .on(({ count, connection }) => {
+        Log.verbose(`EXCHANGE@${connection.address()}: <=GETADDR ${count}`);
+        // get n addresses
+        const addresses = tracker.getAddresses(count);
 
-        const oldOutgoing = connection.outgoing;
-        connection.outgoing = new Stream()
-          // convert { command, payload } to message data
-          .map(({ command, payload }) => Message.create(
-            magic,
-            command,
-            Date.now() / 1000,
-            payload,
-          ));
-        connection.outgoing.pipe(oldOutgoing);
-      })
+        connection.outgoing.next({
+          command: Addr.COMMAND(),
+          payload: Addr.create(addresses),
+        });
+
+        Log.verbose(`EXCHANGE@${connection.address()}: =>ADDR ${addresses.length}`);
+      });
   }
 };

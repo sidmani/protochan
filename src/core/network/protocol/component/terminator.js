@@ -35,9 +35,10 @@ module.exports = class Terminator {
     return connector.flatmap(connection =>
       connection.incoming
         .invert(120000, Date.now)
-        .on(() => connection.close())
-        .merge(connection.terminate)
-        .on(() => Log.warning(`TERMINATOR@${connection.address()}: Terminating due to timeout.`)))
+        .on(() => {
+          connection.close();
+          Log.warning(`TERMINATOR@${connection.address()}: Terminating due to timeout.`);
+        }))
       .error(e => Log.error(e));
   }
 };
