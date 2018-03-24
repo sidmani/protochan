@@ -44,7 +44,7 @@ module.exports = class ExchangeResponse {
         connection,
       }))
       .on(({ count, connection }) => {
-        Log.verbose(`EXCHANGE@${connection.address()}: <=GETADDR ${count}`);
+        Log.verbose(`EXCHANGE@${connection.address}: <=GETADDR ${count}`);
         // get n addresses
         const addresses = tracker.getAddresses(count);
         connection.outgoing.next({
@@ -52,7 +52,7 @@ module.exports = class ExchangeResponse {
           payload: Addr.create(addresses),
         });
 
-        Log.verbose(`EXCHANGE@${connection.address()}: =>ADDR ${addresses.length}`);
+        Log.verbose(`EXCHANGE@${connection.address}: =>ADDR ${addresses.length}`);
       });
   }
 };

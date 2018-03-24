@@ -46,9 +46,7 @@ tap.test('ExchangeResponse', (t) => {
 
   const connection = {
     outgoing: new Stream(),
-    address() {
-      return '000.111.222.333:4444';
-    },
+    address: '000.111.222.333:4444',
   };
 
   connection.outgoing.on(a => result.push(a));

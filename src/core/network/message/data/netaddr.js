@@ -60,12 +60,6 @@ module.exports = class NetAddress {
     return this.data.getUint32(this.offset + 22);
   }
 
-  IPv4URL() {
-    const ip = this.IPv4().join('.');
-    const port = this.port();
-    return `${ip}:${port}`;
-  }
-
   static set(data, offset, services, ipv4, port, timestamp) {
     data.setUint32(offset + 0, services);
     data.setUint16(offset + 14, 0xFFFF);

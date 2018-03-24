@@ -37,7 +37,7 @@ module.exports = class Terminator {
         .invert(120000, Date.now)
         .on(() => {
           connection.close();
-          Log.warning(`TERMINATOR@${connection.address()}: Terminating due to timeout.`);
+          Log.warning(`TERMINATOR@${connection.address}: Terminating due to timeout.`);
         }))
       .error(e => Log.error(e));
   }

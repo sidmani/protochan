@@ -52,7 +52,7 @@ tap.test('Netaddr', (t) => {
     0xEE, 0xF7, 0xA1, 0xD4,
   ]), 'Netaddr.IPv4 works');
   t.equal(n.port(), 0x1337, 'Netaddr.port works');
-  t.equal(n.IPv4URL(), '238.247.161.212:4919', 'Netaddr.IPv4URL works');
+
   t.equal(n.timestamp(), 0xAFDEBC89, 'Netaddr.timestamp works');
 
   const setData = new Uint8Array(28);

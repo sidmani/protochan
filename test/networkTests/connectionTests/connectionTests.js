@@ -26,19 +26,35 @@ const tap = require('tap');
 const Connection = require('../../../src/core/network/connection/connection.js');
 
 tap.test('Connection', (t) => {
-  const c = new Connection(new Uint8Array([127, 0, 1, 2]), 8333);
+  const c = new Connection(new Uint8Array([127, 0, 1, 2]), 8333, 0x13371337);
 
-  const arr = [];
+  let arr = [];
 
-  t.equal(c.address(), '127.0.1.2:8333', 'Connection formats ip and port correctly');
+  t.equal(c.address, '127.0.1.2:8333', 'Connection formats ip and port correctly');
+  t.strictSame(c.netaddr(0xAABBCCDD, 0xFF3AB4A1).data, new Uint8Array([
+    0xAA, 0xBB, 0xCC, 0xDD,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xFF, 0xFF,
+    0x7F, 0x00, 0x01, 0x02,
+    0x20, 0x8D,
+    0xFF, 0x3A, 0xB4, 0xA1,
+  ]), 'Connection generates netaddr');
 
-  c.terminate.on(() => arr.push(1));
-  c.incoming.on(() => arr.push(2));
-  c.outgoing.on(() => arr.push(3));
+  c.terminate.on(d => arr.push(d || 1));
+  c.incoming.on(d => arr.push(d));
+  c.outgoing.on(d => arr.push(d));
+
+  c.receive([0x13, 0x37, 0x13, 0x37]);
+  c.receive([0x13, 0x37, 0x13, 0x38]);
+
+  t.strictSame(arr, [new Uint8Array([0x13, 0x37, 0x13, 0x37])], 'Connection.receive filters magic and creates uint8array');
+  arr = [];
   c.close();
   c.incoming.next();
   c.outgoing.next();
   c.terminate.next();
+
   t.strictSame(arr, [1], 'Connection.close triggers terminate and destroys all streams');
 
   t.end();

@@ -36,7 +36,7 @@ tap.test('Echo response', (t) => {
   EchoResponse.attach({ RECEIVER: receiver });
   const connection = {
     outgoing: new Stream(),
-    address: () => '111.222.333.444:5555',
+    address: '111.222.333.444:5555',
   };
 
   connection.outgoing.on(obj => result.push(obj));

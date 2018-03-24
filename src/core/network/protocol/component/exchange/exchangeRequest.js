@@ -36,7 +36,7 @@ module.exports = class Exchange {
   static attach({ HANDSHAKE: handshake }) {
     handshake
       .on(({ connection }) => {
-        Log.verbose(`EXCHANGE@${connection.address()}: =>GETADDR 255 `);
+        Log.verbose(`EXCHANGE@${connection.address}: =>GETADDR 255`);
         connection.outgoing.next({
           command: Getaddr.COMMAND(),
           payload: Getaddr.create(0xFF),

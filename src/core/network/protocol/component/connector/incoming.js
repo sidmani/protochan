@@ -48,17 +48,19 @@ module.exports = class Incoming {
 
     // terminate illegal connections
     connectionStream
+    // XXX: broken
       .filter(connection =>
         // if we're already connected
-        tracker.connectedTo(connection.address()) ||
+        tracker.connectedTo(connection.address) ||
         // or if reached incoming connection limit
         tracker.connections.size() >= MAX_INCOMING_CONNECTIONS)
       .on(connection => connection.close());
 
     return connectionStream
+    // XXX: broken
       .filter(c =>
-        !tracker.connectedTo(c.address()) &&
+        !tracker.connectedTo(c.address) &&
         tracker.connections.size() < MAX_INCOMING_CONNECTIONS)
-      .on(c => Log.verbose(`INCOMING: Accepted connection from ${c.address()}`));
+      .on(c => Log.verbose(`INCOMING: Accepted connection from ${c.address}`));
   }
 };

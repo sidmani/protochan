@@ -26,17 +26,19 @@
 
 const Stream = require('../stream.js');
 const Message = require('../message/message.js');
+const Netaddr = require('../message/data/netaddr.js');
 
 module.exports = class Connection {
   constructor(ip, port, magic) {
     this.ip = ip; // as uint8array
     this.port = port; // as number (uint16)
-    this.incoming = new Stream()
+    this.address = `${this.ip.join('.')}:${this.port}`;
+    this.transform = new Stream();
+    this.incoming = this.transform
       // create uint8array from native array
       .map(arr => new Uint8Array(arr))
       // pass only messages with valid magic value
       .filter(data => Message.getMagic(data) === magic);
-
     this.outgoing = new Stream();
     this.outgoing
       // convert { command, payload } to uint8array
@@ -54,14 +56,20 @@ module.exports = class Connection {
     this.terminate = new Stream();
   }
 
-  address() {
-    return `${this.ip.join('.')}:${this.port}`;
-  }
-
   close() {
     this.terminate.next();
-    this.incoming.destroy();
+    this.transform.destroy();
     this.outgoing.destroy();
     this.terminate.destroy();
+  }
+
+  receive(data) {
+    this.transform.next(data);
+  }
+
+  netaddr(rawServices, time) {
+    const data = new Uint8Array(Netaddr.BYTE_LENGTH());
+    Netaddr.set(data, 0, rawServices, this.ip, this.port, time);
+    return new Netaddr(data);
   }
 };

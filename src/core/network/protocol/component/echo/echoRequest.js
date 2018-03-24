@@ -42,7 +42,7 @@ module.exports = class EchoRequest {
         .invert(20000 + random, Date.now)
         .map(() => connection))
       .on((connection) => {
-        Log.verbose(`ECHO@${connection.address()}: =>PING`);
+        Log.verbose(`ECHO@${connection.address}: =>PING`);
         connection.outgoing.next({
           command: Ping.COMMAND(),
         });

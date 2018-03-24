@@ -47,7 +47,7 @@ module.exports = class Tracker {
 
     connection.terminate.on(() => {
       this.connections.unset(netaddr.IPv4());
-      Log.warning(`TRACKER@${netaddr.IPv4URL()}: Connection terminated.`);
+      Log.warning(`TRACKER@${connection.address}: Connection terminated.`);
       onTerminate();
     });
   }
@@ -57,16 +57,7 @@ module.exports = class Tracker {
     this.received.next(address);
   }
 
-  addConnection(address) {
-    this.connections.set(address, address.IPv4());
-    this.known.set(address, address.IPv4(), true);
-  }
-
-  removeConnection(address) {
-    this.connections.unset(address.IPv4());
-  }
-
-  connectedTo(address) {
-    return this.connections.containsStringified(address);
+  connectedTo(netaddr) {
+    return this.connections.contains(netaddr.IPv4());
   }
 };

@@ -24,7 +24,6 @@
 
 'use strict';
 
-const WebSocket = require('isomorphic-ws');
 const Stream = require('../../../stream.js');
 const SocketConnection = require('../../../connection/socketConnection.js');
 const Log = require('../../../../util/log.js');
@@ -44,17 +43,17 @@ module.exports = class Outgoing {
 
     // if queue returns connected addr, dispense next
     queue
-      .filter(a => tracker.connectedTo(a.IPv4URL()))
+      .filter(a => tracker.connectedTo(a))
       .on(() => dispense.next());
 
     const outgoing = queue
       // don't connect to the same address twice
-      .filter(a => !tracker.connectedTo(a.IPv4URL()))
+      .filter(a => !tracker.connectedTo(a))
       .map((address) => {
-        // if the address is a socket server
+        // if the address points to a socket host
         if (address.services.socketHost()) {
-          Log.verbose(`OUTGOING: Attempting connection to ${address.IPv4URL()}.`);
           const connection = SocketConnection.create(address.IPv4(), port, magic);
+          Log.verbose(`OUTGOING: Attempting connection to ${connection.address}.`);
 
           tracker.track(address, connection, () => dispense.next());
 

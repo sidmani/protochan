@@ -38,10 +38,19 @@ module.exports = class SocketConnection extends Connection {
     );
 
     this.socket = socket;
-    // data transfer
-    this.socket.onmessage = event => this.incoming.next(event.data);
+    // event handling
+    this.socket.onmessage = event => this.receive(event.data);
     this.socket.onclose = () => super.close();
-    this.socket.onerror = e => Log.error(`SOCKET@${this.address()}: ${e.message}`);
+    this.socket.onerror = e => Log.error(`SOCKET@${this.address}: ${e.message}`);
+  }
+
+  send(data) {
+    this.socket.send(data);
+  }
+
+  close() {
+    this.socket.close();
+    super.close();
   }
 
   static create(ipv4, port, magic) {
@@ -53,7 +62,7 @@ module.exports = class SocketConnection extends Connection {
 
   static extractIP(socket) {
     let ipv4;
-    // let port;
+
     if (!socket.url) {
       ipv4 = socket._socket.remoteAddress.slice(7);
     } else {
@@ -70,14 +79,5 @@ module.exports = class SocketConnection extends Connection {
       return socket._socket.remotePort;
     }
     return parseInt(socket.url.slice(5).split(':')[1], 10);
-  }
-
-  send(data) {
-    this.socket.send(data);
-  }
-
-  close() {
-    this.socket.close();
-    super.close();
   }
 };

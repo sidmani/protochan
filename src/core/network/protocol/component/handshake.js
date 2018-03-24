@@ -58,14 +58,14 @@ module.exports = class Handshake {
         .map(msg => ({ connection, msg })))
       .filter(({ msg, connection }) => {
         if (msg.nonce() === nonce) {
-          Log.verbose(`HANDSHAKE@${connection.address()}: Connection is with self, closing...`);
+          Log.verbose(`HANDSHAKE@${connection.address}: Connection is with self, closing...`);
           connection.close();
           return false;
         }
         return true;
       })
       // log version reception
-      .on(({ connection, msg }) => Log.verbose(`HANDSHAKE@${connection.address()}: <=VERSION=${msg.version()}, SERVICES=${Log.hex(msg.services.mask, 8)}`))
+      .on(({ connection, msg }) => Log.verbose(`HANDSHAKE@${connection.address}: <=VERSION=${msg.version()}, SERVICES=${Log.hex(msg.services.mask, 8)}`))
       // send verack message
       .on(({ connection }) => Stream.every(200, 1).on(() => {
         connection.outgoing.next({
@@ -78,7 +78,7 @@ module.exports = class Handshake {
         .map(data => new Verack(data))
         .first()
         .map(() => ({ connection, msg })))
-      .on(({ connection }) => Log.verbose(`HANDSHAKE@${connection.address()}: <=VERACK.`))
+      .on(({ connection }) => Log.verbose(`HANDSHAKE@${connection.address}: <=VERACK.`))
       .map(({ connection, msg }) => ({
         connection,
         // set version to minimum of both peers

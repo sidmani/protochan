@@ -44,10 +44,8 @@ module.exports = class KnownAccumulator {
     handshake
       // add the addresses of incoming connections to known
       .on(({ connection, services }) => {
-        const data = new Uint8Array(22);
-        Netaddr.set(data, 0, services.mask, connection.ip, connection.port);
-        const address = new Netaddr(data);
-        tracker.track(address, connection);
+        const netaddr = connection.netaddr(services.mask, Date.now() / 1000);
+        tracker.track(netaddr, connection);
       });
   }
 };
