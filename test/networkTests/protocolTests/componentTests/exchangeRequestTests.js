@@ -22,51 +22,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-'use strict';
+const tap = require('tap');
+const ExReq = require('../../../../src/core/network/protocol/component/exchange/exchangeRequest.js');
+const Stream = require('../../../../src/core/network/stream.js');
 
-const HashMap = require('../hash/hashMap.js');
-const Stream = require('./stream.js');
-const Log = require('../util/log.js');
+tap.test('ExchangeRequest', (t) => {
+  t.equal(ExReq.id(), 'EXCHANGE_REQUEST', 'id');
+  t.strictSame(ExReq.inputs(), ['HANDSHAKE'], 'inputs');
 
-module.exports = class Tracker {
-  constructor() {
-    this.known = new HashMap();
-    this.connections = new HashMap();
-    this.received = new Stream();
-  }
-
-  getAddresses(n = 1) {
-    return this.known.enumerate().slice(this.known.size() - n);
-  }
-
-  track(netaddr, connection, onTerminate = () => {}) {
-    // add to connections
-    this.connections.set(connection, netaddr.IPv4());
-    // add to known, allowing overwrites
-    this.known.set(netaddr, netaddr.IPv4(), true);
-
-    connection.terminate.on(() => {
-      this.connections.unset(netaddr.IPv4());
-      Log.warning(`TRACKER@${netaddr.IPv4URL()}: Connection terminated.`);
-      onTerminate();
-    });
-  }
-
-  addKnown(address) {
-    this.known.set(address, address.IPv4());
-    this.received.next(address);
-  }
-
-  addConnection(address) {
-    this.connections.set(address, address.IPv4());
-    this.known.set(address, address.IPv4(), true);
-  }
-
-  removeConnection(address) {
-    this.connections.unset(address.IPv4());
-  }
-
-  connectedTo(address) {
-    return this.connections.containsStringified(address);
-  }
-};
+  t.end();
+});

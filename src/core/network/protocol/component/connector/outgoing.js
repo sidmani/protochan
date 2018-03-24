@@ -54,16 +54,11 @@ module.exports = class Outgoing {
         // if the address is a socket server
         if (address.services.socketHost()) {
           Log.verbose(`OUTGOING: Attempting connection to ${address.IPv4URL()}.`);
-          const url = `ws://${address.IPv4().join('.')}:${port}`;
-          const socket = new WebSocket(url);
-          const conn = new SocketConnection(socket, magic);
-          tracker.addConnection(address);
-          conn.terminate.on(() => {
-            tracker.removeConnection(address);
-            Log.warning(`OUTGOING@${address.IPv4URL()}: Connection terminated.`);
-            dispense.next();
-          });
-          return conn;
+          const connection = SocketConnection.create(address.IPv4(), port, magic);
+
+          tracker.track(address, connection, () => dispense.next());
+
+          return connection;
         }
         throw Error('Non-socket connections are not yet implemented.');
       }).error(e => Log.error(`OUTGOING: ${e}`));

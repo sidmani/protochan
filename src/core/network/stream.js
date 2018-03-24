@@ -64,7 +64,7 @@ module.exports = class Stream {
     this.children = [];
   }
 
-  attach(fn, destructor = () => {}) {
+  attach(fn, destructor) {
     const child = new Stream(fn, destructor);
     this.children.push(child);
     return child;
@@ -151,27 +151,15 @@ module.exports = class Stream {
 
     return child;
   }
-  //
-  // zip(...streams) {
-  //   const latest = [];
-  //
-  //   streams.forEach((stream, idx) => {
-  //     stream.on((obj) => { latest[idx] = obj; });
-  //   });
-  //
-  //   return this.attach((obj, next) => {
-  //     next([obj, ...latest]);
-  //   });
-  // }
 
   error(fn) {
-    const child = this.attach((obj, next) => next(obj));
+    const child = this.attach();
     child.nextError = fn;
     return child;
   }
 
   merge(...streams) {
-    const child = this.attach((obj, next) => next(obj));
+    const child = this.attach();
     for (let i = 0; i < streams.length; i += 1) {
       streams[i].on(obj => child.next(obj));
     }
