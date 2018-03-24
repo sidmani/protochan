@@ -51,7 +51,7 @@ module.exports = class Incoming {
     // XXX: broken
       .filter(connection =>
         // if we're already connected
-        tracker.connectedTo(connection.address) ||
+        tracker.connectedToString(connection.address) ||
         // or if reached incoming connection limit
         tracker.connections.size() >= MAX_INCOMING_CONNECTIONS)
       .on(connection => connection.close());
@@ -59,7 +59,7 @@ module.exports = class Incoming {
     return connectionStream
     // XXX: broken
       .filter(c =>
-        !tracker.connectedTo(c.address) &&
+        !tracker.connectedToString(c.address) &&
         tracker.connections.size() < MAX_INCOMING_CONNECTIONS)
       .on(c => Log.verbose(`INCOMING: Accepted connection from ${c.address}`));
   }

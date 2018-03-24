@@ -41,23 +41,27 @@ module.exports = class Tracker {
 
   track(netaddr, connection, onTerminate = () => {}) {
     // add to connections
-    this.connections.set(connection, netaddr.IPv4());
+    this.connections.setStringified(connection, connection.address);
     // add to known, allowing overwrites
-    this.known.set(netaddr, netaddr.IPv4(), true);
+    this.known.setStringified(netaddr, connection.address, true);
 
     connection.terminate.on(() => {
-      this.connections.unset(netaddr.IPv4());
+      this.connections.unsetStringified(connection.address);
       Log.warning(`TRACKER@${connection.address}: Connection terminated.`);
       onTerminate();
     });
   }
 
-  addKnown(address) {
-    this.known.set(address, address.IPv4());
-    this.received.next(address);
+  addKnown(netaddr) {
+    this.known.setStringified(netaddr, netaddr.IPv4().join('.'));
+    this.received.next(netaddr);
   }
 
   connectedTo(netaddr) {
-    return this.connections.contains(netaddr.IPv4());
+    return this.connections.containsStringified(netaddr.IPv4().join('.'));
+  }
+
+  connectedToString(address) {
+    return this.connections.containsStringified(address);
   }
 };

@@ -29,11 +29,11 @@ const Log = require('../../util/log.js');
 const WebSocket = require('isomorphic-ws');
 
 module.exports = class SocketConnection extends Connection {
-  constructor(socket, magic) {
+  constructor(socket, magic, address, port) {
     /* eslint-disable no-underscore-dangle */
     super(
-      SocketConnection.extractIP(socket),
-      SocketConnection.extractPort(socket),
+      address || socket._socket.remoteAddress.slice(7),
+      port || socket._socket.remotePort,
       magic,
     );
 
@@ -41,7 +41,7 @@ module.exports = class SocketConnection extends Connection {
     // event handling
     this.socket.onmessage = event => this.receive(event.data);
     this.socket.onclose = () => super.close();
-    this.socket.onerror = e => Log.error(`SOCKET@${this.address}: ${e.message}`);
+    this.socket.onerror = e => Log.error(`SOCKET@${address}: ${e.message}`);
   }
 
   send(data) {
@@ -55,29 +55,9 @@ module.exports = class SocketConnection extends Connection {
 
   static create(ipv4, port, magic) {
     // create socket (for outgoing)
-    const url = `ws://${ipv4.join('.')}:${port}`;
+    const joined = ipv4.join('.');
+    const url = `ws://${joined}:${port}`;
     const socket = new WebSocket(url);
-    return new SocketConnection(socket, magic);
-  }
-
-  static extractIP(socket) {
-    let ipv4;
-
-    if (!socket.url) {
-      ipv4 = socket._socket.remoteAddress.slice(7);
-    } else {
-      ipv4 = socket.url.slice(5).split(':')[0];
-    }
-
-    return new Uint8Array(ipv4
-      .split('.')
-      .map(s => parseInt(s, 10)));
-  }
-
-  static extractPort(socket) {
-    if (!socket.url) {
-      return socket._socket.remotePort;
-    }
-    return parseInt(socket.url.slice(5).split(':')[1], 10);
+    return new SocketConnection(socket, magic, joined, port);
   }
 };

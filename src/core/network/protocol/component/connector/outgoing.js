@@ -53,7 +53,7 @@ module.exports = class Outgoing {
         // if the address points to a socket host
         if (address.services.socketHost()) {
           const connection = SocketConnection.create(address.IPv4(), port, magic);
-          Log.verbose(`OUTGOING: Attempting connection to ${connection.address}.`);
+          Log.verbose(`OUTGOING: Attempting connection to ${connection.address}:${port}.`);
 
           tracker.track(address, connection, () => dispense.next());
 
@@ -61,7 +61,6 @@ module.exports = class Outgoing {
         }
         throw Error('Non-socket connections are not yet implemented.');
       }).error(e => Log.error(`OUTGOING: ${e}`));
-
 
     dispense.next(MAX_OUTGOING_CONNECTIONS);
     return outgoing;

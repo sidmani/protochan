@@ -26,11 +26,11 @@ const tap = require('tap');
 const Connection = require('../../../src/core/network/connection/connection.js');
 
 tap.test('Connection', (t) => {
-  const c = new Connection(new Uint8Array([127, 0, 1, 2]), 8333, 0x13371337);
+  const c = new Connection('127.0.1.2', 8333, 0x13371337);
 
   let arr = [];
 
-  t.equal(c.address, '127.0.1.2:8333', 'Connection formats ip and port correctly');
+  t.equal(c.address, '127.0.1.2', 'Connection formats ip correctly');
   t.strictSame(c.netaddr(0xAABBCCDD, 0xFF3AB4A1).data, new Uint8Array([
     0xAA, 0xBB, 0xCC, 0xDD,
     0x00, 0x00, 0x00, 0x00,

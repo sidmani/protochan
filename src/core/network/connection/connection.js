@@ -29,10 +29,9 @@ const Message = require('../message/message.js');
 const Netaddr = require('../message/data/netaddr.js');
 
 module.exports = class Connection {
-  constructor(ip, port, magic) {
-    this.ip = ip; // as uint8array
+  constructor(address, port, magic) {
     this.port = port; // as number (uint16)
-    this.address = `${this.ip.join('.')}:${this.port}`;
+    this.address = address; // as string
     this.transform = new Stream();
     this.incoming = this.transform
       // create uint8array from native array
@@ -69,7 +68,13 @@ module.exports = class Connection {
 
   netaddr(rawServices, time) {
     const data = new Uint8Array(Netaddr.BYTE_LENGTH());
-    Netaddr.set(data, 0, rawServices, this.ip, this.port, time);
+    Netaddr.set(data, 0, rawServices, this.addressToArray(), this.port, time);
     return new Netaddr(data);
+  }
+
+  addressToArray() {
+    return new Uint8Array(this.address
+      .split('.')
+      .map(s => parseInt(s, 10)));
   }
 };
