@@ -22,12 +22,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-// const Known = require('../../../../src/core/network/protocol/component/known.js');
-//
-// tap.test('KnownAccumulator', (t) => {
-//   t.equal(Known.id(), 'KNOWN_ACCUMULATOR', 'id');
-//   t.strictSame(Known.inputs(), ['RECEIVER', 'HANDSHAKE'], 'inputs');
-//
-//   t.end();
-// });
+'use strict';
+
+const config = {
+  // global constants
+  MAGIC: 0x13371337,
+  SERVICES: 0x00000001,
+  VERSION: 1,
+  // connection
+  MAX_INCOMING_CONNECTIONS: 100,
+  MAX_OUTGOING_CONNECTIONS: 8, // DO NOT CHANGE
+  SOCKET_HOST_PORT: 8337,
+  // echo
+  ECHO_INTERVAL: 30000,
+  ECHO_FLUX: 5000, // random change in echo period to avoid syncing
+  // exchange
+  EXCHANGE_GETADDR_COUNT: 0xFF,
+  // terminator
+  INACTIVE_TIMEOUT: 120000,
+};
+
+module.exports = Object.freeze(config);

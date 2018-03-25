@@ -29,32 +29,22 @@ const Library = require('./protocol/library.js');
 const Dependencies = require('./protocol/dependencies.js');
 const Tracker = require('./tracker.js');
 
-const Netaddr = require('./message/data/netaddr.js');
-const Services = require('./message/data/services.js');
 const Log = require('../util/log.js').submodule('NETWORK: ');
 
 module.exports = class Network {
-  constructor(magic, version, serviceMask, port) {
+  constructor(config) {
     this.tracker = new Tracker();
 
-    const services = new Services(serviceMask);
-    this.loader = new Loader({
-      magic,
-      version,
-      services,
-      tracker: this.tracker,
-      port,
-    });
-    Log.info(`MAGIC=${Log.hex(magic, 8)}, VERSION=${version}, SERVICES=${Log.hex(serviceMask, 8)}`);
+    this.loader = new Loader(config);
+    this.loader.components.TRACKER = this.tracker;
+
+    Log.info(`MAGIC=${Log.hex(config.MAGIC, 8)}, VERSION=${config.VERSION}, SERVICES=${Log.hex(config.SERVICES, 8)}`);
 
     // load services
-    this.loader.enableServices(services, Library.services);
+    this.loader.enableServices(config.SERVICES, Library.services);
 
     // load global components
-    Log.verbose('Loading components...');
-    for (let j = 0; j < Dependencies.length; j += 1) {
-      this.loader.loadComponent(Dependencies[j], Library.components);
-    }
+    this.loader.loadComponents(Dependencies, Library.components);
 
     Log.info('READY');
   }

@@ -31,7 +31,7 @@ module.exports = class SocketHost {
   static id() { return 'SOCKET_HOST'; }
   static index() { return 0; }
 
-  static attach({ port }) {
+  static attach({ SOCKET_HOST_PORT: port }) {
     const stream = new Stream();
 
     const server = new WebSocket.Server({ port });

@@ -29,18 +29,18 @@ const Log = require('../../util/log.js');
 const localLog = Log.submodule('LOADER: ');
 
 module.exports = class Loader {
-  constructor(constants = {}) {
+  constructor(config) {
     this.components = {};
-    this.constants = constants;
+    this.config = config;
     this.services = {};
   }
 
   // load services
   enableServices(services, library) {
-    localLog.verbose(`enabling services ${Log.hex(services.mask, 8)}.`);
+    localLog.verbose(`enabling services ${Log.hex(services, 8)}.`);
     for (let i = 0; i < 32; i += 1) {
-      if (services.index(i)) {
-        this.services[library[i].id()] = library[i].attach(this.constants);
+      if (((services >> i) & 1) === 1) {
+        this.services[library[i].id()] = library[i].attach(this.config);
         localLog.verbose(`attached service ${library[i].id()} (0x${(1 << i).toString(16).padStart(8, '0')})`);
       }
     }
@@ -60,28 +60,27 @@ module.exports = class Loader {
     set.add(id);
   }
 
-  static resolveDependencies(id, library) {
+  static resolveDependencies(ids, library) {
     const set = new Set();
-    Loader.resolve(id, library, set);
+    ids.forEach(id => Loader.resolve(id, library, set));
     return Array.from(set.keys());
   }
 
   // load components and dependencies
-  // XXX: untested
-  loadComponent(id, library) {
-    const dependencies = Loader.resolveDependencies(id, library);
+  loadComponents(ids, library) {
+    localLog.verbose('loading components...');
+    const dependencies = Loader.resolveDependencies(ids, library);
     dependencies.forEach((dependencyID) => {
-      if (this.components[dependencyID]) { return; }
       const component = library[dependencyID];
       const sublog = Log.submodule(`${dependencyID}`);
       this.components[dependencyID] = component
         .attach(
           this.components,
           this.services,
-          this.constants,
+          this.config,
           sublog,
         )
-        .error(e => sublog.error(`: ${e.message} ${e.trace}`));
+        .error(e => sublog.error(`: ${e.message}`));
 
       localLog.verbose(`attached ${dependencyID} to network.`);
     });

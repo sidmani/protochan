@@ -29,10 +29,10 @@ module.exports = class Connector {
   static inputs() { return ['INCOMING', 'OUTGOING']; }
 
   static attach({
-    INCOMING: incoming,
-    OUTGOING: outgoing,
+    INCOMING,
+    OUTGOING,
   }) {
     // receive connection
-    return incoming.merge(outgoing);
+    return INCOMING.merge(OUTGOING);
   }
 };

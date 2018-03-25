@@ -30,15 +30,15 @@ module.exports = class EchoRequest {
   static id() { return 'ECHO_REQUEST'; }
   static inputs() { return ['HANDSHAKE']; }
 
-  static attach({ HANDSHAKE: handshake }) {
+  static attach({ HANDSHAKE: handshake }, s, { ECHO_INTERVAL, ECHO_FLUX }) {
     // adjust the period randomly to prevent syncing
-    const random = Math.floor(Math.random() * 10000) - 5000;
+    const random = (Math.random() - 0.5) * ECHO_FLUX;
 
     // send a ping every 20 seconds if nothing sent or received
     return handshake.flatmap(({ connection }) =>
       connection.incoming
         .merge(connection.outgoing)
-        .invert(20000 + random, Date.now)
+        .invert(ECHO_INTERVAL + random, Date.now)
         .map(() => connection))
       .on((connection) => {
         connection.outgoing.next({

@@ -28,16 +28,14 @@ const Getaddr = require('../../../message/types/getaddr.js');
 
 module.exports = class Exchange {
   static id() { return 'EXCHANGE_REQUEST'; }
-  static inputs() {
-    return ['HANDSHAKE'];
-  }
+  static inputs() { return ['HANDSHAKE']; }
 
-  static attach({ HANDSHAKE: handshake }) {
-    return handshake
+  static attach({ HANDSHAKE }, s, { EXCHANGE_GETADDR_COUNT }) {
+    return HANDSHAKE
       .on(({ connection }) => {
         connection.outgoing.next({
           command: Getaddr.COMMAND(),
-          payload: Getaddr.create(0xFF),
+          payload: Getaddr.create(EXCHANGE_GETADDR_COUNT),
         });
       });
   }

@@ -28,14 +28,15 @@ module.exports = class Terminator {
   static id() { return 'TERMINATOR'; }
   static inputs() { return ['CONNECTOR']; }
 
-  static attach({ CONNECTOR: connector }, s, c, log) {
+  static attach({ CONNECTOR }, s, { INACTIVE_TIMEOUT }, log) {
     // terminate if nothing received for 30s
-    return connector.flatmap(connection =>
-      connection.incoming
-        .invert(120000, Date.now)
-        .on(() => {
-          connection.close();
-          log.warning(`@${connection.address}: Terminating due to timeout.`);
-        }));
+    return CONNECTOR
+      .flatmap(connection =>
+        connection.incoming
+          .invert(INACTIVE_TIMEOUT, Date.now)
+          .on(() => {
+            connection.close();
+            log.warning(`@${connection.address}: Terminating due to timeout.`);
+          }));
   }
 };

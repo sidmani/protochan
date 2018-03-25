@@ -32,17 +32,17 @@ module.exports = class Handshake {
   static id() { return 'HANDSHAKE'; }
   static inputs() { return ['CONNECTOR']; }
 
-  static attach({ CONNECTOR: connector }, _, { version, services }, log) {
+  static attach({ CONNECTOR }, _, { VERSION, SERVICES }, log) {
     const nonce = Math.floor(Math.random() * 0xFFFFFFFF);
 
-    return connector
+    return CONNECTOR
       // send version message
       .on(connection => Stream.every(2000, 3).on(() => {
         connection.outgoing.next({
           command: Version.COMMAND(),
           payload: Version.create(
-            version,
-            services.mask,
+            VERSION,
+            SERVICES,
             nonce,
           ),
         });
@@ -80,7 +80,7 @@ module.exports = class Handshake {
       .map(({ connection, msg }) => ({
         connection,
         // set version to minimum of both peers
-        version: Math.min(msg.version(), version),
+        version: Math.min(msg.version(), VERSION),
         services: msg.services,
       }));
   }

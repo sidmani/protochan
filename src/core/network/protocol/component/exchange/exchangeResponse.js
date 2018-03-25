@@ -29,9 +29,7 @@ const Addr = require('../../../message/types/addr.js');
 
 module.exports = class ExchangeResponse {
   static id() { return 'EXCHANGE_RESPONSE'; }
-  static inputs() {
-    return ['RECEIVER'];
-  }
+  static inputs() { return ['RECEIVER']; }
 
   static attach({ RECEIVER: receiver }, _, { tracker }) {
     return receiver

@@ -27,21 +27,21 @@
 const Stream = require('../../../stream.js');
 const SocketConnection = require('../../../connection/socketConnection.js');
 
-const MAX_INCOMING_CONNECTIONS = 100;
-
 module.exports = class Incoming {
   static id() { return 'INCOMING'; }
   static inputs() { return []; }
 
-  static attach(_, {
-    SOCKET_HOST: socketHost,
-    // TODO: RTC_HOST: rtcHost
-  }, { tracker, magic }, log) {
+  static attach(
+    { TRACKER },
+    { SOCKET_HOST },
+    { MAGIC, MAX_INCOMING_CONNECTIONS },
+    log,
+  ) {
     const connectionStream = new Stream();
 
-    if (socketHost) {
-      socketHost
-        .map(socket => SocketConnection.createIncoming(socket, magic))
+    if (SOCKET_HOST) {
+      SOCKET_HOST
+        .map(socket => SocketConnection.createIncoming(socket, MAGIC))
         .pipe(connectionStream);
     }
 
@@ -50,16 +50,16 @@ module.exports = class Incoming {
     // XXX: broken
       .filter(connection =>
         // if we're already connected
-        tracker.connectedToString(connection.address) ||
+        TRACKER.connectedToString(connection.address) ||
         // or if reached incoming connection limit
-        tracker.connections.size() >= MAX_INCOMING_CONNECTIONS)
+        TRACKER.connections.size() >= MAX_INCOMING_CONNECTIONS)
       .on(connection => connection.close());
 
     return connectionStream
     // XXX: broken
       .filter(c =>
-        !tracker.connectedToString(c.address) &&
-        tracker.connections.size() < MAX_INCOMING_CONNECTIONS)
+        !TRACKER.connectedToString(c.address) &&
+        TRACKER.connections.size() < MAX_INCOMING_CONNECTIONS)
       .on(c => log.verbose(`@${c.address}: Accepted connection.`));
   }
 };

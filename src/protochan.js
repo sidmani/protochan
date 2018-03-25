@@ -26,10 +26,11 @@
 
 const Network = require('./core/network/network.js');
 const Netaddr = require('./core/network/message/data/netaddr.js');
+const Config = require('./core/config.js');
 
 class Protochan {
-  constructor(port) {
-    this.network = new Network(0x13371337, 1, 0x00000001, port);
+  constructor() {
+    this.network = new Network(Config);
   }
 }
 
@@ -41,7 +42,7 @@ const KNOWN_NETADDR2 = [
   ],
 ].map(arr => new Netaddr(new Uint8Array(arr)));
 
-const p1 = new Protochan(8337);
+const p1 = new Protochan();
 
 setTimeout(() => {
   p1.network.seed(KNOWN_NETADDR2);

@@ -29,6 +29,10 @@ const Stream = require('./stream.js');
 const Log = require('../util/log.js').submodule('TRACKER');
 
 module.exports = class Tracker {
+  static id() { return 'TRACKER'; }
+  static inputs() { return []; }
+
+
   constructor() {
     this.known = new HashMap();
     this.connections = new HashMap();

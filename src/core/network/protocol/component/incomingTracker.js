@@ -22,12 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-// const Known = require('../../../../src/core/network/protocol/component/known.js');
-//
-// tap.test('KnownAccumulator', (t) => {
-//   t.equal(Known.id(), 'KNOWN_ACCUMULATOR', 'id');
-//   t.strictSame(Known.inputs(), ['RECEIVER', 'HANDSHAKE'], 'inputs');
-//
-//   t.end();
-// });
+'use strict';
+
+module.exports = class IncomingTracker {
+  static id() { return 'INCOMING_TRACKER'; }
+  static inputs() { return ['HANDSHAKE']; }
+
+  static attach({ HANDSHAKE, TRACKER }) {
+    return HANDSHAKE
+      // add the addresses of incoming connections to known
+      .map(({ connection, services }) => {
+        const netaddr = connection.netaddr(services.mask, Date.now() / 1000);
+        TRACKER.track(netaddr, connection);
+        return netaddr;
+      });
+  }
+};

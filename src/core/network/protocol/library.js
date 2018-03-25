@@ -37,9 +37,10 @@ const COMPONENTS = {};
   require('./component/terminator.js'),
   require('./component/exchange/exchangeResponse.js'),
   require('./component/exchange/exchangeRequest.js'),
+  require('./component/exchange/exchangeTracker.js'),
   require('./component/echo/echoRequest.js'),
   require('./component/echo/echoResponse.js'),
-  require('./component/known.js'),
+  require('./component/incomingTracker.js'),
 ].forEach((component) => {
   COMPONENTS[component.id()] = component;
 });

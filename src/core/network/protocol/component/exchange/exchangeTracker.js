@@ -24,30 +24,20 @@
 
 'use strict';
 
-const Addr = require('../../message/types/addr.js');
+const Addr = require('../../../message/types/addr.js');
 
-module.exports = class KnownAccumulator {
-  static id() { return 'KNOWN_ACCUMULATOR'; }
-  static inputs() { return ['RECEIVER', 'HANDSHAKE']; }
+module.exports = class ExchangeTracker {
+  static id() { return 'EXCHANGE_TRACKER'; }
+  static inputs() { return ['RECEIVER']; }
 
-  static attach({ RECEIVER: receiver, HANDSHAKE: handshake }, _, { tracker }) {
-    const exch = receiver
+  static attach({ RECEIVER, TRACKER }) {
+    return RECEIVER
       // handle addr messages
       .filter(({ data }) => Addr.getCommand(data) === Addr.COMMAND())
       // create the message
       .map(({ data }) => new Addr(data))
       // iterate over netaddr in addr
       .iterate()
-      .on(addr => tracker.addKnown(addr));
-
-    const inc = handshake
-      // add the addresses of incoming connections to known
-      .map(({ connection, services }) => {
-        const netaddr = connection.netaddr(services.mask, Date.now() / 1000);
-        tracker.track(netaddr, connection);
-        return netaddr;
-      });
-
-    return inc.merge(exch);
+      .on(addr => TRACKER.addKnown(addr));
   }
 };

@@ -44,14 +44,7 @@ tap.test('Loader.enableServices', (t) => {
     3: testService3,
   };
 
-  const services = {
-    mask: 0b00001000,
-    index(i) {
-      return ((this.mask >> i) & 1) === 1;
-    },
-  };
-
-  loader.enableServices(services, library);
+  loader.enableServices(0b00001000, library);
 
   t.equal(loader.services.SERVICE_3, 5, 'Loader loads enabled service');
   t.equal(loader.services.SERVICE_0, undefined, 'Loader does not load disabled service');
@@ -72,7 +65,7 @@ tap.test('Loader.resolve', (t) => {
   Loader.resolve('C', library, set);
   t.strictSame(Array.from(set.keys()), ['A', 'B', 'E', 'D', 'C'], 'resolve creates topological sort of dependency graph');
   t.throws(() => Loader.resolve('F', library, set), 'Loader throws error on unknown component id');
-  const arr = Loader.resolveDependencies('C', library);
+  const arr = Loader.resolveDependencies(['C', 'D'], library);
   t.strictSame(arr, ['A', 'B', 'E', 'D', 'C'], 'resolveDependencies returns array from resolved set');
   t.end();
 });

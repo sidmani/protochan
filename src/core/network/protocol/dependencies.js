@@ -36,5 +36,6 @@ module.exports = [
   'ECHO_REQUEST', // send ping if connection is silent for 15s
   'EXCHANGE_RESPONSE', // send addresses when requested with getaddr
   'EXCHANGE_REQUEST',
-  'KNOWN_ACCUMULATOR', // track incoming connections and addresses
+  'INCOMING_TRACKER', // track incoming connections
+  'EXCHANGE_TRACKER', // track incoming addresses
 ];
