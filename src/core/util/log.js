@@ -39,31 +39,56 @@ function timestamp() {
   return new Date().toISOString().replace('T', ' ').substr(0, 19);
 }
 
-function log(str, level) {
-  if (MIN_LOG_LEVEL > level) { return; }
-  console.log(`${timestamp()} | ${levels[level]} | ${str}`);
+class Log {
+  constructor(prefix) {
+    this.prefix = prefix;
+  }
+
+  submodule(prefix) {
+    return new Log(`${this.prefix}${prefix}`);
+  }
+
+  log(str, level) {
+    if (MIN_LOG_LEVEL > level) { return; }
+    console.log(`${timestamp()} | ${levels[level]} | ${this.prefix}${str}`);
+  }
+
+  verbose(str) {
+    this.log(str, 0);
+  }
+
+  info(str) {
+    this.log(str, 1);
+  }
+
+  warning(str) {
+    this.log(str, 2);
+  }
+
+  error(str) {
+    this.log(str, 3);
+  }
+
+  fatal(str) {
+    this.log(str, 4);
+  }
+
+  /* eslint-disable class-methods-use-this */
+  hex(value, nibbles = 0) {
+    return `0x${value.toString(16).padStart(nibbles, '0')}`;
+  }
+
+  message(command) {
+    switch (command) {
+      case 0: return 'VERSION';
+      case 1: return 'VERACK';
+      case 2: return 'PING';
+      case 3: return 'PONG';
+      case 5: return 'GETADDR';
+      case 6: return 'ADDR';
+      default: return 'UNKNOWN';
+    }
+  }
 }
 
-module.exports.verbose = function (str) {
-  log(str, 0);
-};
-
-module.exports.info = function (str) {
-  log(str, 1);
-};
-
-module.exports.warning = function (str) {
-  log(str, 2);
-};
-
-module.exports.error = function (str) {
-  log(str, 3);
-};
-
-module.exports.fatal = function (str) {
-  log(str, 4);
-};
-
-module.exports.hex = function (value, nibbles = 0) {
-  return `0x${value.toString(16).padStart(nibbles, '0')}`;
-}
+module.exports = new Log('');

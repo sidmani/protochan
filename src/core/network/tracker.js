@@ -26,7 +26,7 @@
 
 const HashMap = require('../hash/hashMap.js');
 const Stream = require('./stream.js');
-const Log = require('../util/log.js');
+const Log = require('../util/log.js').submodule('TRACKER');
 
 module.exports = class Tracker {
   constructor() {
@@ -47,7 +47,7 @@ module.exports = class Tracker {
 
     connection.terminate.on(() => {
       this.connections.unsetStringified(connection.address);
-      Log.warning(`TRACKER@${connection.address}: Connection terminated.`);
+      Log.warning(`@${connection.address}: Connection terminated.`);
       onTerminate();
     });
   }

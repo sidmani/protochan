@@ -26,7 +26,6 @@
 
 const Stream = require('../../../stream.js');
 const SocketConnection = require('../../../connection/socketConnection.js');
-const Log = require('../../../../util/log.js');
 
 // XXX: global
 const MAX_OUTGOING_CONNECTIONS = 5;
@@ -35,32 +34,33 @@ module.exports = class Outgoing {
   static id() { return 'OUTGOING'; }
   static inputs() { return []; }
 
-  static attach(c, s, { tracker, magic, port }) {
+  static attach(c, s, { tracker, magic, port }, log) {
     const dispense = new Stream();
     // tracker.received guarantees unique addresses
     const queue = tracker.received
       .queue(dispense);
 
-    // if queue returns connected addr, dispense next
-    queue
-      .filter(a => tracker.connectedTo(a))
-      .on(() => dispense.next());
-
     const outgoing = queue
       // don't connect to the same address twice
-      .filter(a => !tracker.connectedTo(a))
+      .filter((a) => {
+        if (tracker.connectedTo(a)) {
+          dispense.next();
+          return false;
+        }
+        return true;
+      })
       .map((address) => {
         // if the address points to a socket host
         if (address.services.socketHost()) {
-          const connection = SocketConnection.create(address.IPv4(), port, magic);
-          Log.verbose(`OUTGOING: Attempting connection to ${connection.address}:${port}.`);
+          const connection = SocketConnection.createOutgoing(address.IPv4(), port, magic);
+          log.verbose(`Attempting connection to ${connection.address}:${port}.`);
 
           tracker.track(address, connection, () => dispense.next());
 
           return connection;
         }
         throw Error('Non-socket connections are not yet implemented.');
-      }).error(e => Log.error(`OUTGOING: ${e}`));
+      });
 
     dispense.next(MAX_OUTGOING_CONNECTIONS);
     return outgoing;

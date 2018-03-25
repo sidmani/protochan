@@ -26,7 +26,6 @@
 
 const Ping = require('../../../message/types/ping.js');
 const Pong = require('../../../message/types/pong.js');
-const Log = require('../../../../util/log.js');
 
 module.exports = class EchoResponse {
   static id() { return 'ECHO_RESPONSE'; }
@@ -40,7 +39,6 @@ module.exports = class EchoResponse {
       .map(({ data, connection }) => ({ msg: new Ping(data), connection }))
       // respond
       .on(({ connection }) => {
-        Log.verbose(`ECHO@${connection.address}: =>PONG`);
         connection.outgoing.next({ command: Pong.COMMAND() });
       });
   }

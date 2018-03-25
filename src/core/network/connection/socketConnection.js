@@ -25,23 +25,18 @@
 'use strict';
 
 const Connection = require('./connection.js');
-const Log = require('../../util/log.js');
+const Log = require('../../util/log.js').submodule('SOCKET');
 const WebSocket = require('isomorphic-ws');
 
 module.exports = class SocketConnection extends Connection {
-  constructor(socket, magic, address, port) {
-    /* eslint-disable no-underscore-dangle */
-    super(
-      address || socket._socket.remoteAddress.slice(7),
-      port || socket._socket.remotePort,
-      magic,
-    );
+  constructor(socket, address, port, magic) {
+    super(address, port, magic);
 
     this.socket = socket;
     // event handling
     this.socket.onmessage = event => this.receive(event.data);
     this.socket.onclose = () => super.close();
-    this.socket.onerror = e => Log.error(`SOCKET@${address}: ${e.message}`);
+    this.socket.onerror = e => Log.error(`@${address}: ${e.message}`);
   }
 
   send(data) {
@@ -53,11 +48,18 @@ module.exports = class SocketConnection extends Connection {
     super.close();
   }
 
-  static create(ipv4, port, magic) {
+  static createIncoming(socket, magic) {
+    /* eslint-disable no-underscore-dangle */
+    const address = socket._socket.remoteAddress.slice(7);
+    const port = socket._socket.remotePort;
+    return new SocketConnection(socket, address, port, magic);
+  }
+
+  static createOutgoing(ipv4, port, magic) {
     // create socket (for outgoing)
     const joined = ipv4.join('.');
     const url = `ws://${joined}:${port}`;
     const socket = new WebSocket(url);
-    return new SocketConnection(socket, magic, joined, port);
+    return new SocketConnection(socket, joined, port, magic);
   }
 };

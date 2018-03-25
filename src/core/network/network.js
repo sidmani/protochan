@@ -31,7 +31,7 @@ const Tracker = require('./tracker.js');
 
 const Netaddr = require('./message/data/netaddr.js');
 const Services = require('./message/data/services.js');
-const Log = require('../util/log.js');
+const Log = require('../util/log.js').submodule('NETWORK: ');
 
 module.exports = class Network {
   constructor(magic, version, serviceMask, port) {
@@ -45,7 +45,7 @@ module.exports = class Network {
       tracker: this.tracker,
       port,
     });
-    Log.info(`NETWORK: MAGIC=${Log.hex(magic, 8)}, VERSION=${version}, SERVICES=${Log.hex(serviceMask, 8)}`);
+    Log.info(`MAGIC=${Log.hex(magic, 8)}, VERSION=${version}, SERVICES=${Log.hex(serviceMask, 8)}`);
 
     // load services
     this.loader.enableServices(services, Library.services);
@@ -56,12 +56,12 @@ module.exports = class Network {
       this.loader.loadComponent(Dependencies[j], Library.components);
     }
 
-    Log.info('NETWORK: READY');
+    Log.info('READY');
   }
 
   seed(addresses) {
     // send addr message containing bootstrap addresses
-    Log.info('NETWORK: SEEDING...');
+    Log.info('SEEDING...');
     addresses.forEach(address => this.tracker.addKnown(address));
   }
 };

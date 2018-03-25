@@ -24,7 +24,6 @@
 
 'use strict';
 
-const Log = require('../../../util/log.js');
 const Version = require('../../message/types/version.js');
 const Verack = require('../../message/types/verack.js');
 const Stream = require('../../stream.js');
@@ -33,7 +32,7 @@ module.exports = class Handshake {
   static id() { return 'HANDSHAKE'; }
   static inputs() { return ['CONNECTOR']; }
 
-  static attach({ CONNECTOR: connector }, _, { version, services }) {
+  static attach({ CONNECTOR: connector }, _, { version, services }, log) {
     const nonce = Math.floor(Math.random() * 0xFFFFFFFF);
 
     return connector
@@ -58,16 +57,16 @@ module.exports = class Handshake {
         .map(msg => ({ connection, msg })))
       .filter(({ msg, connection }) => {
         if (msg.nonce() === nonce) {
-          Log.verbose(`HANDSHAKE@${connection.address}: Connection is with self, closing...`);
+          log.verbose(`@${connection.address}: Connection is with self, closing...`);
           connection.close();
           return false;
         }
         return true;
       })
       // log version reception
-      .on(({ connection, msg }) => Log.verbose(`HANDSHAKE@${connection.address}: <=VERSION=${msg.version()}, SERVICES=${Log.hex(msg.services.mask, 8)}`))
+      .on(({ connection, msg }) => log.verbose(`@${connection.address}: REMOTE VERSION=${msg.version()}, SERVICES=${log.hex(msg.services.mask, 8)}`))
       // send verack message
-      .on(({ connection }) => Stream.every(200, 1).on(() => {
+      .on(({ connection }) => Stream.every(500, 2).on(() => {
         connection.outgoing.next({
           command: Verack.COMMAND(),
         });
@@ -78,13 +77,11 @@ module.exports = class Handshake {
         .map(data => new Verack(data))
         .first()
         .map(() => ({ connection, msg })))
-      .on(({ connection }) => Log.verbose(`HANDSHAKE@${connection.address}: <=VERACK.`))
       .map(({ connection, msg }) => ({
         connection,
         // set version to minimum of both peers
         version: Math.min(msg.version(), version),
         services: msg.services,
-      }))
-      .error(e => Log.error(e));
+      }));
   }
 };

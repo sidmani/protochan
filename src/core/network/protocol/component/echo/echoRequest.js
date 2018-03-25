@@ -25,7 +25,6 @@
 'use strict';
 
 const Ping = require('../../../message/types/ping.js');
-const Log = require('../../../../util/log.js');
 
 module.exports = class EchoRequest {
   static id() { return 'ECHO_REQUEST'; }
@@ -36,13 +35,12 @@ module.exports = class EchoRequest {
     const random = Math.floor(Math.random() * 10000) - 5000;
 
     // send a ping every 20 seconds if nothing sent or received
-    handshake.flatmap(({ connection }) =>
+    return handshake.flatmap(({ connection }) =>
       connection.incoming
         .merge(connection.outgoing)
         .invert(20000 + random, Date.now)
         .map(() => connection))
       .on((connection) => {
-        Log.verbose(`ECHO@${connection.address}: =>PING`);
         connection.outgoing.next({
           command: Ping.COMMAND(),
         });

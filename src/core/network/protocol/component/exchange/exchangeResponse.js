@@ -26,7 +26,6 @@
 
 const Getaddr = require('../../../message/types/getaddr.js');
 const Addr = require('../../../message/types/addr.js');
-const Log = require('../../../../util/log.js');
 
 module.exports = class ExchangeResponse {
   static id() { return 'EXCHANGE_RESPONSE'; }
@@ -44,15 +43,12 @@ module.exports = class ExchangeResponse {
         connection,
       }))
       .on(({ count, connection }) => {
-        Log.verbose(`EXCHANGE@${connection.address}: <=GETADDR ${count}`);
         // get n addresses
         const addresses = tracker.getAddresses(count);
         connection.outgoing.next({
           command: Addr.COMMAND(),
           payload: Addr.create(addresses),
         });
-
-        Log.verbose(`EXCHANGE@${connection.address}: =>ADDR ${addresses.length}`);
       });
   }
 };

@@ -26,6 +26,8 @@
 
 const Log = require('../../util/log.js');
 
+const localLog = Log.submodule('LOADER: ');
+
 module.exports = class Loader {
   constructor(constants = {}) {
     this.components = {};
@@ -35,11 +37,11 @@ module.exports = class Loader {
 
   // load services
   enableServices(services, library) {
-    Log.verbose(`LOADER: enabling services ${Log.hex(services.mask, 8)}.`);
+    localLog.verbose(`enabling services ${Log.hex(services.mask, 8)}.`);
     for (let i = 0; i < 32; i += 1) {
       if (services.index(i)) {
         this.services[library[i].id()] = library[i].attach(this.constants);
-        Log.verbose(`LOADER: attached service ${library[i].id()} (0x${(1 << i).toString(16).padStart(8, '0')})`);
+        localLog.verbose(`attached service ${library[i].id()} (0x${(1 << i).toString(16).padStart(8, '0')})`);
       }
     }
   }
@@ -71,13 +73,17 @@ module.exports = class Loader {
     dependencies.forEach((dependencyID) => {
       if (this.components[dependencyID]) { return; }
       const component = library[dependencyID];
-      this.components[dependencyID] = component.attach(
-        this.components,
-        this.services,
-        this.constants,
-      );
+      const sublog = Log.submodule(`${dependencyID}`);
+      this.components[dependencyID] = component
+        .attach(
+          this.components,
+          this.services,
+          this.constants,
+          sublog,
+        )
+        .error(e => sublog.error(`: ${e.message} ${e.trace}`));
 
-      Log.verbose(`LOADER: attached ${dependencyID} to network.`);
+      localLog.verbose(`attached ${dependencyID} to network.`);
     });
   }
 };

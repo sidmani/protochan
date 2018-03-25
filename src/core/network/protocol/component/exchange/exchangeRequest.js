@@ -25,7 +25,6 @@
 'use strict';
 
 const Getaddr = require('../../../message/types/getaddr.js');
-const Log = require('../../../../util/log.js');
 
 module.exports = class Exchange {
   static id() { return 'EXCHANGE_REQUEST'; }
@@ -34,9 +33,8 @@ module.exports = class Exchange {
   }
 
   static attach({ HANDSHAKE: handshake }) {
-    handshake
+    return handshake
       .on(({ connection }) => {
-        Log.verbose(`EXCHANGE@${connection.address}: =>GETADDR 255`);
         connection.outgoing.next({
           command: Getaddr.COMMAND(),
           payload: Getaddr.create(0xFF),

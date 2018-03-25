@@ -27,6 +27,7 @@
 const Stream = require('../stream.js');
 const Message = require('../message/message.js');
 const Netaddr = require('../message/data/netaddr.js');
+const Log = require('../../util/log.js').submodule('CONNECTION');
 
 module.exports = class Connection {
   constructor(address, port, magic) {
@@ -51,6 +52,10 @@ module.exports = class Connection {
       .map(uint8array => Array.from(uint8array))
       // send the data
       .on(data => this.send(data));
+
+    const log = Log.submodule(`@${address}: `);
+    this.outgoing.on(data => log.verbose(`SEND ${log.message(data.command)}`));
+    this.incoming.on(data => log.verbose(`RCV ${log.message(Message.getCommand(data))}`));
 
     this.terminate = new Stream();
   }
