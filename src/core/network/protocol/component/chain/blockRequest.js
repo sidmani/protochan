@@ -22,38 +22,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-const Receiver = require('../../../../src/core/network/protocol/component/receiver.js');
-const Stream = require('@protochan/stream');
+'use strict';
 
-tap.test('Receiver', (t) => {
-  t.equal(Receiver.id(), 'RECEIVER', 'id');
-  t.strictSame(Receiver.inputs(), ['HANDSHAKE'], 'inputs');
+const Inv = require('../../../message/types/inv.js');
+const GetBlock = require('../../../message/types/getblock.js');
 
-  const hs = new Stream();
+module.exports = class BlockRequest {
+  static id() { return 'BLOCK_REQUEST'; }
+  static inputs() { return ['RECEIVER', 'CHAIN']; }
 
-  const result = [];
-  Receiver.attach({ HANDSHAKE: hs }).on(r => result.push(r));
-
-  const connection1 = {
-    incoming: new Stream(),
-  };
-
-  const connection2 = {
-    incoming: new Stream(),
-  };
-
-  hs.next({ connection: connection1, services: {}, version: 1 });
-  hs.next({ connection: connection2, services: {}, version: 1 });
-
-  connection2.incoming.next('foo');
-  connection1.incoming.next('bar');
-
-  t.strictSame(
-    result,
-    [{ connection: connection2, data: 'foo' }, { connection: connection1, data: 'bar' }],
-    'Receiver joins incoming data with source connection',
-  );
-
-  t.end();
-});
+  static attach({ RECEIVER, CHAIN }) {
+    return RECEIVER
+      .filter(({ data }) => Inv.getCommand(data) === Inv.COMMAND())
+      .map(({ connection, data }) => ({ connection, msg: new Inv(data) }))
+      .on(({ connection, msg }) => {
+        const vectors = [];
+        msg.forEach((vector) => {
+          if (!CHAIN.nodeMap.contains(vector.hash())) {
+            vectors.push(vector);
+          }
+        });
+        connection.outgoing.next({
+          command: GetBlock.command(),
+          payload: GetBlock.create(vectors),
+        });
+      });
+  }
+};

@@ -24,28 +24,47 @@
 
 'use strict';
 
-const ErrorType = require('../error.js');
+const Message = require('../message.js');
+/* eslint-disable no-unused-vars */
+const ByteArray = require('../../../util/byteArray.js');
+/* eslint-enable no-unused-vars */
 
-const Board = class Board {
-  constructor(header, data) {
-    // chain contains verified posts
-    this.chain = new Chain(header, data);
-    // pool contains posts that were rejected from the chain
-    this.pool = new HashMap();
+module.exports = class Bundle extends Message {
+  constructor(data, ObjectClass) {
+    super(data, 2 + (data.getUint16(Message.HEADER_LENGTH()) * ObjectClass.BYTE_LENGTH()));
+    this.ObjectClass = ObjectClass;
   }
 
-  received(header, data) {
-    try {
-      this.chain.addChild(header, data);
-    } catch (error) {
+  count() {
+    return this.data.getUint16(Message.HEADER_LENGTH());
+  }
 
+  object(index) {
+    return new this.ObjectClass(
+      this.data,
+      Message.HEADER_LENGTH()
+       + 2
+       + (index * this.ObjectClass.BYTE_LENGTH()),
+    );
+  }
+
+  forEach(fn) {
+    const count = this.count();
+    for (let i = 0; i < count; i += 1) {
+      fn(this.object(i));
     }
   }
 
-  getTopThreads(count) {
-    
+  static create(objects, ObjectClass) {
+    const payload = new Uint8Array(2 + (objects.length * ObjectClass.BYTE_LENGTH()));
+    payload.setUint16(0, objects.length);
+    objects.forEach((object, index) => {
+      const addressData = object.data.subarray(
+        object.offset,
+        object.offset + ObjectClass.BYTE_LENGTH(),
+      );
+      payload.set(addressData, 2 + (ObjectClass.BYTE_LENGTH() * index));
+    });
+    return payload;
   }
-
 };
-
-module.exports = Board;

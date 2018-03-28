@@ -28,9 +28,9 @@ module.exports = class Receiver {
   static id() { return 'RECEIVER'; }
   static inputs() { return ['HANDSHAKE']; }
 
-  static attach({ HANDSHAKE: handshake }) {
+  static attach({ HANDSHAKE }) {
     // do some black magic
-    return handshake
+    return HANDSHAKE
       .flatmap(({ connection }) =>
         connection.incoming.map(data =>
           ({ connection, data })));

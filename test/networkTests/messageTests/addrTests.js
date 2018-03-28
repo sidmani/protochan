@@ -36,9 +36,9 @@ tap.test('Addr', (t) => {
     0x13, 0x37, 0x13, 0x37,
     0x00, 0x00, 0x00, 0x06,
     0xAF, 0x49, 0xC8, 0x9E,
-    0xD1, 0x9C, 0x87, 0x56,
+    71, 13, 53, 121,
     // payload
-    0x02, // address count
+    0x00, 0x02, // address count
     // address 1
     0x00, 0x00, 0x00, 0x01,
     0xAB, 0xDD, 0xFE, 0x1A,
@@ -62,12 +62,12 @@ tap.test('Addr', (t) => {
   let a;
   t.doesNotThrow(() => { a = new Addr(data); }, 'Addr accepts valid data');
 
-  t.equal(a.addressCount(), 2, 'Addr gets address count');
-  t.equal(a.address(1).offset, 43, 'Addr gets address at index');
+  t.equal(a.count(), 2, 'Addr gets address count');
+  t.equal(a.object(1).offset, 44, 'Addr gets address at index');
 
   const forEach = [];
   a.forEach(addr => forEach.push(addr));
-  t.strictSame(forEach.map(addr => addr.offset), [17, 43], 'Addr.forEach iterates over all addresses');
+  t.strictSame(forEach.map(addr => addr.offset), [18, 44], 'Addr.forEach iterates over all addresses');
 
   t.strictSame(Addr.create(forEach), data.subarray(16), 'Addr.create works');
   t.end();

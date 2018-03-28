@@ -27,10 +27,73 @@
 const Network = require('./core/network/network.js');
 const Netaddr = require('./core/network/message/data/netaddr.js');
 const Config = require('./core/config.js');
+const Chain = require('./core/chain/chain.js');
+const Header = require('./core/chain/header/header.js');
+
+const genesis_header = new Header(new Uint8Array([
+  0x00, 0x00,
+  0x00,
+  0x5A, 0xB8, 0x6F, 0x2B,
+  0x00, 0x00, 0x00, 0x00,
+  // prev hash
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  // data hash
+  163,
+  5,
+  94,
+  148,
+  159,
+  80,
+  170,
+  146,
+  123,
+  159,
+  150,
+  83,
+  31,
+  241,
+  153,
+  0,
+  158,
+  84,
+  51,
+  202,
+  195,
+  49,
+  220,
+  187,
+  233,
+  106,
+  157,
+  166,
+  161,
+  212,
+  34,
+  57,
+  // board
+  0x13, 0x37, 0x13, 0x37,
+  0x00,
+]));
+
+const genesis_data = new Uint8Array([
+  0x06,
+  0xA0,
+  0xA3,
+  0xA4,
+  0xA8,
+  0xC0,
+]);
 
 class Protochan {
   constructor() {
-    this.network = new Network(Config);
+    this.network = new Network(Config, new Chain(genesis_header, genesis_data));
   }
 }
 

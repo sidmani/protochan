@@ -163,3 +163,12 @@ module.exports.digest = function blake2s(input) {
   blake2sUpdate(ctx, input);
   return blake2sFinal(ctx);
 };
+
+module.exports.hexDigest = function(input) {
+  let arr = module.exports.digest(input);
+  let str = '';
+  for (let i = 0; i < arr.byteLength; i += 1) {
+    str += (arr[i] < 16 ? '0' : '') + arr[i].toString(16);
+  }
+  return str;
+}

@@ -22,26 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-const Queue = require('../../src/core/util/queue.js');
+'use strict';
 
-tap.test('Queue', (t) => {
-  const q = new Queue();
+const Block = require('../../../message/types/block.js');
 
-  t.equal(q.dequeue(), undefined, 'Queue.dequeue returns undefined when empty');
+module.exports = class ChainInsert {
+  static id() { return 'CHAIN_INSERT'; }
+  static inputs() { return ['RECEIVER']; }
 
-  q.enqueue(5);
-  q.enqueue(8);
-
-  t.equal(q.length(), 2, 'Queue.length works');
-  t.equal(q.dequeue(), 5, 'Dequeue returns expected value');
-  t.equal(q.length(), 1, 'Queue.length works');
-  t.equal(q.peek(), 8, 'Queue.peek gets next without modifying queue');
-  t.equal(q.dequeue(), 8, 'Dequeue returns expected value');
-  t.equal(q.length(), 0, 'Queue.length works');
-  t.equal(q.dequeue(), undefined, 'Dequeue returns undefined after empty');
-  t.equal(q.length(), 0, 'Queue.length does not decrease below 0');
-
-
-  t.end();
-});
+  static attach({ RECEIVER, CHAIN }) {
+    return RECEIVER
+      .filter(data => Block.getCommand(data) === Block.COMMAND())
+      .map(data => new Block(data))
+      .on(block => CHAIN.add(block.header(), block.data()));
+  }
+};

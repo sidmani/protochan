@@ -32,6 +32,7 @@ module.exports = class Exchange {
 
   static attach({ HANDSHAKE }, s, { EXCHANGE_GETADDR_COUNT }) {
     return HANDSHAKE
+      .wait(3000)
       .on(({ connection }) => {
         connection.outgoing.next({
           command: Getaddr.COMMAND(),

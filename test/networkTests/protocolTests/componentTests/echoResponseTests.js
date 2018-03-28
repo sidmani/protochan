@@ -24,7 +24,7 @@
 
 const tap = require('tap');
 const EchoResponse = require('../../../../src/core/network/protocol/component/echo/echoResponse.js');
-const Stream = require('../../../../src/core/network/stream.js');
+const Stream = require('@protochan/stream');
 
 tap.test('Echo response', (t) => {
   t.equal(EchoResponse.id(), 'ECHO_RESPONSE', 'id');

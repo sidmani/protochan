@@ -22,38 +22,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-const Receiver = require('../../../../src/core/network/protocol/component/receiver.js');
-const Stream = require('@protochan/stream');
+'use strict';
 
-tap.test('Receiver', (t) => {
-  t.equal(Receiver.id(), 'RECEIVER', 'id');
-  t.strictSame(Receiver.inputs(), ['HANDSHAKE'], 'inputs');
+const Message = require('../message.js');
+const InvVect = require('../data/invvect.js');
 
-  const hs = new Stream();
+module.exports = class GetBlock extends Message {
+  static COMMAND() { return 0x00000008; }
 
-  const result = [];
-  Receiver.attach({ HANDSHAKE: hs }).on(r => result.push(r));
+  constructor(data) {
+    super(data, 1 + (data[Message.HEADER_LENGTH()] * InvVect.BYTE_LENGTH()));
+  }
 
-  const connection1 = {
-    incoming: new Stream(),
-  };
+  header() {
+    return this.data.subarray(0, 80);
+  }
 
-  const connection2 = {
-    incoming: new Stream(),
-  };
+  data() {
+    return this.data.subarray(80);
+  }
 
-  hs.next({ connection: connection1, services: {}, version: 1 });
-  hs.next({ connection: connection2, services: {}, version: 1 });
-
-  connection2.incoming.next('foo');
-  connection1.incoming.next('bar');
-
-  t.strictSame(
-    result,
-    [{ connection: connection2, data: 'foo' }, { connection: connection1, data: 'bar' }],
-    'Receiver joins incoming data with source connection',
-  );
-
-  t.end();
-});
+  static create(header, data) {
+    const payload = new Uint8Array(header.byteLength + data.byteLength);
+    payload.set(header, 0);
+    payload.set(header.length, data);
+    return payload;
+  }
+};

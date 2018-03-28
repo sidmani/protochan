@@ -32,11 +32,12 @@ const Tracker = require('./tracker.js');
 const Log = require('../util/log.js').submodule('NETWORK: ');
 
 module.exports = class Network {
-  constructor(config) {
+  constructor(config, chain) {
     this.tracker = new Tracker();
 
     this.loader = new Loader(config);
     this.loader.components.TRACKER = this.tracker;
+    this.loader.components.CHAIN = chain;
 
     Log.info(`MAGIC=${Log.hex(config.MAGIC, 8)}, VERSION=${config.VERSION}, SERVICES=${Log.hex(config.SERVICES, 8)}`);
 

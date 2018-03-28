@@ -25,7 +25,7 @@
 'use strict';
 
 const WebSocket = require('ws');
-const Stream = require('../../stream.js');
+const Stream = require('@protochan/stream');
 
 module.exports = class SocketHost {
   static id() { return 'SOCKET_HOST'; }

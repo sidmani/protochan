@@ -24,7 +24,7 @@
 
 'use strict';
 
-const Stream = require('../../../stream.js');
+const Stream = require('@protochan/stream');
 const SocketConnection = require('../../../connection/socketConnection.js');
 
 module.exports = class Incoming {

@@ -24,7 +24,7 @@
 
 'use strict';
 
-const Stream = require('../stream.js');
+const Stream = require('@protochan/stream');
 const Message = require('../message/message.js');
 const Netaddr = require('../message/data/netaddr.js');
 const Log = require('../../util/log.js').submodule('CONNECTION');

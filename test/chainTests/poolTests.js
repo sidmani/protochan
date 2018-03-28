@@ -80,6 +80,6 @@ tap.test('Pool', (t) => {
   ], 'Traversal works after further dependencies are resolved');
 
   p.recursivelyClearDependents(baseNode);
-  t.equal(p.pool.size(), 0, 'Recursive clearing works');
+  t.equal(p.pool.size, 0, 'Recursive clearing works');
   t.end();
 });

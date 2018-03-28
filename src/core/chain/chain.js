@@ -91,7 +91,7 @@ module.exports = class Chain {
   }
 
   addChild(node) {
-    const prevNode = this.getStringified(node.header.prevHash);
+    const prevNode = this.nodeMap.getStringified(node.header.prevHash);
     if (!prevNode) {
       throw ErrorType.missingReference(prevNode.hash);
     }

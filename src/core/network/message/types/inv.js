@@ -24,32 +24,17 @@
 
 'use strict';
 
-module.exports = class Queue {
-  constructor() {
-    this.array = [];
-    this.offset = 0;
+const Bundle = require('./bundle.js');
+const InvVect = require('../data/invvect.js');
+
+module.exports = class Inv extends Bundle {
+  static COMMAND() { return 0x00000004; }
+
+  constructor(data) {
+    super(data, InvVect);
   }
 
-  dequeue() {
-    if (this.array.length === 0) { return undefined; }
-    const item = this.array[this.offset];
-    this.offset += 1;
-    if (this.offset >= this.array.length) {
-      this.array = [];
-      this.offset = 0;
-    }
-    return item;
-  }
-
-  enqueue(obj) {
-    this.array.push(obj);
-  }
-
-  peek() {
-    return this.array[this.offset];
-  }
-
-  length() {
-    return this.array.length - this.offset;
+  static create(addresses) {
+    return Bundle.create(addresses, InvVect);
   }
 };

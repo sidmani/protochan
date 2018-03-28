@@ -24,7 +24,7 @@
 
 const tap = require('tap');
 const ExReq = require('../../../../src/core/network/protocol/component/exchange/exchangeRequest.js');
-const Stream = require('../../../../src/core/network/stream.js');
+const Stream = require('@protochan/stream');
 
 tap.test('ExchangeRequest', (t) => {
   t.equal(ExReq.id(), 'EXCHANGE_REQUEST', 'id');

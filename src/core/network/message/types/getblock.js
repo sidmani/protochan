@@ -22,38 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-const Receiver = require('../../../../src/core/network/protocol/component/receiver.js');
-const Stream = require('@protochan/stream');
+'use strict';
 
-tap.test('Receiver', (t) => {
-  t.equal(Receiver.id(), 'RECEIVER', 'id');
-  t.strictSame(Receiver.inputs(), ['HANDSHAKE'], 'inputs');
+const Bundle = require('./bundle.js');
+const InvVect = require('../data/invvect.js');
 
-  const hs = new Stream();
+module.exports = class GetBlock extends Bundle {
+  static COMMAND() { return 0x00000007; }
 
-  const result = [];
-  Receiver.attach({ HANDSHAKE: hs }).on(r => result.push(r));
+  constructor(data) {
+    super(data, InvVect);
+  }
 
-  const connection1 = {
-    incoming: new Stream(),
-  };
-
-  const connection2 = {
-    incoming: new Stream(),
-  };
-
-  hs.next({ connection: connection1, services: {}, version: 1 });
-  hs.next({ connection: connection2, services: {}, version: 1 });
-
-  connection2.incoming.next('foo');
-  connection1.incoming.next('bar');
-
-  t.strictSame(
-    result,
-    [{ connection: connection2, data: 'foo' }, { connection: connection1, data: 'bar' }],
-    'Receiver joins incoming data with source connection',
-  );
-
-  t.end();
-});
+  static create(addresses) {
+    return Bundle.create(addresses, InvVect);
+  }
+};

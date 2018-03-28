@@ -24,28 +24,26 @@
 
 'use strict';
 
-const HashMap = require('../hash/hashMap.js');
-
 module.exports = class Pool {
   constructor() {
-    this.pool = new HashMap();
+    this.pool = new Map();
     // this.blacklist = new HashMap();
   }
 
   addDependent(dependentNode, dependencyHash) {
-    if (this.pool.containsStringified(dependencyHash)) {
-      this.pool.getStringified(dependencyHash).push(dependentNode);
+    if (this.pool.has(dependencyHash)) {
+      this.pool.get(dependencyHash).push(dependentNode);
     } else {
-      this.pool.setStringified([dependentNode], dependencyHash);
+      this.pool.set(dependencyHash, [dependentNode]);
     }
   }
 
   getDependents(hash) {
-    return this.pool.getStringified(hash) || [];
+    return this.pool.get(hash) || [];
   }
 
   clearDependents(hash) {
-    this.pool.unsetStringified(hash);
+    this.pool.delete(hash);
   }
 
   recursivelyClearDependents(node) {

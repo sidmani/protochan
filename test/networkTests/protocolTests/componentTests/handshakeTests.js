@@ -23,7 +23,7 @@
 // SOFTWARE.
 
 const tap = require('tap');
-const Stream = require('../../../../src/core/network/stream.js');
+const Stream = require('@protochan/stream');
 const Handshake = require('../../../../src/core/network/protocol/component/handshake.js');
 const Version = require('../../../../src/core/network/message/types/version.js');
 const Verack = require('../../../../src/core/network/message/types/verack.js');

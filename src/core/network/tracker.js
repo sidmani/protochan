@@ -25,7 +25,7 @@
 'use strict';
 
 const HashMap = require('../hash/hashMap.js');
-const Stream = require('./stream.js');
+const Stream = require('@protochan/stream');
 const Log = require('../util/log.js').submodule('TRACKER');
 
 module.exports = class Tracker {

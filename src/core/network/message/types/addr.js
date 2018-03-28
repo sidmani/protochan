@@ -24,46 +24,17 @@
 
 'use strict';
 
-const Message = require('../message.js');
+const Bundle = require('./bundle.js');
 const Netaddr = require('../data/netaddr.js');
 
-module.exports = class Addr extends Message {
+module.exports = class Addr extends Bundle {
   static COMMAND() { return 0x00000006; }
 
   constructor(data) {
-    super(data, 1 + (data[Message.HEADER_LENGTH()] * Netaddr.BYTE_LENGTH()));
-  }
-
-  addressCount() {
-    return this.data[Message.HEADER_LENGTH()];
-  }
-
-  address(index) {
-    return new Netaddr(
-      this.data,
-      Message.HEADER_LENGTH()
-       + 1
-       + (index * Netaddr.BYTE_LENGTH()),
-    );
-  }
-
-  forEach(fn) {
-    const count = this.addressCount();
-    for (let i = 0; i < count; i += 1) {
-      fn(this.address(i));
-    }
+    super(data, Netaddr);
   }
 
   static create(addresses) {
-    const payload = new Uint8Array(1 + (addresses.length * Netaddr.BYTE_LENGTH()));
-    payload[0] = addresses.length;
-    for (let i = 0; i < addresses.length; i += 1) {
-      const addressData = addresses[i].data.subarray(
-        addresses[i].offset,
-        addresses[i].offset + Netaddr.BYTE_LENGTH(),
-      );
-      payload.set(addressData, 1 + (Netaddr.BYTE_LENGTH() * i));
-    }
-    return payload;
+    return Bundle.create(addresses, Netaddr);
   }
 };

@@ -24,7 +24,7 @@
 
 const tap = require('tap');
 const ExResp = require('../../../../src/core/network/protocol/component/exchange/exchangeResponse.js');
-const Stream = require('../../../../src/core/network/stream.js');
+const Stream = require('@protochan/stream');
 
 tap.test('ExchangeResponse', (t) => {
   t.equal(ExResp.id(), 'EXCHANGE_RESPONSE', 'id');
@@ -70,10 +70,10 @@ tap.test('ExchangeResponse', (t) => {
 
   t.equal(requestedCount, 2, 'Address count requested from tracker is correct');
 
-  const expectedPayload = new Uint8Array(53);
-  expectedPayload[0] = 2;
-  expectedPayload.fill(5, 1, 27);
-  expectedPayload.fill(3, 27, 53);
+  const expectedPayload = new Uint8Array(54);
+  expectedPayload[1] = 2;
+  expectedPayload.fill(5, 2, 28);
+  expectedPayload.fill(3, 28, 54);
   t.strictSame(result, [{
     command: 0x00000006,
     payload: expectedPayload,

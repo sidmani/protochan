@@ -26,7 +26,7 @@
 
 const Version = require('../../message/types/version.js');
 const Verack = require('../../message/types/verack.js');
-const Stream = require('../../stream.js');
+const Stream = require('@protochan/stream');
 
 module.exports = class Handshake {
   static id() { return 'HANDSHAKE'; }

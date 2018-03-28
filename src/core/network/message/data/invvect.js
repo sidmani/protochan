@@ -22,38 +22,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const tap = require('tap');
-const Receiver = require('../../../../src/core/network/protocol/component/receiver.js');
-const Stream = require('@protochan/stream');
+'use strict';
 
-tap.test('Receiver', (t) => {
-  t.equal(Receiver.id(), 'RECEIVER', 'id');
-  t.strictSame(Receiver.inputs(), ['HANDSHAKE'], 'inputs');
+/* eslint-disable no-unused-vars */
+const ByteArray = require('../../../util/byteArray.js');
+/* eslint-enable no-unused-vars */
 
-  const hs = new Stream();
+module.exports = class InventoryVector {
+  static BYTE_LENGTH() {
+    return 36;
+  }
 
-  const result = [];
-  Receiver.attach({ HANDSHAKE: hs }).on(r => result.push(r));
+  constructor(data, offset = 0) {
+    this.data = data;
+    this.offset = offset;
+  }
 
-  const connection1 = {
-    incoming: new Stream(),
-  };
+  type() {
+    return this.data.getUint32(this.offset + 0);
+  }
 
-  const connection2 = {
-    incoming: new Stream(),
-  };
+  hash() {
+    return this.data.subarray(this.offset + 4, this.offset + 32);
+  }
 
-  hs.next({ connection: connection1, services: {}, version: 1 });
-  hs.next({ connection: connection2, services: {}, version: 1 });
-
-  connection2.incoming.next('foo');
-  connection1.incoming.next('bar');
-
-  t.strictSame(
-    result,
-    [{ connection: connection2, data: 'foo' }, { connection: connection1, data: 'bar' }],
-    'Receiver joins incoming data with source connection',
-  );
-
-  t.end();
-});
+  static set(data, offset, type, hash) {
+    data.setUint32(offset + 0, type);
+    data.set(hash, offset + 4);
+  }
+};
