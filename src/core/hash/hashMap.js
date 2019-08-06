@@ -35,10 +35,9 @@ module.exports = class HashMap {
     this.setStringified(obj, HashMap.uint8ArrToHex(hash), overwrite);
   }
 
-  setStringified(obj, hash, overwrite = false) {
-    if (typeof hash !== 'string') { throw Error(); }
-    if (this.map.has(hash) && !overwrite) throw ErrorType.duplicateKey();
-    this.map.set(hash, obj);
+  setStringified(obj, str, overwrite = false) {
+    if (this.map.has(str) && !overwrite) throw ErrorType.duplicateKey();
+    this.map.set(str, obj);
   }
 
   unset(hash) {
@@ -90,12 +89,9 @@ module.exports = class HashMap {
   }
 
   static uint8ArrToHex(arr) {
-    if (!(arr instanceof Uint8Array)) throw ErrorType.parameterType();
-    let str = '';
-    for (let i = 0; i < arr.byteLength; i += 1) {
-      str += (arr[i] < 16 ? '0' : '') + arr[i].toString(16);
-    }
-    return str;
+    return Array.from(arr)
+      .map(val => val.toString(16).padStart(2, '0'))
+      .join('');
   }
 
   static hexToUint8Arr(str) {

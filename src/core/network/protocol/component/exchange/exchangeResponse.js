@@ -31,8 +31,8 @@ module.exports = class ExchangeResponse {
   static id() { return 'EXCHANGE_RESPONSE'; }
   static inputs() { return ['RECEIVER']; }
 
-  static attach({ RECEIVER: receiver }, _, { tracker }) {
-    return receiver
+  static attach({ RECEIVER, TRACKER }) {
+    return RECEIVER
       // handle getaddr messages
       .filter(({ data }) => Getaddr.getCommand(data) === Getaddr.COMMAND())
       // create the message
@@ -42,7 +42,7 @@ module.exports = class ExchangeResponse {
       }))
       .on(({ count, connection }) => {
         // get n addresses
-        const addresses = tracker.getAddresses(count);
+        const addresses = TRACKER.getAddresses(count);
         connection.outgoing.next({
           command: Addr.COMMAND(),
           payload: Addr.create(addresses),
