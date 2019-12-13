@@ -38,7 +38,7 @@
   "dependencies": {
     "@protochan/stream": "0.0.5",
     "isomorphic-ws": "^4.0.0",
-    "npm": "^5.8.0",
+    "npm": "^6.13.4",
     "ws": "^4.1.0"
   }
 }
